@@ -227,3 +227,4 @@ When adding new API endpoints:
 ## License
 
 Part of the Gridiron Football Management Game project.
+
