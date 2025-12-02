@@ -11,7 +11,7 @@ export const TeamsPage = () => {
 
   if (error) {
     return (
-      <ErrorMessage message="Failed to load teams. Make sure the API is running on http://localhost:5000" />
+      <ErrorMessage message="Failed to load teams. Unable to connect to the API." />
     );
   }
 

@@ -45,7 +45,7 @@ jobs:
           VITE_AZURE_AUTHORITY: https://gtggridiron.ciamlogin.com/gtggridiron.onmicrosoft.com
           VITE_AZURE_REDIRECT_URI: https://nice-bay-03bfc8b10.3.azurestaticapps.net
           VITE_AZURE_POST_LOGOUT_REDIRECT_URI: https://nice-bay-03bfc8b10.3.azurestaticapps.net
-          VITE_API_URL: https://app-gridiron-api-dev.azurewebsites.net
+          VITE_API_URL: https://app-gridiron-api-dev.azurewebsites.net/api
 
       - name: Copy staticwebapp.config.json to dist
         run: cp staticwebapp.config.json dist/

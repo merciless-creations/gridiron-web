@@ -65,8 +65,23 @@ The application is configured to use the **Goal To Go Football** app registratio
 
 - **Tenant:** gtggridiron.onmicrosoft.com
 - **Client ID:** 29348959-a014-4550-b3c3-044585c83f0a
-- **Redirect URI:** http://localhost:3000
+- **Redirect URI (localhost):** http://localhost:3000
+- **Redirect URI (production):** https://nice-bay-03bfc8b10.3.azurestaticapps.net
 - **Supported Identity Providers:** Email/Password, Google
+
+#### Adding Redirect URIs for New Deployments
+
+When deploying to a new environment (e.g., staging, production), you must add the redirect URI to Azure:
+
+1. Go to **Azure Portal** → **Microsoft Entra External ID** (or your CIAM tenant)
+2. Navigate to **Applications** → **App registrations**
+3. Select app **29348959-a014-4550-b3c3-044585c83f0a**
+4. Go to **Authentication** in the left sidebar
+5. Under **Platform configurations** → **Single-page application**, click **Add URI**
+6. Add your new redirect URI (e.g., `https://your-app.azurestaticapps.net`)
+7. Click **Save**
+
+**Note:** This is a configuration change in Azure Portal only - no code deployment is needed.
 
 For detailed Azure setup instructions, see: [AUTHENTICATION_SETUP.md](../AUTHENTICATION_SETUP.md)
 

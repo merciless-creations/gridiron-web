@@ -108,7 +108,7 @@ export const HomePage = () => {
         <div className="card max-w-md mx-auto bg-red-50 border-red-200">
           <p className="text-red-800 text-center">
             <strong>API Connection Error</strong><br />
-            Make sure the backend API is running on http://localhost:5000
+            Unable to connect to the API. Please try again later.
           </p>
         </div>
       )}
