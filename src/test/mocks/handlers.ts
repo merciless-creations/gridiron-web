@@ -55,11 +55,13 @@ export const mockSimulateResponse: SimulateGameResponse = {
 }
 
 // Mock data - User
+// Note: isGlobalAdmin is set to true so the test user can manage all leagues
+// including newly created ones during E2E tests
 export const mockUser: User = {
   id: 1,
   email: 'testuser@example.com',
   displayName: 'Test User',
-  isGlobalAdmin: false,
+  isGlobalAdmin: true,
   createdAt: '2024-01-15T10:00:00Z',
   lastLoginAt: '2024-11-29T08:30:00Z',
   leagueRoles: [
