@@ -63,6 +63,43 @@ npm run test:e2e
 - See `.claude/skills/gridiron-frontend/SKILL.md` for design guidelines
 - Data-dense layouts inspired by ESPN, Yahoo Sports, sportsbooks
 
+## Git Workflow
+
+> ⛔ **ABSOLUTE RULE: NEVER COMMIT OR PUSH DIRECTLY TO MASTER OR MAIN** ⛔
+>
+> This is non-negotiable. Violations break CI/CD and require manual cleanup.
+
+### Required Process for ALL Changes
+
+1. **Create a feature branch** from master:
+   ```bash
+   git checkout master
+   git pull
+   git checkout -b feature/your-change-description
+   ```
+
+2. **Make changes and commit** to the feature branch:
+   ```bash
+   git add .
+   git commit -m "Description of change"
+   ```
+
+3. **Push the feature branch** to origin:
+   ```bash
+   git push -u origin feature/your-change-description
+   ```
+
+4. **Create a Pull Request** for Scott to review
+
+5. **Wait for approval** — Scott will merge after CI passes
+
+### Branch Naming
+- `feature/` — New features or enhancements
+- `fix/` — Bug fixes
+- `chore/` — Maintenance, refactoring, docs
+
+This applies to ALL changes, no matter how small—even single-line fixes.
+
 ## When Uncertain
 
 Ask Scott. He is precise in his requirements—do not assume or estimate. If a requirement is ambiguous, clarify before implementing.
