@@ -15,7 +15,7 @@ test.describe('Critical User Journeys', () => {
   test('User Journey: App loads and navigation works', async ({ page }) => {
     // Start at home page
     await page.goto('/')
-    await expect(page.getByRole('heading', { name: 'Gridiron Football Manager' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Goal to Go Football' })).toBeVisible()
 
     // Can navigate to Teams (which loads from API)
     await page.click('text=Teams')
