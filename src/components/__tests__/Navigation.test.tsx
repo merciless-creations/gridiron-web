@@ -27,7 +27,7 @@ const renderNavigation = () => {
 describe('Navigation', () => {
   it('renders the app title', () => {
     renderNavigation()
-    expect(screen.getByText('Gridiron')).toBeInTheDocument()
+    expect(screen.getByText('Goal to Go')).toBeInTheDocument()
   })
 
   it('renders all navigation links', () => {

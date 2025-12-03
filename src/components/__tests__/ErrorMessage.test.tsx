@@ -21,14 +21,14 @@ describe('ErrorMessage', () => {
     // Check for SVG icon
     const svg = container.querySelector('svg')
     expect(svg).toBeInTheDocument()
-    expect(svg).toHaveClass('text-red-600')
+    expect(svg).toHaveClass('text-gridiron-loss')
   })
 
   it('has error styling classes', () => {
     const { container } = render(<ErrorMessage />)
 
-    const errorContainer = container.querySelector('.bg-red-50')
+    const errorContainer = container.querySelector('.bg-gridiron-loss\\/10')
     expect(errorContainer).toBeInTheDocument()
-    expect(errorContainer).toHaveClass('border', 'border-red-200', 'rounded-lg')
+    expect(errorContainer).toHaveClass('border', 'rounded')
   })
 })

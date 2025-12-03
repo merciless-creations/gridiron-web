@@ -4,20 +4,36 @@
 
 @layer base {
   body {
-    @apply min-h-screen bg-gray-50 text-gray-900;
+    @apply min-h-screen bg-gridiron-bg-primary text-gridiron-text-primary font-body;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-gridiron-primary hover:bg-blue-900 text-white font-semibold py-2 px-4 rounded-lg transition-colors;
+    @apply bg-gridiron-accent hover:bg-emerald-400 text-gridiron-bg-primary font-semibold py-2 px-4 rounded transition-colors;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors;
+    @apply bg-gridiron-bg-tertiary hover:bg-gridiron-border-emphasis text-gridiron-text-primary font-semibold py-2 px-4 rounded transition-colors border border-gridiron-border-subtle;
+  }
+
+  .btn-danger {
+    @apply bg-gridiron-loss hover:bg-red-500 text-white font-semibold py-2 px-4 rounded transition-colors;
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-gridiron-bg-card rounded p-6 border border-gridiron-border-subtle;
+  }
+
+  .stat-value {
+    @apply font-display font-bold tabular-nums;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 bg-gridiron-bg-secondary border border-gridiron-border-subtle rounded text-gridiron-text-primary placeholder-gridiron-text-muted focus:outline-none focus:ring-2 focus:ring-gridiron-accent focus:border-transparent;
+  }
+
+  .select-field {
+    @apply w-full px-3 py-2 bg-gridiron-bg-secondary border border-gridiron-border-subtle rounded text-gridiron-text-primary focus:outline-none focus:ring-2 focus:ring-gridiron-accent focus:border-transparent;
   }
 }
