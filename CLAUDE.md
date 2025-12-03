@@ -1,6 +1,6 @@
 # Gridiron Web
 
-Gridiron is a web-based NFL franchise management simulation game. This repository contains the React frontend.
+Gridiron is a web-based NFL style franchise management simulation game. This repository contains the React frontend.
 
 ## Vision
 
