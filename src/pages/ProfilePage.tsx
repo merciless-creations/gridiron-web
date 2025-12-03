@@ -63,28 +63,28 @@ export const ProfilePage = () => {
     <div className="space-y-8">
       {/* Page Header */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+        <h1 className="text-4xl font-display font-bold text-gridiron-text-primary mb-2">
           User Profile
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-gridiron-text-secondary">
           Manage your account and view your leagues
         </p>
       </div>
 
       {/* User Info Card */}
       <div className="card max-w-2xl mx-auto">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Account Information</h2>
+        <h2 className="text-2xl font-display font-semibold text-gridiron-text-primary mb-4">Account Information</h2>
 
         <div className="space-y-4">
           {/* User ID - Shareable Key */}
-          <div className="bg-gridiron-primary bg-opacity-5 border-2 border-gridiron-primary rounded-lg p-4">
+          <div className="bg-gridiron-accent/10 border-2 border-gridiron-accent/30 rounded p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <label className="text-sm font-medium text-gray-700 block mb-1">
+                <label className="text-sm font-medium text-gridiron-text-secondary block mb-1">
                   Your User ID
                 </label>
                 <div className="flex items-center space-x-3">
-                  <code className="text-2xl font-bold text-gridiron-primary">
+                  <code className="text-2xl font-display font-bold text-gridiron-accent">
                     {user.id}
                   </code>
                   <button
@@ -94,7 +94,7 @@ export const ProfilePage = () => {
                     {copiedUserId ? '✓ Copied!' : 'Copy'}
                   </button>
                 </div>
-                <p className="text-xs text-gray-600 mt-2">
+                <p className="text-xs text-gridiron-text-muted mt-2">
                   Share this ID with league commissioners to join a league
                 </p>
               </div>
@@ -103,40 +103,40 @@ export const ProfilePage = () => {
 
           {/* Display Name */}
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">
+            <label className="text-sm font-medium text-gridiron-text-secondary block mb-1">
               Display Name
             </label>
-            <div className="text-lg text-gray-900">{user.displayName}</div>
+            <div className="text-lg text-gridiron-text-primary">{user.displayName}</div>
           </div>
 
           {/* Email */}
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">
+            <label className="text-sm font-medium text-gridiron-text-secondary block mb-1">
               Email
             </label>
-            <div className="text-lg text-gray-900">{user.email}</div>
+            <div className="text-lg text-gridiron-text-primary">{user.email}</div>
           </div>
 
           {/* Global Admin Badge */}
           {user.isGlobalAdmin && (
-            <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-sm font-medium">
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium">
               🔧 Global Administrator
             </div>
           )}
 
           {/* Account Activity */}
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gridiron-border-subtle">
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">
+              <label className="text-sm font-medium text-gridiron-text-secondary block mb-1">
                 Member Since
               </label>
-              <div className="text-sm text-gray-900">{formatDate(user.createdAt)}</div>
+              <div className="text-sm text-gridiron-text-primary">{formatDate(user.createdAt)}</div>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">
+              <label className="text-sm font-medium text-gridiron-text-secondary block mb-1">
                 Last Login
               </label>
-              <div className="text-sm text-gray-900">{formatDate(user.lastLoginAt)}</div>
+              <div className="text-sm text-gridiron-text-primary">{formatDate(user.lastLoginAt)}</div>
             </div>
           </div>
         </div>
@@ -145,13 +145,13 @@ export const ProfilePage = () => {
       {/* Leagues Section */}
       <div className="card max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold text-gray-900">
+          <h2 className="text-2xl font-display font-semibold text-gridiron-text-primary">
             My Leagues ({leagues.length})
           </h2>
         </div>
 
         {leagues.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gridiron-text-muted">
             <div className="text-5xl mb-3">🏈</div>
             <p className="text-lg font-medium mb-2">No leagues yet</p>
             <p className="text-sm">
@@ -164,11 +164,11 @@ export const ProfilePage = () => {
               <Link
                 key={league.leagueId}
                 to={`/leagues/${league.leagueId}`}
-                className="block card border-2 border-gray-200 hover:border-gridiron-primary hover:shadow-md transition-all cursor-pointer"
+                className="block card hover:border-gridiron-accent transition-all cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-display font-semibold text-gridiron-text-primary">
                       {league.leagueName}
                     </h3>
                     <div className="flex flex-wrap gap-2 mt-2">
@@ -177,8 +177,8 @@ export const ProfilePage = () => {
                           key={role.id}
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             role.role === 'Commissioner'
-                              ? 'bg-purple-100 text-purple-800'
-                              : 'bg-blue-100 text-blue-800'
+                              ? 'bg-purple-500/20 text-purple-300'
+                              : 'bg-gridiron-accent/20 text-gridiron-accent'
                           }`}
                         >
                           {role.role === 'Commissioner' ? '👑 Commissioner' : '📋 GM'}
@@ -187,7 +187,7 @@ export const ProfilePage = () => {
                       ))}
                     </div>
                   </div>
-                  <div className="text-gridiron-primary text-xl">→</div>
+                  <div className="text-gridiron-accent text-xl">→</div>
                 </div>
               </Link>
             ))}
@@ -199,7 +199,7 @@ export const ProfilePage = () => {
       {teams.length > 0 && (
         <div className="card max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold text-gray-900">
+            <h2 className="text-2xl font-display font-semibold text-gridiron-text-primary">
               My Teams ({teams.length})
             </h2>
           </div>
@@ -209,18 +209,18 @@ export const ProfilePage = () => {
               <Link
                 key={team.teamId}
                 to={`/teams/${team.teamId}`}
-                className="block card border-2 border-gray-200 hover:border-gridiron-secondary hover:shadow-md transition-all cursor-pointer"
+                className="block card hover:border-gridiron-win transition-all cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-display font-semibold text-gridiron-text-primary">
                       {team.teamName}
                     </h3>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gridiron-text-muted mt-1">
                       {team.leagueName}
                     </p>
                   </div>
-                  <div className="text-gridiron-secondary text-xl">→</div>
+                  <div className="text-gridiron-win text-xl">→</div>
                 </div>
               </Link>
             ))}

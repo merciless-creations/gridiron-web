@@ -7,15 +7,15 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gridiron-bg-primary flex flex-col">
       <Navigation />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
-      <footer className="bg-white border-t mt-auto">
+      <footer className="bg-gridiron-bg-secondary border-t border-gridiron-border-subtle mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <p className="text-center text-sm text-gray-600">
-            Gridiron Football Manager &copy; {new Date().getFullYear()}
+          <p className="text-center text-sm text-gridiron-text-muted">
+            Goal to Go Football &copy; {new Date().getFullYear()}
           </p>
         </div>
       </footer>

@@ -4,10 +4,10 @@ interface ErrorMessageProps {
 
 export const ErrorMessage = ({ message = 'An error occurred' }: ErrorMessageProps) => {
   return (
-    <div className="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+    <div className="bg-gridiron-loss/10 border border-gridiron-loss/30 rounded p-4 my-4">
       <div className="flex items-center">
         <svg
-          className="w-5 h-5 text-red-600 mr-2"
+          className="w-5 h-5 text-gridiron-loss mr-2"
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -17,7 +17,7 @@ export const ErrorMessage = ({ message = 'An error occurred' }: ErrorMessageProp
             clipRule="evenodd"
           />
         </svg>
-        <p className="text-sm text-red-800 font-medium">{message}</p>
+        <p className="text-sm text-gridiron-loss font-medium">{message}</p>
       </div>
     </div>
   );

@@ -155,19 +155,19 @@ export const LeagueDetailPage = () => {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <Link to="/leagues" className="text-gridiron-primary hover:underline text-sm mb-2 inline-block">
+          <Link to="/leagues" className="text-gridiron-accent hover:underline text-sm mb-2 inline-block">
             ← Back to Leagues
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900" data-testid="league-name">{league.name}</h1>
+          <h1 className="text-4xl font-display font-bold text-gridiron-text-primary" data-testid="league-name">{league.name}</h1>
           <div className="flex items-center gap-4 mt-2">
-            <span className="text-lg text-gray-600">Season {league.season}</span>
+            <span className="text-lg text-gridiron-text-secondary">Season {league.season}</span>
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              league.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+              league.isActive ? 'bg-gridiron-win/20 text-gridiron-win' : 'bg-gridiron-bg-tertiary text-gridiron-text-muted'
             }`}>
               {league.isActive ? 'Active' : 'Inactive'}
             </span>
             {isCommissioner && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300">
                 👑 Commissioner
               </span>
             )}
@@ -178,21 +178,21 @@ export const LeagueDetailPage = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setShowPopulateModal(true)}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              className="px-4 py-2 bg-gridiron-win text-white rounded hover:bg-green-600 transition-colors"
               data-testid="populate-rosters-button"
             >
               Populate Rosters
             </button>
             <button
               onClick={handleOpenEditModal}
-              className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+              className="btn-secondary"
               data-testid="edit-league-button"
             >
               Edit
             </button>
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              className="btn-danger"
               data-testid="delete-league-button"
             >
               Delete
@@ -203,7 +203,7 @@ export const LeagueDetailPage = () => {
 
       {/* Error Message */}
       {actionError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded" data-testid="action-error">
+        <div className="bg-gridiron-loss/10 border border-gridiron-loss/30 text-gridiron-loss px-4 py-3 rounded" data-testid="action-error">
           {actionError}
         </div>
       )}
@@ -211,54 +211,54 @@ export const LeagueDetailPage = () => {
       {/* League Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="card text-center">
-          <div className="text-3xl font-bold text-gridiron-primary">{league.totalConferences}</div>
-          <div className="text-sm text-gray-600">Conferences</div>
+          <div className="text-3xl font-display font-bold text-gridiron-accent">{league.totalConferences}</div>
+          <div className="text-sm text-gridiron-text-secondary">Conferences</div>
         </div>
         <div className="card text-center">
-          <div className="text-3xl font-bold text-gridiron-primary">
+          <div className="text-3xl font-display font-bold text-gridiron-accent">
             {league.conferences?.reduce((acc, c) => acc + c.divisions.length, 0) || 0}
           </div>
-          <div className="text-sm text-gray-600">Divisions</div>
+          <div className="text-sm text-gridiron-text-secondary">Divisions</div>
         </div>
         <div className="card text-center">
-          <div className="text-3xl font-bold text-gridiron-primary">{league.totalTeams}</div>
-          <div className="text-sm text-gray-600">Teams</div>
+          <div className="text-3xl font-display font-bold text-gridiron-accent">{league.totalTeams}</div>
+          <div className="text-sm text-gridiron-text-secondary">Teams</div>
         </div>
         <div className="card text-center">
-          <div className="text-3xl font-bold text-gridiron-primary">
+          <div className="text-3xl font-display font-bold text-gridiron-accent">
             {allTeams.reduce((acc, t) => acc + (t.players?.length || 0), 0)}
           </div>
-          <div className="text-sm text-gray-600">Players</div>
+          <div className="text-sm text-gridiron-text-secondary">Players</div>
         </div>
       </div>
 
       {/* League Structure */}
       <div className="card">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">League Structure</h2>
+        <h2 className="text-2xl font-display font-semibold text-gridiron-text-primary mb-4">League Structure</h2>
 
         {league.conferences?.length === 0 ? (
-          <p className="text-gray-500">No conferences in this league yet.</p>
+          <p className="text-gridiron-text-muted">No conferences in this league yet.</p>
         ) : (
           <div className="space-y-4">
             {league.conferences?.map(conference => (
-              <div key={conference.id} className="border border-gray-200 rounded-lg overflow-hidden">
+              <div key={conference.id} className="border border-gridiron-border-subtle rounded overflow-hidden">
                 <button
                   onClick={() => toggleConference(conference.id)}
-                  className="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="w-full flex justify-between items-center p-4 bg-gridiron-bg-secondary hover:bg-gridiron-bg-tertiary transition-colors"
                   data-testid={`conference-${conference.id}`}
                 >
-                  <span className="text-lg font-semibold text-gray-900">{conference.name}</span>
-                  <span className="text-gray-500">
+                  <span className="text-lg font-display font-semibold text-gridiron-text-primary">{conference.name}</span>
+                  <span className="text-gridiron-text-secondary">
                     {conference.divisions.length} divisions • {conference.divisions.reduce((acc, d) => acc + d.teams.length, 0)} teams
                     <span className="ml-2">{expandedConferences.has(conference.id) ? '▼' : '▶'}</span>
                   </span>
                 </button>
 
                 {expandedConferences.has(conference.id) && (
-                  <div className="p-4 space-y-4">
+                  <div className="p-4 space-y-4 bg-gridiron-bg-primary">
                     {conference.divisions.map(division => (
                       <div key={division.id} className="ml-4">
-                        <h4 className="font-medium text-gray-800 mb-2" data-testid={`division-${division.id}`}>
+                        <h4 className="font-medium text-gridiron-text-secondary mb-2" data-testid={`division-${division.id}`}>
                           {division.name}
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 ml-4">
@@ -266,11 +266,11 @@ export const LeagueDetailPage = () => {
                             <Link
                               key={team.id}
                               to={`/teams/${team.id}`}
-                              className="block p-3 bg-white border border-gray-200 rounded hover:border-gridiron-primary hover:shadow transition-all"
+                              className="block p-3 bg-gridiron-bg-card border border-gridiron-border-subtle rounded hover:border-gridiron-accent transition-all"
                               data-testid={`team-${team.id}`}
                             >
-                              <div className="font-medium text-gray-900">{team.city} {team.name}</div>
-                              <div className="text-sm text-gray-500">
+                              <div className="font-medium text-gridiron-text-primary">{team.city} {team.name}</div>
+                              <div className="text-sm text-gridiron-text-muted">
                                 {team.players?.length || 0} players
                               </div>
                             </Link>
@@ -290,7 +290,7 @@ export const LeagueDetailPage = () => {
       {isCommissioner && (
         <div className="card">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-900">League Members</h2>
+            <h2 className="text-2xl font-display font-semibold text-gridiron-text-primary">League Members</h2>
             <button
               onClick={() => setShowAddUserModal(true)}
               className="btn-primary"
@@ -301,14 +301,14 @@ export const LeagueDetailPage = () => {
           </div>
 
           {!leagueUsers || leagueUsers.length === 0 ? (
-            <p className="text-gray-500">No other users in this league yet.</p>
+            <p className="text-gridiron-text-muted">No other users in this league yet.</p>
           ) : (
             <div className="space-y-3">
               {leagueUsers.map((user: User) => (
-                <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={user.id} className="flex items-center justify-between p-3 bg-gridiron-bg-secondary rounded">
                   <div>
-                    <div className="font-medium text-gray-900">{user.displayName}</div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
+                    <div className="font-medium text-gridiron-text-primary">{user.displayName}</div>
+                    <div className="text-sm text-gridiron-text-muted">{user.email}</div>
                     <div className="flex gap-2 mt-1">
                       {user.leagueRoles
                         .filter(r => r.leagueId === leagueId)
@@ -317,8 +317,8 @@ export const LeagueDetailPage = () => {
                             key={role.id}
                             className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                               role.role === 'Commissioner'
-                                ? 'bg-purple-100 text-purple-800'
-                                : 'bg-blue-100 text-blue-800'
+                                ? 'bg-purple-500/20 text-purple-300'
+                                : 'bg-gridiron-accent/20 text-gridiron-accent'
                             }`}
                           >
                             {role.role === 'Commissioner' ? '👑 Commissioner' : `📋 GM - ${role.teamName}`}
@@ -334,7 +334,7 @@ export const LeagueDetailPage = () => {
                           <button
                             key={role.id}
                             onClick={() => handleRemoveRole(user.id, role.id)}
-                            className="text-red-600 hover:text-red-800 text-sm"
+                            className="text-gridiron-loss hover:text-red-400 text-sm"
                             data-testid={`remove-role-${role.id}`}
                           >
                             Remove
@@ -351,33 +351,33 @@ export const LeagueDetailPage = () => {
 
       {/* Edit League Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="edit-league-modal">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" data-testid="edit-league-modal">
+          <div className="bg-gridiron-bg-card border border-gridiron-border-subtle rounded max-w-md w-full mx-4">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Edit League</h2>
-                <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+                <h2 className="text-2xl font-display font-bold text-gridiron-text-primary">Edit League</h2>
+                <button onClick={() => setShowEditModal(false)} className="text-gridiron-text-muted hover:text-gridiron-text-primary text-2xl">×</button>
               </div>
 
               <form onSubmit={handleUpdateLeague} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">League Name</label>
+                  <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">League Name</label>
                   <input
                     type="text"
                     value={editFormData.name || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gridiron-primary"
+                    className="input-field"
                     data-testid="edit-name-input"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Season</label>
+                  <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">Season</label>
                   <input
                     type="number"
                     value={editFormData.season || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, season: parseInt(e.target.value) || undefined })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gridiron-primary"
+                    className="input-field"
                     data-testid="edit-season-input"
                   />
                 </div>
@@ -388,14 +388,14 @@ export const LeagueDetailPage = () => {
                     id="isActive"
                     checked={editFormData.isActive || false}
                     onChange={(e) => setEditFormData({ ...editFormData, isActive: e.target.checked })}
-                    className="h-4 w-4 text-gridiron-primary focus:ring-gridiron-primary border-gray-300 rounded"
+                    className="h-4 w-4 text-gridiron-accent focus:ring-gridiron-accent border-gridiron-border-subtle rounded bg-gridiron-bg-secondary"
                     data-testid="edit-active-checkbox"
                   />
-                  <label htmlFor="isActive" className="ml-2 text-sm text-gray-700">Active</label>
+                  <label htmlFor="isActive" className="ml-2 text-sm text-gridiron-text-secondary">Active</label>
                 </div>
 
                 <div className="flex space-x-4 pt-4">
-                  <button type="button" onClick={() => setShowEditModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                  <button type="button" onClick={() => setShowEditModal(false)} className="flex-1 btn-secondary">
                     Cancel
                   </button>
                   <button type="submit" disabled={updateLeague.isPending} className="flex-1 btn-primary disabled:opacity-50" data-testid="submit-edit-league">
@@ -410,18 +410,18 @@ export const LeagueDetailPage = () => {
 
       {/* Delete League Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="delete-league-modal">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" data-testid="delete-league-modal">
+          <div className="bg-gridiron-bg-card border border-gridiron-border-subtle rounded max-w-md w-full mx-4">
             <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Delete League</h2>
-              <p className="text-gray-600 mb-6">
-                Are you sure you want to delete <strong>{league.name}</strong>? This will remove all conferences, divisions, teams, and players. This action cannot be undone.
+              <h2 className="text-2xl font-display font-bold text-gridiron-text-primary mb-4">Delete League</h2>
+              <p className="text-gridiron-text-secondary mb-6">
+                Are you sure you want to delete <strong className="text-gridiron-text-primary">{league.name}</strong>? This will remove all conferences, divisions, teams, and players. This action cannot be undone.
               </p>
               <div className="flex space-x-4">
-                <button onClick={() => setShowDeleteModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                <button onClick={() => setShowDeleteModal(false)} className="flex-1 btn-secondary">
                   Cancel
                 </button>
-                <button onClick={handleDeleteLeague} disabled={deleteLeague.isPending} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50" data-testid="confirm-delete-league">
+                <button onClick={handleDeleteLeague} disabled={deleteLeague.isPending} className="flex-1 btn-danger disabled:opacity-50" data-testid="confirm-delete-league">
                   {deleteLeague.isPending ? 'Deleting...' : 'Delete League'}
                 </button>
               </div>
@@ -432,27 +432,27 @@ export const LeagueDetailPage = () => {
 
       {/* Populate Rosters Modal */}
       {showPopulateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="populate-rosters-modal">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" data-testid="populate-rosters-modal">
+          <div className="bg-gridiron-bg-card border border-gridiron-border-subtle rounded max-w-md w-full mx-4">
             <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Populate Team Rosters</h2>
-              <p className="text-gray-600 mb-4">
+              <h2 className="text-2xl font-display font-bold text-gridiron-text-primary mb-4">Populate Team Rosters</h2>
+              <p className="text-gridiron-text-secondary mb-4">
                 This will generate 53 random players for each team in the league. Existing rosters will be cleared.
               </p>
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Seed (optional)</label>
+                <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">Seed (optional)</label>
                 <input
                   type="number"
                   value={populateSeed}
                   onChange={(e) => setPopulateSeed(e.target.value)}
                   placeholder="Leave empty for random"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gridiron-primary"
+                  className="input-field"
                   data-testid="populate-seed-input"
                 />
-                <p className="text-xs text-gray-500 mt-1">Use a seed for reproducible player generation</p>
+                <p className="text-xs text-gridiron-text-muted mt-1">Use a seed for reproducible player generation</p>
               </div>
               <div className="flex space-x-4">
-                <button onClick={() => setShowPopulateModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                <button onClick={() => setShowPopulateModal(false)} className="flex-1 btn-secondary">
                   Cancel
                 </button>
                 <button onClick={handlePopulateRosters} disabled={populateRosters.isPending} className="flex-1 btn-primary disabled:opacity-50" data-testid="confirm-populate-rosters">
@@ -466,34 +466,34 @@ export const LeagueDetailPage = () => {
 
       {/* Add User Modal */}
       {showAddUserModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="add-user-modal">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" data-testid="add-user-modal">
+          <div className="bg-gridiron-bg-card border border-gridiron-border-subtle rounded max-w-md w-full mx-4">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Add User to League</h2>
-                <button onClick={() => setShowAddUserModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+                <h2 className="text-2xl font-display font-bold text-gridiron-text-primary">Add User to League</h2>
+                <button onClick={() => setShowAddUserModal(false)} className="text-gridiron-text-muted hover:text-gridiron-text-primary text-2xl">×</button>
               </div>
 
               <form onSubmit={handleAddUser} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">User ID *</label>
+                  <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">User ID *</label>
                   <input
                     type="text"
                     value={addUserFormData.userId}
                     onChange={(e) => setAddUserFormData({ ...addUserFormData, userId: e.target.value })}
                     placeholder="Enter the user's ID number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gridiron-primary"
+                    className="input-field"
                     data-testid="add-user-id-input"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Ask the user for their ID from their profile page</p>
+                  <p className="text-xs text-gridiron-text-muted mt-1">Ask the user for their ID from their profile page</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+                  <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">Role *</label>
                   <select
                     value={addUserFormData.role}
                     onChange={(e) => setAddUserFormData({ ...addUserFormData, role: e.target.value as 'Commissioner' | 'GeneralManager' })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gridiron-primary"
+                    className="select-field"
                     data-testid="add-user-role-select"
                   >
                     <option value="GeneralManager">General Manager (Team)</option>
@@ -503,11 +503,11 @@ export const LeagueDetailPage = () => {
 
                 {addUserFormData.role === 'GeneralManager' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Team *</label>
+                    <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">Team *</label>
                     <select
                       value={addUserFormData.teamId}
                       onChange={(e) => setAddUserFormData({ ...addUserFormData, teamId: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gridiron-primary"
+                      className="select-field"
                       data-testid="add-user-team-select"
                     >
                       <option value="">Select a team...</option>
@@ -521,7 +521,7 @@ export const LeagueDetailPage = () => {
                 )}
 
                 <div className="flex space-x-4 pt-4">
-                  <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                  <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 btn-secondary">
                     Cancel
                   </button>
                   <button type="submit" disabled={assignRole.isPending} className="flex-1 btn-primary disabled:opacity-50" data-testid="submit-add-user">

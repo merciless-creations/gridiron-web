@@ -72,8 +72,8 @@ export const LeaguesPage = () => {
       {/* Page Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">My Leagues</h1>
-          <p className="text-lg text-gray-600">
+          <h1 className="text-4xl font-display font-bold text-gridiron-text-primary mb-2">My Leagues</h1>
+          <p className="text-lg text-gridiron-text-secondary">
             Manage your leagues or create a new one
           </p>
         </div>
@@ -90,8 +90,8 @@ export const LeaguesPage = () => {
       {!leagues || leagues.length === 0 ? (
         <div className="card text-center py-12">
           <div className="text-6xl mb-4">🏈</div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">No Leagues Yet</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-display font-semibold text-gridiron-text-primary mb-2">No Leagues Yet</h2>
+          <p className="text-gridiron-text-secondary mb-6">
             Create your first league to get started, or ask a commissioner to add you to an existing league.
           </p>
           <button
@@ -110,45 +110,45 @@ export const LeaguesPage = () => {
               <Link
                 key={league.id}
                 to={`/leagues/${league.id}`}
-                className="card border-2 border-gray-200 hover:border-gridiron-primary hover:shadow-lg transition-all"
+                className="card hover:border-gridiron-accent transition-all"
                 data-testid={`league-card-${league.id}`}
               >
                 <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-xl font-semibold text-gray-900">{league.name}</h3>
+                  <h3 className="text-xl font-display font-semibold text-gridiron-text-primary">{league.name}</h3>
                   {role && (
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         role === 'Commissioner'
-                          ? 'bg-purple-100 text-purple-800'
-                          : 'bg-blue-100 text-blue-800'
+                          ? 'bg-purple-500/20 text-purple-300'
+                          : 'bg-gridiron-accent/20 text-gridiron-accent'
                       }`}
                     >
                       {role === 'Commissioner' ? '👑 Commissioner' : '📋 GM'}
                     </span>
                   )}
                 </div>
-                <div className="space-y-2 text-sm text-gray-600">
+                <div className="space-y-2 text-sm text-gridiron-text-secondary">
                   <div className="flex justify-between">
                     <span>Season:</span>
-                    <span className="font-medium text-gray-900">{league.season}</span>
+                    <span className="font-medium text-gridiron-text-primary">{league.season}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Conferences:</span>
-                    <span className="font-medium text-gray-900">{league.totalConferences}</span>
+                    <span className="font-medium text-gridiron-text-primary">{league.totalConferences}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Teams:</span>
-                    <span className="font-medium text-gray-900">{league.totalTeams}</span>
+                    <span className="font-medium text-gridiron-text-primary">{league.totalTeams}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Status:</span>
-                    <span className={`font-medium ${league.isActive ? 'text-green-600' : 'text-gray-500'}`}>
+                    <span className={`font-medium ${league.isActive ? 'text-gridiron-win' : 'text-gridiron-text-muted'}`}>
                       {league.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                 </div>
-                <div className="mt-4 pt-3 border-t border-gray-200">
-                  <span className="text-gridiron-primary font-medium text-sm">
+                <div className="mt-4 pt-3 border-t border-gridiron-border-subtle">
+                  <span className="text-gridiron-accent font-medium text-sm">
                     View League →
                   </span>
                 </div>
@@ -160,14 +160,14 @@ export const LeaguesPage = () => {
 
       {/* Create League Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="create-league-modal">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" data-testid="create-league-modal">
+          <div className="bg-gridiron-bg-card border border-gridiron-border-subtle rounded max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Create New League</h2>
+                <h2 className="text-2xl font-display font-bold text-gridiron-text-primary">Create New League</h2>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                  className="text-gridiron-text-muted hover:text-gridiron-text-primary text-2xl"
                   data-testid="close-modal-button"
                 >
                   ×
@@ -176,32 +176,32 @@ export const LeaguesPage = () => {
 
               <form onSubmit={handleCreateLeague} className="space-y-6">
                 {formError && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded" data-testid="form-error">
+                  <div className="bg-gridiron-loss/10 border border-gridiron-loss/30 text-gridiron-loss px-4 py-3 rounded" data-testid="form-error">
                     {formError}
                   </div>
                 )}
 
                 {/* League Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">
                     League Name *
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gridiron-primary focus:border-transparent"
+                    className="input-field"
                     placeholder="My Awesome League"
                     data-testid="league-name-input"
                   />
                 </div>
 
                 {/* Structure Configuration */}
-                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                  <h3 className="font-medium text-gray-900">League Structure</h3>
+                <div className="bg-gridiron-bg-secondary rounded p-4 space-y-4">
+                  <h3 className="font-medium text-gridiron-text-primary">League Structure</h3>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">
                       Number of Conferences
                     </label>
                     <input
@@ -210,13 +210,13 @@ export const LeaguesPage = () => {
                       max="8"
                       value={formData.numberOfConferences}
                       onChange={(e) => setFormData({ ...formData, numberOfConferences: parseInt(e.target.value) || 1 })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gridiron-primary focus:border-transparent"
+                      className="input-field"
                       data-testid="conferences-input"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">
                       Divisions per Conference
                     </label>
                     <input
@@ -225,13 +225,13 @@ export const LeaguesPage = () => {
                       max="8"
                       value={formData.divisionsPerConference}
                       onChange={(e) => setFormData({ ...formData, divisionsPerConference: parseInt(e.target.value) || 1 })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gridiron-primary focus:border-transparent"
+                      className="input-field"
                       data-testid="divisions-input"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">
                       Teams per Division
                     </label>
                     <input
@@ -240,15 +240,15 @@ export const LeaguesPage = () => {
                       max="8"
                       value={formData.teamsPerDivision}
                       onChange={(e) => setFormData({ ...formData, teamsPerDivision: parseInt(e.target.value) || 1 })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gridiron-primary focus:border-transparent"
+                      className="input-field"
                       data-testid="teams-input"
                     />
                   </div>
 
                   {/* Summary */}
-                  <div className="bg-gridiron-primary bg-opacity-10 rounded p-3 text-center">
-                    <span className="text-sm text-gray-700">Total Teams: </span>
-                    <span className="text-lg font-bold text-gridiron-primary" data-testid="total-teams">
+                  <div className="bg-gridiron-accent/10 rounded p-3 text-center">
+                    <span className="text-sm text-gridiron-text-secondary">Total Teams: </span>
+                    <span className="text-lg font-display font-bold text-gridiron-accent" data-testid="total-teams">
                       {totalTeams}
                     </span>
                   </div>
@@ -259,7 +259,7 @@ export const LeaguesPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="flex-1 btn-secondary"
                   >
                     Cancel
                   </button>

@@ -15,6 +15,6 @@ describe('Loading', () => {
     const { container } = render(<Loading />)
 
     const spinner = container.querySelector('.animate-spin')
-    expect(spinner).toHaveClass('rounded-full', 'h-12', 'w-12', 'border-b-2', 'border-gridiron-primary')
+    expect(spinner).toHaveClass('rounded-full', 'h-12', 'w-12', 'border-b-2', 'border-gridiron-accent')
   })
 })
