@@ -17,15 +17,6 @@ export default function LeagueStructurePage() {
   const [error, setError] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-export default function LeagueStructurePage() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  
-  const [league, setLeague] = useState<LeagueDetail | null>(null);
-  const [constraints, setConstraints] = useState<LeagueConstraints | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   // Fetch league and constraints
   useEffect(() => {
     async function loadData() {
