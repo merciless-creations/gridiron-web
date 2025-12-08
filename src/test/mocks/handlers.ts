@@ -3,6 +3,8 @@ import type { Team } from '../../types/Team'
 import type { Game, SimulateGameResponse } from '../../types/Game'
 import type { League, LeagueDetail, CreateLeagueRequest } from '../../types/League'
 import type { User } from '../../types/User'
+import { leagueConstraintsHandlers } from '../../mocks/handlers/leagueConstraints'
+import { leagueStructureHandlers } from '../../mocks/handlers/leagueStructure'
 
 // Mock data - Teams
 export const mockTeams: Team[] = [
@@ -152,6 +154,10 @@ export const resetMockState = () => {
 
 // API handlers
 export const handlers = [
+  // ============ LEAGUE CONSTRAINTS & STRUCTURE ============
+  ...leagueConstraintsHandlers,
+  ...leagueStructureHandlers,
+
   // ============ TEAMS ============
   // GET /api/teams
   http.get('/api/teams', () => {
