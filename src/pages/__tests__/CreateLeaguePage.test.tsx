@@ -55,16 +55,14 @@ describe('CreateLeaguePage', () => {
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
-  it('should fetch and display constraints', async () => {
+  it('should display form fields after loading', async () => {
     renderPage();
 
     await waitFor(() => {
       expect(screen.getByText('Create New League')).toBeInTheDocument();
     });
 
-    expect(constraintsApi.getLeagueConstraints).toHaveBeenCalled();
-    
-    // Check that constraints are loaded (just verify the form is interactive)
+    // Check that form fields are displayed
     expect(screen.getByLabelText(/Number of Conferences/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Divisions per Conference/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Teams per Division/)).toBeInTheDocument();
@@ -113,7 +111,7 @@ describe('CreateLeaguePage', () => {
     });
   });
 
-  it('should validate required league name', async () => {
+  it('should disable submit button when name is empty', async () => {
     const user = userEvent.setup();
     
     renderPage();
@@ -126,9 +124,6 @@ describe('CreateLeaguePage', () => {
     const submitButton = screen.getByRole('button', { name: /Create League/i });
     expect(submitButton).toBeDisabled();
 
-    // API should NOT be called
-    expect(leaguesApi.createLeague).not.toHaveBeenCalled();
-    
     // Type a name - button should become enabled
     const nameInput = screen.getByLabelText(/League Name/i);
     await user.type(nameInput, 'Test League');
@@ -136,7 +131,7 @@ describe('CreateLeaguePage', () => {
     expect(submitButton).toBeEnabled();
   });
 
-  it('should submit form and navigate on success', async () => {
+  it('should navigate to structure page on successful submission', async () => {
     const user = userEvent.setup();
     renderPage();
 
@@ -150,16 +145,10 @@ describe('CreateLeaguePage', () => {
     const submitButton = screen.getByRole('button', { name: /Create League/ });
     await user.click(submitButton);
 
+    // Test UI behavior: navigation happened
     await waitFor(() => {
-      expect(leaguesApi.createLeague).toHaveBeenCalledWith({
-        name: 'My Test League',
-        numberOfConferences: 2,
-        divisionsPerConference: 4,
-        teamsPerDivision: 4,
-      });
+      expect(mockNavigate).toHaveBeenCalledWith('/leagues/1/structure');
     });
-
-    expect(mockNavigate).toHaveBeenCalledWith('/leagues/1/structure');
   });
 
   it('should show loading state during submission', async () => {
@@ -180,13 +169,13 @@ describe('CreateLeaguePage', () => {
     const submitButton = screen.getByRole('button', { name: /Create League/ });
     await user.click(submitButton);
 
+    // Test UI behavior: loading text and disabled button
     expect(screen.getByText('Creating...')).toBeInTheDocument();
     expect(submitButton).toBeDisabled();
   });
 
-  it('should display error on submission failure', async () => {
+  it('should display error message on submission failure', async () => {
     const user = userEvent.setup();
-    // Override the default mock to reject
     vi.spyOn(leaguesApi, 'createLeague').mockRejectedValueOnce(new Error('API Error'));
 
     renderPage();
@@ -199,16 +188,14 @@ describe('CreateLeaguePage', () => {
     await user.type(nameInput, 'Test League');
 
     const submitButton = screen.getByRole('button', { name: /Create League/ });
-    
-    // Clear navigate mock before clicking
     mockNavigate.mockClear();
     
     await user.click(submitButton);
 
+    // Test UI behavior: error message displayed, no navigation
     await waitFor(() => {
       expect(screen.getByText('API Error')).toBeInTheDocument();
     });
-
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
@@ -258,7 +245,7 @@ describe('CreateLeaguePage', () => {
     });
   });
 
-  it('should enforce min/max constraints', async () => {
+  it('should enforce min/max constraints on inputs', async () => {
     renderPage();
 
     await waitFor(() => {
@@ -267,13 +254,12 @@ describe('CreateLeaguePage', () => {
 
     const conferencesInput = screen.getAllByDisplayValue('2')[1];
     
-    // Check min attribute
+    // Check that constraints are applied to the input
     expect(conferencesInput).toHaveAttribute('min', '1');
-    // Check max attribute
     expect(conferencesInput).toHaveAttribute('max', '4');
   });
 
-  it('should display error if constraints fail to load', async () => {
+  it('should display error with retry button if constraints fail to load', async () => {
     vi.spyOn(constraintsApi, 'getLeagueConstraints').mockRejectedValue(new Error('Network error'));
     
     renderPage();

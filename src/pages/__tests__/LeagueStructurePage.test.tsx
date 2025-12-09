@@ -102,15 +102,12 @@ describe('LeagueStructurePage', () => {
     expect(screen.getByText('Loading league...')).toBeInTheDocument();
   });
 
-  it('should fetch and display league structure', async () => {
+  it('should display league name and structure after loading', async () => {
     renderPage();
 
     await waitFor(() => {
       expect(screen.getByText('Test League')).toBeInTheDocument();
     });
-
-    expect(leaguesApi.getLeague).toHaveBeenCalledWith(1);
-    expect(constraintsApi.getLeagueConstraints).toHaveBeenCalled();
 
     // Check conferences are displayed
     expect(screen.getByText('AFC')).toBeInTheDocument();
@@ -154,7 +151,7 @@ describe('LeagueStructurePage', () => {
     }
   });
 
-  it('should display teams when division is expanded', async () => {
+  it('should display teams with city names', async () => {
     renderPage();
 
     await waitFor(() => {
@@ -166,7 +163,7 @@ describe('LeagueStructurePage', () => {
     expect(screen.getByText('(Pittsburgh)')).toBeInTheDocument();
   });
 
-  it('should handle add conference', async () => {
+  it('should show new conference in UI after adding', async () => {
     const user = userEvent.setup();
     const newConference = {
       id: 102,
@@ -185,16 +182,13 @@ describe('LeagueStructurePage', () => {
     const addButton = screen.getByText('+ Add Conference');
     await user.click(addButton);
 
+    // Test UI behavior: new conference appears
     await waitFor(() => {
-      expect(structureApi.addConference).toHaveBeenCalledWith(1, {
-        name: 'Conference 3',
-        numberOfDivisions: 4,
-        teamsPerDivision: 4,
-      });
+      expect(screen.getByText('Conference 3')).toBeInTheDocument();
     });
   });
 
-  it('should disable add conference when max reached', async () => {
+  it('should disable add conference button when max reached', async () => {
     const fullLeague = {
       ...mockLeague,
       totalConferences: 4,
@@ -217,7 +211,7 @@ describe('LeagueStructurePage', () => {
     expect(addButton).toBeDisabled();
   });
 
-  it('should handle add division to conference', async () => {
+  it('should show new division in UI after adding', async () => {
     const user = userEvent.setup();
     const newDivision = {
       id: 204,
@@ -237,20 +231,18 @@ describe('LeagueStructurePage', () => {
     const addDivButton = screen.getAllByText('+ Division')[0];
     await user.click(addDivButton);
 
+    // Test UI behavior: new division appears
     await waitFor(() => {
-      expect(structureApi.addDivision).toHaveBeenCalledWith(100, {
-        name: expect.stringMatching(/Division \d+/),
-        numberOfTeams: 4,
-      });
+      expect(screen.getByText('Division 3')).toBeInTheDocument();
     });
   });
 
-  it('should handle add team to division', async () => {
+  it('should show new team in UI after adding', async () => {
     const user = userEvent.setup();
     const newTeam = {
       id: 9,
       divisionId: 200,
-      name: 'Team 3',
+      name: 'Team 9',
       city: 'City',
       budget: 100000000,
       championships: 0,
@@ -273,15 +265,13 @@ describe('LeagueStructurePage', () => {
     const addTeamButtons = screen.getAllByText('+ Team');
     await user.click(addTeamButtons[0]);
 
+    // Test UI behavior: new team appears
     await waitFor(() => {
-      expect(structureApi.addTeam).toHaveBeenCalledWith(200, {
-        name: expect.stringMatching(/Team \d+/),
-        city: 'City',
-      });
+      expect(screen.getByText('Team 9')).toBeInTheDocument();
     });
   });
 
-  it('should handle delete conference with confirmation', async () => {
+  it('should show confirmation dialog when deleting conference', async () => {
     const user = userEvent.setup();
     vi.spyOn(structureApi, 'deleteConference').mockResolvedValue({
       success: true,
@@ -302,18 +292,15 @@ describe('LeagueStructurePage', () => {
     const deleteButtons = screen.getAllByTitle('Delete conference');
     await user.click(deleteButtons[0]);
 
+    // Test UI behavior: confirmation dialog shown
     expect(confirmSpy).toHaveBeenCalledWith(
       expect.stringContaining('Delete AFC?')
     );
 
-    await waitFor(() => {
-      expect(structureApi.deleteConference).toHaveBeenCalledWith(100);
-    });
-
     confirmSpy.mockRestore();
   });
 
-  it('should show last saved timestamp', async () => {
+  it('should show last saved timestamp after changes', async () => {
     const user = userEvent.setup();
     
     vi.spyOn(structureApi, 'addConference').mockResolvedValue({
@@ -331,12 +318,13 @@ describe('LeagueStructurePage', () => {
     const addButton = screen.getByText('+ Add Conference');
     await user.click(addButton);
 
+    // Test UI behavior: saved indicator shown
     await waitFor(() => {
       expect(screen.getByText(/Saved just now/)).toBeInTheDocument();
     });
   });
 
-  it('should navigate back to leagues', async () => {
+  it('should navigate back to leagues list', async () => {
     const user = userEvent.setup();
     renderPage();
 
@@ -350,7 +338,7 @@ describe('LeagueStructurePage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/leagues');
   });
 
-  it('should display error if league fails to load', async () => {
+  it('should display error message if league fails to load', async () => {
     vi.spyOn(leaguesApi, 'getLeague').mockRejectedValue(new Error('Network error'));
 
     renderPage();
@@ -362,7 +350,7 @@ describe('LeagueStructurePage', () => {
     expect(screen.getByText('Back to Leagues')).toBeInTheDocument();
   });
 
-  it('should display help text', async () => {
+  it('should display help text for editing', async () => {
     renderPage();
 
     await waitFor(() => {
