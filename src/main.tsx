@@ -15,7 +15,11 @@ setupAuthInterceptor(msalInstance)
 // Function to render the app
 const renderApp = () => {
   msalInstance.initialize().then(() => {
-    msalInstance.handleRedirectPromise().then(() => {
+    msalInstance.handleRedirectPromise().catch((error) => {
+      // Log auth errors but don't block rendering
+      console.error('Error handling redirect:', error)
+    }).finally(() => {
+      // Render app regardless of auth state
       createRoot(document.getElementById('root')!).render(
         <StrictMode>
           <MsalProvider instance={msalInstance}>
@@ -23,8 +27,6 @@ const renderApp = () => {
           </MsalProvider>
         </StrictMode>,
       )
-    }).catch((error) => {
-      console.error('Error handling redirect:', error)
     })
   })
 }
