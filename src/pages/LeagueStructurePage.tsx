@@ -49,8 +49,11 @@ export default function LeagueStructurePage() {
     if (!league) return;
 
     try {
+      // Count total conferences in league
+      const totalConferencesCount = league.conferences.length;
+
       const newConference = await addConference(league.id, {
-        name: `Conference ${league.conferences.length + 1}`,
+        name: `Conference ${totalConferencesCount + 1}`,
         numberOfDivisions: 4,
         teamsPerDivision: 4,
       });
@@ -105,8 +108,13 @@ export default function LeagueStructurePage() {
     if (!conference) return;
 
     try {
+      // Count total divisions across all conferences
+      const totalDivisionsCount = league.conferences.reduce((total, conf) => {
+        return total + conf.divisions.length;
+      }, 0);
+
       const newDivision = await addDivision(conferenceId, {
-        name: `Division ${conference.divisions.length + 1}`,
+        name: `Division ${totalDivisionsCount + 1}`,
         numberOfTeams: 4,
       });
 
