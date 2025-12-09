@@ -43,3 +43,9 @@ export const useTeamRoster = (id: number) => {
     enabled: !!id,
   });
 };
+
+// Direct API export for non-hook usage
+export const updateTeam = async (id: number, data: Partial<Team>): Promise<void> => {
+  await apiClient.put(`/leagues-management/teams/${id}`, data);
+};
+
