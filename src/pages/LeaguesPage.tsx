@@ -1,21 +1,11 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useLeagues, useCreateLeague, useCurrentUser } from '../api';
+import { Link, useNavigate } from 'react-router-dom';
+import { useLeagues, useCurrentUser } from '../api';
 import { Loading, ErrorMessage } from '../components';
-import type { CreateLeagueRequest } from '../types/League';
 
 export const LeaguesPage = () => {
+  const navigate = useNavigate();
   const { data: leagues, isLoading, error } = useLeagues();
   const { data: user } = useCurrentUser();
-  const createLeague = useCreateLeague();
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [formData, setFormData] = useState<CreateLeagueRequest>({
-    name: '',
-    numberOfConferences: 2,
-    divisionsPerConference: 2,
-    teamsPerDivision: 4,
-  });
-  const [formError, setFormError] = useState<string | null>(null);
 
   // Get user's role in a specific league
   const getUserRoleInLeague = (leagueId: number) => {
@@ -25,44 +15,6 @@ export const LeaguesPage = () => {
     if (roles.some(r => r.role === 'GeneralManager')) return 'GeneralManager';
     return null;
   };
-
-  const handleCreateLeague = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-
-    // Validation
-    if (!formData.name.trim()) {
-      setFormError('League name is required');
-      return;
-    }
-    if (formData.numberOfConferences < 1 || formData.numberOfConferences > 8) {
-      setFormError('Number of conferences must be between 1 and 8');
-      return;
-    }
-    if (formData.divisionsPerConference < 1 || formData.divisionsPerConference > 8) {
-      setFormError('Divisions per conference must be between 1 and 8');
-      return;
-    }
-    if (formData.teamsPerDivision < 1 || formData.teamsPerDivision > 8) {
-      setFormError('Teams per division must be between 1 and 8');
-      return;
-    }
-
-    try {
-      await createLeague.mutateAsync(formData);
-      setShowCreateModal(false);
-      setFormData({
-        name: '',
-        numberOfConferences: 2,
-        divisionsPerConference: 2,
-        teamsPerDivision: 4,
-      });
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Failed to create league');
-    }
-  };
-
-  const totalTeams = formData.numberOfConferences * formData.divisionsPerConference * formData.teamsPerDivision;
 
   if (isLoading) return <Loading />;
   if (error) return <ErrorMessage message="Failed to load leagues" />;
@@ -78,7 +30,7 @@ export const LeaguesPage = () => {
           </p>
         </div>
         <button
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => navigate('/leagues/create')}
           className="btn-primary text-lg px-6 py-3"
           data-testid="create-league-button"
         >
@@ -95,7 +47,7 @@ export const LeaguesPage = () => {
             Create your first league to get started, or ask a commissioner to add you to an existing league.
           </p>
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => navigate('/leagues/create')}
             className="btn-primary"
             data-testid="create-first-league-button"
           >
@@ -155,126 +107,6 @@ export const LeaguesPage = () => {
               </Link>
             );
           })}
-        </div>
-      )}
-
-      {/* Create League Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" data-testid="create-league-modal">
-          <div className="bg-gridiron-bg-card border border-gridiron-border-subtle rounded max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-display font-bold text-gridiron-text-primary">Create New League</h2>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="text-gridiron-text-muted hover:text-gridiron-text-primary text-2xl"
-                  data-testid="close-modal-button"
-                >
-                  ×
-                </button>
-              </div>
-
-              <form onSubmit={handleCreateLeague} className="space-y-6">
-                {formError && (
-                  <div className="bg-gridiron-loss/10 border border-gridiron-loss/30 text-gridiron-loss px-4 py-3 rounded" data-testid="form-error">
-                    {formError}
-                  </div>
-                )}
-
-                {/* League Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">
-                    League Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="input-field"
-                    placeholder="My Awesome League"
-                    data-testid="league-name-input"
-                  />
-                </div>
-
-                {/* Structure Configuration */}
-                <div className="bg-gridiron-bg-secondary rounded p-4 space-y-4">
-                  <h3 className="font-medium text-gridiron-text-primary">League Structure</h3>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">
-                      Number of Conferences
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="8"
-                      value={formData.numberOfConferences}
-                      onChange={(e) => setFormData({ ...formData, numberOfConferences: parseInt(e.target.value) || 1 })}
-                      className="input-field"
-                      data-testid="conferences-input"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">
-                      Divisions per Conference
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="8"
-                      value={formData.divisionsPerConference}
-                      onChange={(e) => setFormData({ ...formData, divisionsPerConference: parseInt(e.target.value) || 1 })}
-                      className="input-field"
-                      data-testid="divisions-input"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gridiron-text-secondary mb-1">
-                      Teams per Division
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="8"
-                      value={formData.teamsPerDivision}
-                      onChange={(e) => setFormData({ ...formData, teamsPerDivision: parseInt(e.target.value) || 1 })}
-                      className="input-field"
-                      data-testid="teams-input"
-                    />
-                  </div>
-
-                  {/* Summary */}
-                  <div className="bg-gridiron-accent/10 rounded p-3 text-center">
-                    <span className="text-sm text-gridiron-text-secondary">Total Teams: </span>
-                    <span className="text-lg font-display font-bold text-gridiron-accent" data-testid="total-teams">
-                      {totalTeams}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateModal(false)}
-                    className="flex-1 btn-secondary"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={createLeague.isPending}
-                    className="flex-1 btn-primary disabled:opacity-50"
-                    data-testid="submit-create-league"
-                  >
-                    {createLeague.isPending ? 'Creating...' : 'Create League'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
         </div>
       )}
     </div>

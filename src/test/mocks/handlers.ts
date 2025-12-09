@@ -1,8 +1,11 @@
 import { http, HttpResponse } from 'msw'
 import type { Team } from '../../types/Team'
 import type { Game, SimulateGameResponse } from '../../types/Game'
-import type { League, LeagueDetail, CreateLeagueRequest } from '../../types/League'
+import type { League } from '../../types/League'
 import type { User } from '../../types/User'
+import { leagueConstraintsHandlers } from '../../mocks/handlers/leagueConstraints'
+import { leagueStructureHandlers } from '../../mocks/handlers/leagueStructure'
+import { leagueHandlers } from '../../mocks/handlers/leagues'
 
 // Mock data - Teams
 export const mockTeams: Team[] = [
@@ -77,7 +80,7 @@ export const mockUser: User = {
   ],
 }
 
-// Mock data - Leagues
+// Mock data - Leagues (predefined, stateless)
 export const mockLeagues: League[] = [
   {
     id: 1,
@@ -95,63 +98,22 @@ export const mockLeagues: League[] = [
     totalTeams: 16,
     totalConferences: 2,
   },
+  {
+    id: 3,
+    name: 'NFL-Style League',
+    season: 2024,
+    isActive: true,
+    totalTeams: 32,
+    totalConferences: 2,
+  },
 ]
 
-export const mockLeagueDetail: LeagueDetail = {
-  id: 1,
-  name: 'Test League',
-  season: 2024,
-  isActive: true,
-  totalTeams: 8,
-  totalConferences: 2,
-  conferences: [
-    {
-      id: 1,
-      name: 'Conference A',
-      divisions: [
-        {
-          id: 1,
-          name: 'Division 1',
-          teams: [mockTeams[0], mockTeams[1]],
-        },
-        {
-          id: 2,
-          name: 'Division 2',
-          teams: [],
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: 'Conference B',
-      divisions: [
-        {
-          id: 3,
-          name: 'Division 3',
-          teams: [],
-        },
-        {
-          id: 4,
-          name: 'Division 4',
-          teams: [],
-        },
-      ],
-    },
-  ],
-}
-
-// Mutable state for tests that modify data
-let leaguesState = [...mockLeagues]
-let nextLeagueId = 3
-
-// Helper to reset mutable state between tests
-export const resetMockState = () => {
-  leaguesState = [...mockLeagues]
-  nextLeagueId = 3
-}
-
-// API handlers
+// API handlers - STATELESS (always return same data)
 export const handlers = [
+  // ============ LEAGUE CONSTRAINTS & STRUCTURE ============
+  ...leagueConstraintsHandlers,
+  ...leagueStructureHandlers,
+
   // ============ TEAMS ============
   // GET /api/teams
   http.get('/api/teams', () => {
@@ -205,82 +167,12 @@ export const handlers = [
   }),
 
   // ============ LEAGUES ============
-  // GET /api/leagues-management
-  http.get('/api/leagues-management', () => {
-    return HttpResponse.json(leaguesState)
-  }),
+  ...leagueHandlers,
 
-  // GET /api/leagues-management/:id
-  http.get('/api/leagues-management/:id', ({ params }) => {
-    const league = leaguesState.find(l => l.id === Number(params.id))
-    if (!league) {
-      return new HttpResponse(null, { status: 404 })
-    }
-    // Return detailed version for single league
-    return HttpResponse.json({
-      ...mockLeagueDetail,
-      id: league.id,
-      name: league.name,
-      season: league.season,
-      isActive: league.isActive,
-    })
-  }),
-
-  // POST /api/leagues-management
-  http.post('/api/leagues-management', async ({ request }) => {
-    const body = await request.json() as CreateLeagueRequest
-    const totalTeams = body.numberOfConferences * body.divisionsPerConference * body.teamsPerDivision
-    const newLeague: League = {
-      id: nextLeagueId++,
-      name: body.name,
-      season: 2024,
-      isActive: true,
-      totalTeams,
-      totalConferences: body.numberOfConferences,
-    }
-    leaguesState.push(newLeague)
-    return HttpResponse.json({
-      ...mockLeagueDetail,
-      id: newLeague.id,
-      name: newLeague.name,
-      totalTeams: newLeague.totalTeams,
-      totalConferences: newLeague.totalConferences,
-    })
-  }),
-
-  // PUT /api/leagues-management/:id
-  http.put('/api/leagues-management/:id', async ({ params, request }) => {
-    const id = Number(params.id)
-    const body = await request.json() as { name?: string; season?: number; isActive?: boolean }
-    const leagueIndex = leaguesState.findIndex(l => l.id === id)
-    if (leagueIndex === -1) {
-      return new HttpResponse(null, { status: 404 })
-    }
-    leaguesState[leagueIndex] = {
-      ...leaguesState[leagueIndex],
-      ...body,
-    }
-    return HttpResponse.json({
-      ...mockLeagueDetail,
-      ...leaguesState[leagueIndex],
-    })
-  }),
-
-  // DELETE /api/leagues-management/:id
-  http.delete('/api/leagues-management/:id', ({ params }) => {
-    const id = Number(params.id)
-    const leagueIndex = leaguesState.findIndex(l => l.id === id)
-    if (leagueIndex === -1) {
-      return new HttpResponse(null, { status: 404 })
-    }
-    leaguesState.splice(leagueIndex, 1)
-    return new HttpResponse(null, { status: 204 })
-  }),
-
-  // POST /api/leagues-management/:id/populate-rosters
+  // POST /api/leagues-management/:id/populate-rosters (returns success but doesn't persist)
   http.post('/api/leagues-management/:id/populate-rosters', ({ params }) => {
     const id = Number(params.id)
-    const league = leaguesState.find(l => l.id === id)
+    const league = mockLeagues.find(l => l.id === id)
     if (!league) {
       return new HttpResponse(null, { status: 404 })
     }
