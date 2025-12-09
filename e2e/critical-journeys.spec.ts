@@ -59,7 +59,7 @@ test.describe('Critical User Journeys', () => {
 
     // Should navigate to structure page
     await page.waitForURL('**/structure', { timeout: 10000 })
-    await expect(page.getByText(leagueName)).toBeVisible()
+    await expect(page.getByRole('heading', { name: leagueName })).toBeVisible({ timeout: 10000 })
 
     // Navigate back to leagues list
     await page.goto('/leagues')
