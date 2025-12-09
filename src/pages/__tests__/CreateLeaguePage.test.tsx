@@ -268,7 +268,7 @@ describe('CreateLeaguePage', () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText(/Failed to load constraints/)).toBeInTheDocument();
+      expect(screen.getByText(/Failed to load league constraints/)).toBeInTheDocument();
     });
 
     expect(screen.getByRole('button', { name: /Retry/ })).toBeInTheDocument();
