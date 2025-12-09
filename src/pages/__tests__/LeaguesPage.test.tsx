@@ -49,31 +49,13 @@ describe('LeaguesPage', () => {
     })
   })
 
-  describe('Create League Navigation', () => {
-    it('navigates to create league page when clicking create button', async () => {
-      const user = userEvent.setup()
-      const navigate = vi.fn()
-      
-      // Mock useNavigate
-      vi.mock('react-router-dom', async () => {
-        const actual = await vi.importActual('react-router-dom')
-        return {
-          ...actual,
-          useNavigate: () => navigate,
-        }
-      })
-      
+  describe('Create League Button', () => {
+    it('displays create league button', async () => {
       render(<LeaguesPage />)
 
       await waitFor(() => {
         expect(screen.getByTestId('create-league-button')).toBeInTheDocument()
       })
-
-      await user.click(screen.getByTestId('create-league-button'))
-
-      // For now, just verify the button exists and is clickable
-      // Full navigation testing is handled in E2E tests
-      expect(screen.getByTestId('create-league-button')).toBeInTheDocument()
     })
   })
 

@@ -37,16 +37,14 @@ describe('useAutoSave', () => {
     // Should not have called saveFn yet
     expect(saveFn).not.toHaveBeenCalled();
 
-    // Fast-forward time
-    act(() => {
-      vi.advanceTimersByTime(500);
+    // Fast-forward time and run all pending timers
+    await act(async () => {
+      await vi.runAllTimersAsync();
     });
 
     // Should have called saveFn only once with the last value
-    await waitFor(() => {
-      expect(saveFn).toHaveBeenCalledTimes(1);
-      expect(saveFn).toHaveBeenCalledWith({ name: 'test3' });
-    });
+    expect(saveFn).toHaveBeenCalledTimes(1);
+    expect(saveFn).toHaveBeenCalledWith({ name: 'test3' });
   });
 
   it('should save immediately when saveImmediate is called', async () => {
@@ -69,22 +67,22 @@ describe('useAutoSave', () => {
 
     const { result } = renderHook(() => useAutoSave({ saveFn }));
 
-    act(() => {
+    // Trigger save and advance timers
+    await act(async () => {
       result.current.save({ name: 'test' });
-      vi.advanceTimersByTime(800);
+      await vi.advanceTimersByTimeAsync(800);
     });
 
-    await waitFor(() => {
-      expect(result.current.isSaving).toBe(true);
-    });
+    // Should be saving now
+    expect(result.current.isSaving).toBe(true);
 
+    // Resolve the save
     await act(async () => {
       resolveSave!();
     });
 
-    await waitFor(() => {
-      expect(result.current.isSaving).toBe(false);
-    });
+    // Should no longer be saving
+    expect(result.current.isSaving).toBe(false);
   });
 
   it('should update lastSaved timestamp on successful save', async () => {
@@ -114,11 +112,9 @@ describe('useAutoSave', () => {
       await result.current.saveImmediate({ name: 'test' });
     });
 
-    await waitFor(() => {
-      expect(result.current.error).toEqual(error);
-      expect(result.current.isSaving).toBe(false);
-      expect(onError).toHaveBeenCalledWith(error);
-    });
+    expect(result.current.error).toEqual(error);
+    expect(result.current.isSaving).toBe(false);
+    expect(onError).toHaveBeenCalledWith(error);
   });
 
   it('should clear error state when clearError is called', async () => {
@@ -129,9 +125,7 @@ describe('useAutoSave', () => {
       await result.current.saveImmediate({ name: 'test' });
     });
 
-    await waitFor(() => {
-      expect(result.current.error).not.toBeNull();
-    });
+    expect(result.current.error).not.toBeNull();
 
     act(() => {
       result.current.clearError();
@@ -152,9 +146,7 @@ describe('useAutoSave', () => {
       await result.current.saveImmediate({ name: 'test' });
     });
 
-    await waitFor(() => {
-      expect(onSuccess).toHaveBeenCalled();
-    });
+    expect(onSuccess).toHaveBeenCalled();
   });
 
   it('should cancel pending debounced save when saveImmediate is called', async () => {
@@ -200,13 +192,11 @@ describe('useAutoSave', () => {
     expect(saveFn).not.toHaveBeenCalled();
 
     // Fast-forward another 500ms - now should have saved
-    act(() => {
-      vi.advanceTimersByTime(500);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
     });
 
-    await waitFor(() => {
-      expect(saveFn).toHaveBeenCalledTimes(1);
-    });
+    expect(saveFn).toHaveBeenCalledTimes(1);
   });
 
   it('should cleanup timers on unmount', () => {
