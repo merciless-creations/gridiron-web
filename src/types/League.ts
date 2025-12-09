@@ -47,3 +47,43 @@ export interface PopulateRostersResponse {
   name: string;
   totalTeams: number;
 }
+
+export interface LeagueConstraints {
+  minConferences: number;
+  maxConferences: number;
+  minDivisionsPerConference: number;
+  maxDivisionsPerConference: number;
+  minTeamsPerDivision: number;
+  maxTeamsPerDivision: number;
+}
+
+export interface AddConferenceRequest {
+  name: string;
+  numberOfDivisions: number;
+  teamsPerDivision: number;
+}
+
+export interface AddDivisionRequest {
+  name: string;
+  numberOfTeams: number;
+}
+
+export interface AddTeamRequest {
+  name?: string;
+  city?: string;
+}
+
+export interface UpdateConferenceRequest {
+  name?: string;
+}
+
+export interface UpdateDivisionRequest {
+  name?: string;
+}
+
+export interface CascadeDeleteResult {
+  success: boolean;
+  errorMessage?: string;
+  totalEntitiesDeleted: number;
+  deletedByType: Record<string, number>;
+}
