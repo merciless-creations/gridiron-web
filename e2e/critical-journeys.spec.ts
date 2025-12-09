@@ -49,10 +49,10 @@ test.describe('Critical User Journeys', () => {
     const leagueName = `E2E Test League ${Date.now()}`
     await page.locator('input[placeholder="e.g., National Football League"]').fill(leagueName)
     
-    // Use the number inputs for structure
-    await page.locator('input#conferences').fill('1')
-    await page.locator('input#divisionsPerConference').fill('1')
-    await page.locator('input#teamsPerDivision').fill('2')
+    // Use the number inputs for structure (they're the second input in each group)
+    await page.locator('input[type="number"]').nth(1).fill('1') // conferences
+    await page.locator('input[type="number"]').nth(2).fill('1') // divisions
+    await page.locator('input[type="number"]').nth(3).fill('2') // teams
     
     // Submit the form
     await page.getByRole('button', { name: /Create League/i }).click()
