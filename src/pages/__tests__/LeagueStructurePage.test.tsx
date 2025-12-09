@@ -233,9 +233,6 @@ describe('LeagueStructurePage', () => {
       expect(screen.getByText('AFC')).toBeInTheDocument();
     });
 
-    // Hover over AFC to show add division button
-    const afcSection = screen.getByText('AFC').closest('div');
-    
     // Find and click the + Division button
     const addDivButton = screen.getAllByText('+ Division')[0];
     await user.click(addDivButton);

@@ -20,7 +20,6 @@ interface LeagueStructureTreeProps {
 export function LeagueStructureTree({
   league,
   constraints,
-  onUpdateLeague,
   onAddConference,
   onDeleteConference,
   onUpdateConference,

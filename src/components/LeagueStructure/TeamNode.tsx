@@ -15,7 +15,7 @@ export function TeamNode({ team, onUpdate, onDelete }: TeamNodeProps) {
   const [name, setName] = useState(team.name);
   const [city, setCity] = useState(team.city);
 
-  const { save, isSaving, lastSaved, error } = useAutoSave({
+  const { save, isSaving, error } = useAutoSave({
     saveFn: async (data: Partial<Team>) => {
       await updateTeam(team.id, data);
       onUpdate({ ...team, ...data });

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getLeague, updateLeague } from '../api/leagues';
+import { getLeague } from '../api/leagues';
 import { getLeagueConstraints } from '../api/leagueConstraints';
 import { addConference, deleteConference, addDivision, deleteDivision, addTeam, deleteTeam } from '../api/leagueStructure';
 import { LeagueStructureTree } from '../components/LeagueStructure';
