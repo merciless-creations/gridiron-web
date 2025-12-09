@@ -47,7 +47,7 @@ test.describe('Critical User Journeys', () => {
 
     // Fill in league parameters
     const leagueName = `E2E Test League ${Date.now()}`
-    await page.locator('input[placeholder="Enter league name"]').fill(leagueName)
+    await page.locator('input[placeholder="e.g., National Football League"]').fill(leagueName)
     
     // Use the number inputs for structure
     await page.locator('input#conferences').fill('1')
