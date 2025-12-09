@@ -9,8 +9,6 @@ import type {
 } from '../../types/League';
 import type { Team } from '../../types/Team';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
 // In-memory counters for generating IDs
 let nextConferenceId = 1000;
 let nextDivisionId = 2000;
@@ -59,7 +57,7 @@ export const leagueStructureHandlers = [
    * Add a new conference to a league
    */
   http.post<{ leagueId: string }, AddConferenceRequest>(
-    `${API_URL}/api/leagues-management/:leagueId/conferences`,
+    '/api/leagues-management/:leagueId/conferences',
     async ({ params, request }) => {
       const body = await request.json();
       
@@ -86,7 +84,7 @@ export const leagueStructureHandlers = [
    * Delete a conference (cascade)
    */
   http.delete<{ conferenceId: string }>(
-    `${API_URL}/api/leagues-management/conferences/:conferenceId`,
+    '/api/leagues-management/conferences/:conferenceId',
     ({ params }) => {
       // Simulate cascade delete
       const result: CascadeDeleteResult = {
@@ -108,7 +106,7 @@ export const leagueStructureHandlers = [
    * Add a new division to a conference
    */
   http.post<{ conferenceId: string }, AddDivisionRequest>(
-    `${API_URL}/api/leagues-management/conferences/:conferenceId/divisions`,
+    '/api/leagues-management/conferences/:conferenceId/divisions',
     async ({ params, request }) => {
       const body = await request.json();
       
@@ -134,7 +132,7 @@ export const leagueStructureHandlers = [
    * Delete a division (cascade)
    */
   http.delete<{ divisionId: string }>(
-    `${API_URL}/api/leagues-management/divisions/:divisionId`,
+    '/api/leagues-management/divisions/:divisionId',
     ({ params }) => {
       const result: CascadeDeleteResult = {
         success: true,
@@ -154,7 +152,7 @@ export const leagueStructureHandlers = [
    * Add a new team to a division
    */
   http.post<{ divisionId: string }, AddTeamRequest>(
-    `${API_URL}/api/leagues-management/divisions/:divisionId/teams`,
+    '/api/leagues-management/divisions/:divisionId/teams',
     async ({ params, request }) => {
       const body = await request.json();
 
@@ -180,7 +178,7 @@ export const leagueStructureHandlers = [
    * Delete a team (cascade)
    */
   http.delete<{ teamId: string }>(
-    `${API_URL}/api/leagues-management/teams/:teamId`,
+    '/api/leagues-management/teams/:teamId',
     ({ params }) => {
       const result: CascadeDeleteResult = {
         success: true,
