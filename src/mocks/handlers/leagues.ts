@@ -12,7 +12,6 @@ function generateEmptyLeague(id: number, request: CreateLeagueRequest): LeagueDe
     season: new Date().getFullYear(),
     totalTeams: 0,
     totalConferences: 0,
-    totalDivisions: 0,
     isActive: true,
     conferences: [],
   };
