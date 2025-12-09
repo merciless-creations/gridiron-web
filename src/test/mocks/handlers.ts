@@ -5,6 +5,7 @@ import type { League, LeagueDetail, CreateLeagueRequest } from '../../types/Leag
 import type { User } from '../../types/User'
 import { leagueConstraintsHandlers } from '../../mocks/handlers/leagueConstraints'
 import { leagueStructureHandlers } from '../../mocks/handlers/leagueStructure'
+import { generateMockLeague } from '../../mocks/data/leaguePresets'
 
 // Mock data - Teams
 export const mockTeams: Team[] = [
@@ -144,11 +145,13 @@ export const mockLeagueDetail: LeagueDetail = {
 
 // Mutable state for tests that modify data
 let leaguesState = [...mockLeagues]
+let leagueDetailsState = new Map<number, LeagueDetail>() // Store full details
 let nextLeagueId = 3
 
 // Helper to reset mutable state between tests
 export const resetMockState = () => {
   leaguesState = [...mockLeagues]
+  leagueDetailsState.clear()
   nextLeagueId = 3
 }
 
@@ -218,10 +221,19 @@ export const handlers = [
 
   // GET /api/leagues-management/:id
   http.get('/api/leagues-management/:id', ({ params }) => {
-    const league = leaguesState.find(l => l.id === Number(params.id))
+    const leagueId = Number(params.id)
+    
+    // Check if we have detailed data for this league
+    if (leagueDetailsState.has(leagueId)) {
+      return HttpResponse.json(leagueDetailsState.get(leagueId))
+    }
+    
+    // Fall back to finding in summary list and returning mock detail
+    const league = leaguesState.find(l => l.id === leagueId)
     if (!league) {
       return new HttpResponse(null, { status: 404 })
     }
+    
     // Return detailed version for single league
     return HttpResponse.json({
       ...mockLeagueDetail,
@@ -245,13 +257,14 @@ export const handlers = [
       totalConferences: body.numberOfConferences,
     }
     leaguesState.push(newLeague)
-    return HttpResponse.json({
-      ...mockLeagueDetail,
-      id: newLeague.id,
-      name: newLeague.name,
-      totalTeams: newLeague.totalTeams,
-      totalConferences: newLeague.totalConferences,
-    })
+    
+    // Generate proper league structure based on request
+    const leagueDetail = generateMockLeague(body, newLeague.id)
+    
+    // Store the detailed structure
+    leagueDetailsState.set(newLeague.id, leagueDetail)
+    
+    return HttpResponse.json(leagueDetail)
   }),
 
   // PUT /api/leagues-management/:id

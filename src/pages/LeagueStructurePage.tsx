@@ -173,8 +173,15 @@ export default function LeagueStructurePage() {
     if (!division) return;
 
     try {
+      // Count total teams across all conferences and divisions
+      const totalTeamsCount = league.conferences.reduce((total, conf) => {
+        return total + conf.divisions.reduce((divTotal, div) => {
+          return divTotal + div.teams.length;
+        }, 0);
+      }, 0);
+
       const newTeam = await addTeam(divisionId, {
-        name: `Team ${division.teams.length + 1}`,
+        name: `Team ${totalTeamsCount + 1}`,
         city: 'City',
       });
 
