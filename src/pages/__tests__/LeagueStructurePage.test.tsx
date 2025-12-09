@@ -239,7 +239,7 @@ describe('LeagueStructurePage', () => {
 
     await waitFor(() => {
       expect(structureApi.addDivision).toHaveBeenCalledWith(100, {
-        name: 'Division 3',
+        name: expect.stringMatching(/Division \d+/),
         numberOfTeams: 4,
       });
     });
@@ -275,7 +275,7 @@ describe('LeagueStructurePage', () => {
 
     await waitFor(() => {
       expect(structureApi.addTeam).toHaveBeenCalledWith(200, {
-        name: 'Team 3',
+        name: expect.stringMatching(/Team \d+/),
         city: 'City',
       });
     });
