@@ -58,7 +58,7 @@ export const leagueStructureHandlers = [
    */
   http.post<{ leagueId: string }, AddConferenceRequest>(
     '/api/leagues-management/:leagueId/conferences',
-    async ({ params: _params, request }) => {
+    async ({ request }) => {
       const body = await request.json();
       
       // Validate request
@@ -85,7 +85,7 @@ export const leagueStructureHandlers = [
    */
   http.delete<{ conferenceId: string }>(
     '/api/leagues-management/conferences/:conferenceId',
-    ({ params: _params }) => {
+    () => {
       // Simulate cascade delete
       const result: CascadeDeleteResult = {
         success: true,
@@ -107,7 +107,7 @@ export const leagueStructureHandlers = [
    */
   http.post<{ conferenceId: string }, AddDivisionRequest>(
     '/api/leagues-management/conferences/:conferenceId/divisions',
-    async ({ params: _params, request }) => {
+    async ({ request }) => {
       const body = await request.json();
       
       if (!body.name || body.numberOfTeams <= 0) {
@@ -133,7 +133,7 @@ export const leagueStructureHandlers = [
    */
   http.delete<{ divisionId: string }>(
     '/api/leagues-management/divisions/:divisionId',
-    ({ params: _params }) => {
+    () => {
       const result: CascadeDeleteResult = {
         success: true,
         totalEntitiesDeleted: 5, // 1 division + 4 teams (example)
@@ -153,7 +153,7 @@ export const leagueStructureHandlers = [
    */
   http.post<{ divisionId: string }, AddTeamRequest>(
     '/api/leagues-management/divisions/:divisionId/teams',
-    async ({ params: _params, request }) => {
+    async ({ request }) => {
       const body = await request.json();
 
       const team: Team = {
@@ -179,7 +179,7 @@ export const leagueStructureHandlers = [
    */
   http.delete<{ teamId: string }>(
     '/api/leagues-management/teams/:teamId',
-    ({ params: _params }) => {
+    () => {
       const result: CascadeDeleteResult = {
         success: true,
         totalEntitiesDeleted: 1, // Just the team (players would be included in real API)
