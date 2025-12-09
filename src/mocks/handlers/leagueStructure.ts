@@ -122,7 +122,7 @@ export const leagueStructureHandlers = [
       const division: Division = {
         id: nextDivisionId++,
         name: body.name,
-        teams: generateTeams(body.numberOfTeams),
+        teams: generateTeams(body.numberOfTeams, nextDivisionId - 1),
       };
 
       return HttpResponse.json(division, { status: 201 });

@@ -43,16 +43,16 @@ const mockLeague = {
           id: 200,
           name: 'North',
           teams: [
-            { id: 1, name: 'Ravens', city: 'Baltimore', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 80, chemistry: 75 },
-            { id: 2, name: 'Steelers', city: 'Pittsburgh', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 85, chemistry: 80 },
+            { id: 1, divisionId: 200, name: 'Ravens', city: 'Baltimore', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 80, chemistry: 75 },
+            { id: 2, divisionId: 200, name: 'Steelers', city: 'Pittsburgh', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 85, chemistry: 80 },
           ],
         },
         {
           id: 201,
           name: 'South',
           teams: [
-            { id: 3, name: 'Titans', city: 'Tennessee', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 70, chemistry: 65 },
-            { id: 4, name: 'Colts', city: 'Indianapolis', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 75, chemistry: 70 },
+            { id: 3, divisionId: 201, name: 'Titans', city: 'Tennessee', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 70, chemistry: 65 },
+            { id: 4, divisionId: 201, name: 'Colts', city: 'Indianapolis', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 75, chemistry: 70 },
           ],
         },
       ],
@@ -65,16 +65,16 @@ const mockLeague = {
           id: 202,
           name: 'East',
           teams: [
-            { id: 5, name: 'Cowboys', city: 'Dallas', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 95, chemistry: 90 },
-            { id: 6, name: 'Eagles', city: 'Philadelphia', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 85, chemistry: 80 },
+            { id: 5, divisionId: 202, name: 'Cowboys', city: 'Dallas', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 95, chemistry: 90 },
+            { id: 6, divisionId: 202, name: 'Eagles', city: 'Philadelphia', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 85, chemistry: 80 },
           ],
         },
         {
           id: 203,
           name: 'West',
           teams: [
-            { id: 7, name: '49ers', city: 'San Francisco', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 90, chemistry: 85 },
-            { id: 8, name: 'Seahawks', city: 'Seattle', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 85, chemistry: 80 },
+            { id: 7, divisionId: 203, name: '49ers', city: 'San Francisco', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 90, chemistry: 85 },
+            { id: 8, divisionId: 203, name: 'Seahawks', city: 'Seattle', budget: 100000000, championships: 0, wins: 0, losses: 0, ties: 0, fanSupport: 85, chemistry: 80 },
           ],
         },
       ],
@@ -249,6 +249,7 @@ describe('LeagueStructurePage', () => {
     const user = userEvent.setup();
     const newTeam = {
       id: 9,
+      divisionId: 200,
       name: 'Team 3',
       city: 'City',
       budget: 100000000,
