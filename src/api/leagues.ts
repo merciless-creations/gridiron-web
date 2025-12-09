@@ -104,3 +104,16 @@ export const usePopulateRosters = () => {
     },
   });
 };
+
+// Direct API exports for non-hook usage
+export const createLeague = leaguesApi.create;
+export const getLeague = leaguesApi.getById;
+export const updateLeague = leaguesApi.update;
+export const deleteLeague = leaguesApi.delete;
+export const updateConference = async (id: number, request: { name?: string }): Promise<void> => {
+  await apiClient.put(`/leagues-management/conferences/${id}`, request);
+};
+export const updateDivision = async (id: number, request: { name?: string }): Promise<void> => {
+  await apiClient.put(`/leagues-management/divisions/${id}`, request);
+};
+
