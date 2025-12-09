@@ -17,11 +17,12 @@ let nextTeamId = 3000;
 /**
  * Generate placeholder teams for a division
  */
-function generateTeams(count: number): Team[] {
+function generateTeams(count: number, divisionId: number): Team[] {
   const teams: Team[] = [];
   for (let i = 1; i <= count; i++) {
     teams.push({
       id: nextTeamId++,
+      divisionId,
       name: `Team ${nextTeamId}`,
       city: 'City',
       budget: 100000000,
@@ -42,10 +43,11 @@ function generateTeams(count: number): Team[] {
 function generateDivisions(count: number, teamsPerDivision: number): Division[] {
   const divisions: Division[] = [];
   for (let i = 1; i <= count; i++) {
+    const divisionId = nextDivisionId++;
     divisions.push({
-      id: nextDivisionId++,
+      id: divisionId,
       name: `Division ${nextDivisionId}`,
-      teams: generateTeams(teamsPerDivision),
+      teams: generateTeams(teamsPerDivision, divisionId),
     });
   }
   return divisions;
@@ -153,11 +155,12 @@ export const leagueStructureHandlers = [
    */
   http.post<{ divisionId: string }, AddTeamRequest>(
     '/api/leagues-management/divisions/:divisionId/teams',
-    async ({ request }) => {
+    async ({ params, request }) => {
       const body = await request.json();
 
       const team: Team = {
         id: nextTeamId++,
+        divisionId: Number(params.divisionId),
         name: body.name || `Team ${nextTeamId}`,
         city: body.city || 'City',
         budget: 100000000,
