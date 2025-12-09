@@ -5,6 +5,7 @@ import type { League, LeagueDetail, CreateLeagueRequest } from '../../types/Leag
 import type { User } from '../../types/User'
 import { leagueConstraintsHandlers } from '../../mocks/handlers/leagueConstraints'
 import { leagueStructureHandlers } from '../../mocks/handlers/leagueStructure'
+import { leagueHandlers } from '../../mocks/handlers/leagues'
 import { generateMockLeague } from '../../mocks/data/leaguePresets'
 
 // Mock data - Teams
@@ -228,61 +229,7 @@ export const handlers = [
   }),
 
   // ============ LEAGUES ============
-  // GET /api/leagues-management (always returns same list)
-  http.get('/api/leagues-management', () => {
-    return HttpResponse.json(mockLeagues)
-  }),
-
-  // GET /api/leagues-management/:id (always returns predefined data)
-  http.get('/api/leagues-management/:id', ({ params }) => {
-    const leagueId = Number(params.id)
-    const leagueDetail = mockLeagueDetails.get(leagueId)
-    
-    if (!leagueDetail) {
-      return new HttpResponse(null, { status: 404 })
-    }
-    
-    return HttpResponse.json(leagueDetail)
-  }),
-
-  // POST /api/leagues-management (returns success but doesn't persist)
-  http.post('/api/leagues-management', async ({ request }) => {
-    const body = await request.json() as CreateLeagueRequest
-    
-    // Generate structure for the created league (but don't store it)
-    const newLeague = generateMockLeague(body, 999) // Use ID 999 for demo
-    
-    return HttpResponse.json(newLeague)
-  }),
-
-  // PUT /api/leagues-management/:id (returns success but doesn't persist)
-  http.put('/api/leagues-management/:id', async ({ params, request }) => {
-    const id = Number(params.id)
-    const body = await request.json() as { name?: string; season?: number; isActive?: boolean }
-    const league = mockLeagueDetails.get(id)
-    
-    if (!league) {
-      return new HttpResponse(null, { status: 404 })
-    }
-    
-    // Return updated league (but don't actually modify the mock data)
-    return HttpResponse.json({
-      ...league,
-      ...body,
-    })
-  }),
-
-  // DELETE /api/leagues-management/:id (returns success but doesn't persist)
-  http.delete('/api/leagues-management/:id', ({ params }) => {
-    const id = Number(params.id)
-    const league = mockLeagues.find(l => l.id === id)
-    
-    if (!league) {
-      return new HttpResponse(null, { status: 404 })
-    }
-    
-    return new HttpResponse(null, { status: 204 })
-  }),
+  ...leagueHandlers,
 
   // POST /api/leagues-management/:id/populate-rosters (returns success but doesn't persist)
   http.post('/api/leagues-management/:id/populate-rosters', ({ params }) => {
