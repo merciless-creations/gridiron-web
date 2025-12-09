@@ -1,12 +1,11 @@
 import { http, HttpResponse } from 'msw'
 import type { Team } from '../../types/Team'
 import type { Game, SimulateGameResponse } from '../../types/Game'
-import type { League, LeagueDetail, CreateLeagueRequest } from '../../types/League'
+import type { League } from '../../types/League'
 import type { User } from '../../types/User'
 import { leagueConstraintsHandlers } from '../../mocks/handlers/leagueConstraints'
 import { leagueStructureHandlers } from '../../mocks/handlers/leagueStructure'
 import { leagueHandlers } from '../../mocks/handlers/leagues'
-import { generateMockLeague } from '../../mocks/data/leaguePresets'
 
 // Mock data - Teams
 export const mockTeams: Team[] = [
@@ -108,67 +107,6 @@ export const mockLeagues: League[] = [
     totalConferences: 2,
   },
 ]
-
-// Predefined league details (stateless - always return same data)
-const mockLeagueDetails: Map<number, LeagueDetail> = new Map([
-  // League 1: Small test league
-  [1, {
-    id: 1,
-    name: 'Test League',
-    season: 2024,
-    isActive: true,
-    totalTeams: 8,
-    totalConferences: 2,
-    conferences: [
-      {
-        id: 1,
-        name: 'Conference A',
-        divisions: [
-          {
-            id: 1,
-            name: 'Division 1',
-            teams: [mockTeams[0], mockTeams[1]],
-          },
-          {
-            id: 2,
-            name: 'Division 2',
-            teams: [],
-          },
-        ],
-      },
-      {
-        id: 2,
-        name: 'Conference B',
-        divisions: [
-          {
-            id: 3,
-            name: 'Division 3',
-            teams: [],
-          },
-          {
-            id: 4,
-            name: 'Division 4',
-            teams: [],
-          },
-        ],
-      },
-    ],
-  }],
-  // League 2: Medium league
-  [2, generateMockLeague({ 
-    name: 'Another League', 
-    numberOfConferences: 2, 
-    divisionsPerConference: 4, 
-    teamsPerDivision: 2 
-  }, 2)],
-  // League 3: NFL-style league
-  [3, generateMockLeague({ 
-    name: 'NFL-Style League', 
-    numberOfConferences: 2, 
-    divisionsPerConference: 4, 
-    teamsPerDivision: 4 
-  }, 3)],
-]);
 
 // API handlers - STATELESS (always return same data)
 export const handlers = [
