@@ -47,12 +47,12 @@ test.describe('Critical User Journeys', () => {
 
     // Fill in league parameters
     const leagueName = `E2E Test League ${Date.now()}`
-    await page.getByLabelText(/League Name/).fill(leagueName)
+    await page.locator('input[placeholder="Enter league name"]').fill(leagueName)
     
-    // Use the number inputs (not sliders)
-    await page.locator('input[type="number"]').filter({ hasText: /conferences/i }).first().fill('1')
-    await page.locator('input[type="number"]').filter({ hasText: /divisions/i }).first().fill('1')
-    await page.locator('input[type="number"]').filter({ hasText: /teams/i }).first().fill('2')
+    // Use the number inputs for structure
+    await page.locator('input#conferences').fill('1')
+    await page.locator('input#divisionsPerConference').fill('1')
+    await page.locator('input#teamsPerDivision').fill('2')
     
     // Submit the form
     await page.getByRole('button', { name: /Create League/i }).click()
