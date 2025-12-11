@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install mock server dependencies
+        run: npm ci --prefix mock-server
+
       - name: Security audit
         run: npm audit --audit-level=high
 
