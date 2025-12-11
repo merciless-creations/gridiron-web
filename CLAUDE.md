@@ -46,11 +46,23 @@ npm run dev
 ## Testing
 
 ```bash
-# Unit/Component tests
+# Unit/Component tests (uses mock server on port 3002)
 npm run test
 
-# E2E tests (requires mocked API)
+# E2E tests (uses mock server on port 3001)
 npm run test:e2e
+```
+
+### Mock Server
+
+Both unit tests and E2E tests use a shared mock server located at `mock-server/`. The mock server provides:
+- All API endpoints matching the real backend
+- State reset via `POST /_reset` between tests
+- Seed data in `mock-server/data/seed.json`
+
+For local development with mocked data:
+```bash
+npm run dev:mock  # Runs Vite with mock server
 ```
 
 ## Coding Conventions

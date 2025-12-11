@@ -3,14 +3,11 @@ import { defineConfig, devices } from '@playwright/test'
 /**
  * Local E2E test configuration.
  *
- * This config is for running E2E tests locally with proper authentication bypass.
- * It always starts a fresh dev server with VITE_E2E_TEST_MODE=true.
+ * This config is for running E2E tests locally with mock API server.
+ * It starts both the mock server and dev server fresh.
  *
  * Usage:
  *   npm run test:e2e:local
- *
- * Prerequisites:
- *   - API must be running: dotnet run (in Gridiron.WebApi folder)
  */
 export default defineConfig({
   testDir: './e2e',
@@ -35,10 +32,18 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'npm run dev:e2e',
-    url: 'http://localhost:3000',
-    reuseExistingServer: false, // Always start fresh with E2E mode
-    timeout: 60000,
-  },
+  webServer: [
+    {
+      command: 'npm run mock-server',
+      url: 'http://localhost:3001/api/leagues-management/constraints',
+      reuseExistingServer: false,
+      timeout: 60000,
+    },
+    {
+      command: 'npm run dev:mock',
+      url: 'http://localhost:3000',
+      reuseExistingServer: false,
+      timeout: 60000,
+    },
+  ],
 })
