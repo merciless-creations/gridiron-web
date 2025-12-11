@@ -55,6 +55,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install mock server dependencies
+        run: npm ci --prefix mock-server
+
       - name: Run tests with coverage
         run: npm test -- --run --coverage
 
@@ -84,6 +87,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install mock server dependencies
+        run: npm ci --prefix mock-server
+
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
 
@@ -96,11 +102,11 @@ jobs:
           VITE_AZURE_REDIRECT_URI=http://localhost:3000
           VITE_AZURE_POST_LOGOUT_REDIRECT_URI=http://localhost:3000
 
-          # API Configuration - uses MSW mocks in test mode
-          VITE_API_URL=/api
+          # API Configuration - uses mock server
+          VITE_API_URL=http://localhost:3001/api
 
-          # E2E Test Mode - enables API mocking
-          VITE_E2E_TEST_MODE=true
+          # Mock Auth - bypasses Azure AD authentication
+          VITE_MOCK_AUTH=true
           EOF
 
       - name: Run E2E tests

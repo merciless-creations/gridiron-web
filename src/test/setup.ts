@@ -1,18 +1,20 @@
 import '@testing-library/jest-dom'
 import { cleanup } from '@testing-library/react'
-import { afterEach, beforeAll, afterAll } from 'vitest'
-import { server } from './mocks/server'
-import { resetLeagueState } from '../mocks/handlers/leagues'
+import { afterEach, beforeEach } from 'vitest'
 
-// Start MSW server before all tests
-beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }))
+const MOCK_SERVER_URL = 'http://localhost:3002'
 
-// Reset handlers and state after each test
-afterEach(() => {
-  server.resetHandlers()
-  resetLeagueState()
-  cleanup()
+// Reset mock server state before each test to ensure clean state
+beforeEach(async () => {
+  try {
+    const response = await fetch(`${MOCK_SERVER_URL}/_reset`, { method: 'POST' })
+    await response.json() // Ensure response is fully consumed
+  } catch {
+    // Server might not be running during some tests
+  }
 })
 
-// Close MSW server after all tests
-afterAll(() => server.close())
+// Cleanup after each test
+afterEach(async () => {
+  cleanup()
+})

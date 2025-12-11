@@ -6,9 +6,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    globalSetup: './src/test/globalSetup.ts',
     setupFiles: './src/test/setup.ts',
     css: true,
     exclude: ['**/node_modules/**', '**/e2e/**'],
+    env: {
+      VITE_API_URL: 'http://localhost:3002/api',
+      VITE_MOCK_AUTH: 'true',
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -19,7 +24,6 @@ export default defineConfig({
         '**/*.config.*',
         '**/index.ts',
         'src/main.tsx',
-        'src/mocks/',
       ],
       thresholds: {
         statements: 50,

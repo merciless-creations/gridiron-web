@@ -24,5 +24,12 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  /*
+   * Exclude test files from production build.
+   * Test files use Node.js APIs (child_process, path, __dirname) and vitest/jest-dom types
+   * which are not available in this config (types: ["vite/client"]).
+   * Vitest handles its own TypeScript compilation for tests.
+   */
+  "exclude": ["src/test", "src/**/__tests__", "src/**/*.test.ts", "src/**/*.test.tsx"]
 }
