@@ -6,6 +6,7 @@ import LeagueStructurePage from '../LeagueStructurePage';
 import * as leaguesApi from '../../api/leagues';
 import * as constraintsApi from '../../api/leagueConstraints';
 import * as structureApi from '../../api/leagueStructure';
+import * as teamsApi from '../../api/teams';
 
 const mockNavigate = vi.fn();
 
@@ -358,5 +359,279 @@ describe('LeagueStructurePage', () => {
     });
 
     expect(screen.getByText(/Changes save automatically/)).toBeInTheDocument();
+  });
+
+  describe('Inline Editing', () => {
+    describe('Conference name editing', () => {
+      it('should enter edit mode when clicking conference name', async () => {
+        const user = userEvent.setup();
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('AFC')).toBeInTheDocument();
+        });
+
+        // Click on conference name to edit
+        await user.click(screen.getByText('AFC'));
+
+        // Input should appear with current value
+        const input = screen.getByDisplayValue('AFC');
+        expect(input).toBeInTheDocument();
+        expect(input.tagName).toBe('INPUT');
+      });
+
+      it('should save conference name on Enter key', async () => {
+        const user = userEvent.setup();
+        const updateConferenceSpy = vi.spyOn(leaguesApi, 'updateConference').mockResolvedValue(undefined);
+
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('AFC')).toBeInTheDocument();
+        });
+
+        // Click to edit
+        await user.click(screen.getByText('AFC'));
+
+        // Clear and type new name
+        const input = screen.getByDisplayValue('AFC');
+        await user.clear(input);
+        await user.type(input, 'American Conference{Enter}');
+
+        // Verify API was called with correct params
+        await waitFor(() => {
+          expect(updateConferenceSpy).toHaveBeenCalledWith(100, { name: 'American Conference' });
+        });
+      });
+
+      it('should cancel edit on Escape key without saving', async () => {
+        const user = userEvent.setup();
+        const updateConferenceSpy = vi.spyOn(leaguesApi, 'updateConference').mockResolvedValue(undefined);
+
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('AFC')).toBeInTheDocument();
+        });
+
+        // Click to edit
+        await user.click(screen.getByText('AFC'));
+
+        // Type new name then press Escape
+        const input = screen.getByDisplayValue('AFC');
+        await user.clear(input);
+        await user.type(input, 'New Name{Escape}');
+
+        // Should revert to original name and not call API
+        await waitFor(() => {
+          expect(screen.getByText('AFC')).toBeInTheDocument();
+        });
+        expect(updateConferenceSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Division name editing', () => {
+      it('should enter edit mode when clicking division name', async () => {
+        const user = userEvent.setup();
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('North')).toBeInTheDocument();
+        });
+
+        // Click on division name to edit
+        await user.click(screen.getByText('North'));
+
+        // Input should appear with current value
+        const input = screen.getByDisplayValue('North');
+        expect(input).toBeInTheDocument();
+        expect(input.tagName).toBe('INPUT');
+      });
+
+      it('should save division name on Enter key', async () => {
+        const user = userEvent.setup();
+        const updateDivisionSpy = vi.spyOn(leaguesApi, 'updateDivision').mockResolvedValue(undefined);
+
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('North')).toBeInTheDocument();
+        });
+
+        // Click to edit
+        await user.click(screen.getByText('North'));
+
+        // Clear and type new name
+        const input = screen.getByDisplayValue('North');
+        await user.clear(input);
+        await user.type(input, 'Northern Division{Enter}');
+
+        // Verify API was called with correct params
+        await waitFor(() => {
+          expect(updateDivisionSpy).toHaveBeenCalledWith(200, { name: 'Northern Division' });
+        });
+      });
+
+      it('should cancel division edit on Escape key', async () => {
+        const user = userEvent.setup();
+        const updateDivisionSpy = vi.spyOn(leaguesApi, 'updateDivision').mockResolvedValue(undefined);
+
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('North')).toBeInTheDocument();
+        });
+
+        // Click to edit
+        await user.click(screen.getByText('North'));
+
+        // Type new name then press Escape
+        const input = screen.getByDisplayValue('North');
+        await user.clear(input);
+        await user.type(input, 'New Division{Escape}');
+
+        // Should revert to original name
+        await waitFor(() => {
+          expect(screen.getByText('North')).toBeInTheDocument();
+        });
+        expect(updateDivisionSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Team name editing', () => {
+      it('should enter edit mode when clicking team name', async () => {
+        const user = userEvent.setup();
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('Ravens')).toBeInTheDocument();
+        });
+
+        // Click on team name to edit
+        await user.click(screen.getByText('Ravens'));
+
+        // Input should appear with current value
+        const input = screen.getByDisplayValue('Ravens');
+        expect(input).toBeInTheDocument();
+        expect(input.tagName).toBe('INPUT');
+      });
+
+      it('should save team name on Enter key', async () => {
+        const user = userEvent.setup();
+        const updateTeamSpy = vi.spyOn(teamsApi, 'updateTeam').mockResolvedValue(undefined);
+
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('Ravens')).toBeInTheDocument();
+        });
+
+        // Click to edit
+        await user.click(screen.getByText('Ravens'));
+
+        // Clear and type new name
+        const input = screen.getByDisplayValue('Ravens');
+        await user.clear(input);
+        await user.type(input, 'Crows{Enter}');
+
+        // Verify API was called with correct params
+        await waitFor(() => {
+          expect(updateTeamSpy).toHaveBeenCalledWith(1, { name: 'Crows' });
+        });
+      });
+
+      it('should cancel team name edit on Escape key', async () => {
+        const user = userEvent.setup();
+        const updateTeamSpy = vi.spyOn(teamsApi, 'updateTeam').mockResolvedValue(undefined);
+
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('Ravens')).toBeInTheDocument();
+        });
+
+        // Click to edit
+        await user.click(screen.getByText('Ravens'));
+
+        // Type new name then press Escape
+        const input = screen.getByDisplayValue('Ravens');
+        await user.clear(input);
+        await user.type(input, 'New Team{Escape}');
+
+        // Should revert to original name
+        await waitFor(() => {
+          expect(screen.getByText('Ravens')).toBeInTheDocument();
+        });
+        expect(updateTeamSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Team city editing', () => {
+      it('should enter edit mode when clicking team city', async () => {
+        const user = userEvent.setup();
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('(Baltimore)')).toBeInTheDocument();
+        });
+
+        // Click on city to edit
+        await user.click(screen.getByText('(Baltimore)'));
+
+        // Input should appear with current value
+        const input = screen.getByDisplayValue('Baltimore');
+        expect(input).toBeInTheDocument();
+        expect(input.tagName).toBe('INPUT');
+      });
+
+      it('should save team city on Enter key', async () => {
+        const user = userEvent.setup();
+        const updateTeamSpy = vi.spyOn(teamsApi, 'updateTeam').mockResolvedValue(undefined);
+
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('(Baltimore)')).toBeInTheDocument();
+        });
+
+        // Click to edit city
+        await user.click(screen.getByText('(Baltimore)'));
+
+        // Clear and type new city
+        const input = screen.getByDisplayValue('Baltimore');
+        await user.clear(input);
+        await user.type(input, 'Maryland{Enter}');
+
+        // Verify API was called with correct params
+        await waitFor(() => {
+          expect(updateTeamSpy).toHaveBeenCalledWith(1, { city: 'Maryland' });
+        });
+      });
+
+      it('should cancel team city edit on Escape key', async () => {
+        const user = userEvent.setup();
+        const updateTeamSpy = vi.spyOn(teamsApi, 'updateTeam').mockResolvedValue(undefined);
+
+        renderPage();
+
+        await waitFor(() => {
+          expect(screen.getByText('(Baltimore)')).toBeInTheDocument();
+        });
+
+        // Click to edit city
+        await user.click(screen.getByText('(Baltimore)'));
+
+        // Type new city then press Escape
+        const input = screen.getByDisplayValue('Baltimore');
+        await user.clear(input);
+        await user.type(input, 'New City{Escape}');
+
+        // Should revert to original city
+        await waitFor(() => {
+          expect(screen.getByText('(Baltimore)')).toBeInTheDocument();
+        });
+        expect(updateTeamSpy).not.toHaveBeenCalled();
+      });
+    });
   });
 });
