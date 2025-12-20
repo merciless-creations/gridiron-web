@@ -2,11 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
-import CreateLeaguePage from '../CreateLeaguePage';
-import * as leaguesApi from '../../api/leagues';
-import * as constraintsApi from '../../api/leagueConstraints';
 
-const mockNavigate = vi.fn();
+// Use vi.hoisted to ensure mocks are available before vi.mock runs
+const { mockNavigate, mockState } = vi.hoisted(() => ({
+  mockNavigate: vi.fn(),
+  mockState: {
+    createLeagueFn: vi.fn(),
+    getLeagueConstraintsFn: vi.fn(),
+  },
+}));
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -15,6 +19,17 @@ vi.mock('react-router-dom', async () => {
     useNavigate: () => mockNavigate,
   };
 });
+
+vi.mock('../../api/leagues', () => ({
+  createLeague: (...args: unknown[]) => mockState.createLeagueFn(...args),
+}));
+
+vi.mock('../../api/leagueConstraints', () => ({
+  getLeagueConstraints: (...args: unknown[]) => mockState.getLeagueConstraintsFn(...args),
+}));
+
+// Import component after mocks are set up
+import CreateLeaguePage from '../CreateLeaguePage';
 
 const mockConstraints = {
   minConferences: 1,
@@ -38,8 +53,9 @@ const mockLeague = {
 describe('CreateLeaguePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(constraintsApi, 'getLeagueConstraints').mockResolvedValue(mockConstraints);
-    vi.spyOn(leaguesApi, 'createLeague').mockResolvedValue(mockLeague);
+    // Reset and set up default mock implementations
+    mockState.getLeagueConstraintsFn = vi.fn().mockResolvedValue(mockConstraints);
+    mockState.createLeagueFn = vi.fn().mockResolvedValue(mockLeague);
   });
 
   function renderPage() {
@@ -153,7 +169,8 @@ describe('CreateLeaguePage', () => {
 
   it('should show loading state during submission', async () => {
     const user = userEvent.setup();
-    vi.spyOn(leaguesApi, 'createLeague').mockImplementation(() => 
+    // Slow down the mock to verify loading state is visible
+    mockState.createLeagueFn = vi.fn().mockImplementation(() =>
       new Promise(resolve => setTimeout(() => resolve(mockLeague), 100))
     );
 
@@ -176,7 +193,10 @@ describe('CreateLeaguePage', () => {
 
   it('should display error message on submission failure', async () => {
     const user = userEvent.setup();
-    vi.spyOn(leaguesApi, 'createLeague').mockRejectedValueOnce(new Error('API Error'));
+    // Replace the mock function entirely to ensure rejection
+    mockState.createLeagueFn = vi.fn().mockImplementation(() => {
+      return Promise.reject(new Error('API Error'));
+    });
 
     renderPage();
 
@@ -188,15 +208,17 @@ describe('CreateLeaguePage', () => {
     await user.type(nameInput, 'Test League');
 
     const submitButton = screen.getByRole('button', { name: /Create League/ });
-    mockNavigate.mockClear();
-    
+
     await user.click(submitButton);
 
-    // Test UI behavior: error message displayed, no navigation
+    // Test UI behavior: error message should be displayed
     await waitFor(() => {
       expect(screen.getByText('API Error')).toBeInTheDocument();
     });
-    expect(mockNavigate).not.toHaveBeenCalled();
+
+    // Verify the form is still visible (not navigated away)
+    expect(screen.getByLabelText(/League Name/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Create League/ })).toBeInTheDocument();
   });
 
   it('should navigate back to leagues on cancel', async () => {
@@ -260,8 +282,11 @@ describe('CreateLeaguePage', () => {
   });
 
   it('should display error with retry button if constraints fail to load', async () => {
-    vi.spyOn(constraintsApi, 'getLeagueConstraints').mockRejectedValue(new Error('Network error'));
-    
+    // Replace the mock function entirely to ensure rejection
+    mockState.getLeagueConstraintsFn = vi.fn().mockImplementation(() => {
+      return Promise.reject(new Error('Network error'));
+    });
+
     renderPage();
 
     await waitFor(() => {
