@@ -34,6 +34,11 @@ export interface CreateLeagueRequest {
   numberOfConferences: number;
   divisionsPerConference: number;
   teamsPerDivision: number;
+  playoffTeamsPerConference?: number;
+  divisionWinnersAutoQualify?: boolean;
+  byeWeekForTopSeed?: boolean;
+  useHeadToHeadTiebreaker?: boolean;
+  usePointDifferentialTiebreaker?: boolean;
 }
 
 export interface UpdateLeagueRequest {
