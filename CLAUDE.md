@@ -6,11 +6,13 @@ Gridiron is a web-based NFL style franchise management simulation game. This rep
 
 A deep, authentic NFL front office experience where players act as General Managers—drafting, trading, signing, and building rosters across multiple seasons. Multiplayer leagues allow multiple human GMs competing in the same league.
 
-## Repository
+## Repositories
 
 - **gridiron-engine**: https://github.com/merciless-creations/gridiron-engine — C# simulation engine (NuGet package)
 - **gridiron**: https://github.com/merciless-creations/gridiron — C# Backend API, Azure SQL
 - **gridiron-web**: https://github.com/merciless-creations/gridiron-web — React frontend (this repo)
+- **gridiron-injury**: https://github.com/merciless-creations/gridiron-injury — Stateless injury determination engine (NuGet package)
+- **gridiron-progression**: https://github.com/merciless-creations/gridiron-progression — Stateless player progression engine (NuGet package)
 
 ## Project
 - https://github.com/orgs/merciless-creations/projects/3
