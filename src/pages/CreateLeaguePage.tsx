@@ -17,6 +17,8 @@ export default function CreateLeaguePage() {
     numberOfConferences: 2,
     divisionsPerConference: 4,
     teamsPerDivision: 4,
+    regularSeasonGames: 17,
+    byeWeeksPerTeam: 1,
     playoffTeamsPerConference: 7,
     divisionWinnersAutoQualify: true,
     byeWeekForTopSeed: true,
@@ -246,6 +248,68 @@ export default function CreateLeaguePage() {
             <p className="text-sm text-gray-400 mt-2">
               {formData.numberOfConferences} conference{formData.numberOfConferences !== 1 ? 's' : ''} × {formData.divisionsPerConference} division{formData.divisionsPerConference !== 1 ? 's' : ''} × {formData.teamsPerDivision} team{formData.teamsPerDivision !== 1 ? 's' : ''}
             </p>
+          </div>
+
+          {/* Season Configuration Section */}
+          <div className="border-t border-zinc-600 pt-6">
+            <h3 className="text-lg font-semibold text-white mb-4">Season Configuration</h3>
+            
+            {/* Regular Season Games */}
+            <div className="mb-6">
+              <label htmlFor="regularSeasonGames" className="block text-sm font-medium text-gray-300 mb-2">
+                Regular Season Games
+              </label>
+              <div className="flex items-center gap-4">
+                <input
+                  id="regularSeasonGames"
+                  type="range"
+                  min={10}
+                  max={18}
+                  value={formData.regularSeasonGames}
+                  onChange={(e) => setFormData({ ...formData, regularSeasonGames: Number(e.target.value) })}
+                  className="flex-1"
+                />
+                <input
+                  type="number"
+                  min={10}
+                  max={18}
+                  value={formData.regularSeasonGames}
+                  onChange={(e) => setFormData({ ...formData, regularSeasonGames: Number(e.target.value) })}
+                  className="w-20 bg-zinc-700 border border-zinc-600 rounded px-3 py-2 text-white text-center focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  aria-label="Regular Season Games Number Input"
+                />
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                Number of games each team plays during the regular season (10-18)
+              </p>
+            </div>
+
+            {/* Bye Weeks per Team */}
+            <div>
+              <label htmlFor="byeWeeksPerTeam" className="block text-sm font-medium text-gray-300 mb-2">
+                Bye Weeks per Team
+              </label>
+              <div className="flex gap-3">
+                {[0, 1, 2].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, byeWeeksPerTeam: value })}
+                    className={`flex-1 py-3 px-4 rounded font-medium transition-colors ${
+                      formData.byeWeeksPerTeam === value
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-zinc-700 text-gray-300 hover:bg-zinc-600'
+                    }`}
+                    aria-pressed={formData.byeWeeksPerTeam === value}
+                  >
+                    {value} {value === 1 ? 'week' : 'weeks'}
+                  </button>
+                ))}
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                Number of rest weeks each team receives during the season
+              </p>
+            </div>
           </div>
 
           {/* Playoff Configuration Section */}

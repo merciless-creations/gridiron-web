@@ -295,6 +295,198 @@ describe('CreateLeaguePage', () => {
     expect(screen.getByRole('button', { name: /Retry/ })).toBeInTheDocument();
   });
 
+  describe('Season Configuration', () => {
+    it('should display season configuration section with heading', async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Season Configuration')).toBeInTheDocument();
+      });
+    });
+
+    it('should display regular season games with default value of 17', async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByRole('slider', { name: /Regular Season Games/i })).toBeInTheDocument();
+      });
+
+      const slider = screen.getByRole('slider', { name: /Regular Season Games/i });
+      expect(slider).toHaveValue('17');
+    });
+
+    it('should display bye weeks selector with default value of 1', async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Bye Weeks per Team')).toBeInTheDocument();
+      });
+
+      const selectedButton = screen.getByRole('button', { name: '1 week', pressed: true });
+      expect(selectedButton).toBeInTheDocument();
+    });
+
+    it('should update regular season games when slider changes', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByRole('slider', { name: /Regular Season Games/i })).toBeInTheDocument();
+      });
+
+      const numberInput = screen.getByRole('spinbutton', { name: /Regular Season Games Number Input/i });
+      await user.clear(numberInput);
+      await user.type(numberInput, '14');
+
+      await waitFor(() => {
+        const slider = screen.getByRole('slider', { name: /Regular Season Games/i });
+        expect(slider).toHaveValue('14');
+      });
+    });
+
+    it('should update bye weeks when clicking different options', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Bye Weeks per Team')).toBeInTheDocument();
+      });
+
+      const twoWeeksButton = screen.getByRole('button', { name: '2 weeks' });
+      await user.click(twoWeeksButton);
+
+      expect(twoWeeksButton).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByRole('button', { name: '1 week' })).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it('should display 0 weeks option for bye weeks', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: '0 weeks' })).toBeInTheDocument();
+      });
+
+      const zeroWeeksButton = screen.getByRole('button', { name: '0 weeks' });
+      await user.click(zeroWeeksButton);
+
+      expect(zeroWeeksButton).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('should enforce min/max constraints on regular season games input', async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByRole('spinbutton', { name: /Regular Season Games Number Input/i })).toBeInTheDocument();
+      });
+
+      const numberInput = screen.getByRole('spinbutton', { name: /Regular Season Games Number Input/i });
+      expect(numberInput).toHaveAttribute('min', '10');
+      expect(numberInput).toHaveAttribute('max', '18');
+    });
+
+    it('should display helper text for regular season games', async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText(/Number of games each team plays during the regular season/)).toBeInTheDocument();
+      });
+    });
+
+    it('should display helper text for bye weeks', async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText(/Number of rest weeks each team receives/)).toBeInTheDocument();
+      });
+    });
+
+    it('should include season config values in form submission', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/League Name/)).toBeInTheDocument();
+      });
+
+      const nameInput = screen.getByLabelText(/League Name/);
+      await user.type(nameInput, 'Test League');
+
+      const gamesInput = screen.getByRole('spinbutton', { name: /Regular Season Games Number Input/i });
+      await user.clear(gamesInput);
+      await user.type(gamesInput, '16');
+
+      const twoWeeksButton = screen.getByRole('button', { name: '2 weeks' });
+      await user.click(twoWeeksButton);
+
+      const submitButton = screen.getByRole('button', { name: /Create League/ });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockState.createLeagueFn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            regularSeasonGames: 16,
+            byeWeeksPerTeam: 2,
+          })
+        );
+      });
+    });
+
+    it('should submit with default season config values if unchanged', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/League Name/)).toBeInTheDocument();
+      });
+
+      const nameInput = screen.getByLabelText(/League Name/);
+      await user.type(nameInput, 'Test League');
+
+      const submitButton = screen.getByRole('button', { name: /Create League/ });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockState.createLeagueFn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            regularSeasonGames: 17,
+            byeWeeksPerTeam: 1,
+          })
+        );
+      });
+    });
+
+    it('should show all three bye week options', async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: '0 weeks' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: '1 week' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: '2 weeks' })).toBeInTheDocument();
+      });
+    });
+
+    it('should visually highlight selected bye week option', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: '1 week' })).toBeInTheDocument();
+      });
+
+      const oneWeekButton = screen.getByRole('button', { name: '1 week' });
+      expect(oneWeekButton).toHaveClass('bg-emerald-600');
+
+      const zeroWeeksButton = screen.getByRole('button', { name: '0 weeks' });
+      expect(zeroWeeksButton).toHaveClass('bg-zinc-700');
+
+      await user.click(zeroWeeksButton);
+
+      expect(zeroWeeksButton).toHaveClass('bg-emerald-600');
+      expect(oneWeekButton).toHaveClass('bg-zinc-700');
+    });
+  });
+
   describe('Playoff Configuration', () => {
     it('should display playoff configuration section', async () => {
       renderPage();
