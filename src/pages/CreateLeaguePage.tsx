@@ -19,6 +19,11 @@ export default function CreateLeaguePage() {
     teamsPerDivision: 4,
     regularSeasonGames: 17,
     byeWeeksPerTeam: 1,
+    playoffTeamsPerConference: 7,
+    divisionWinnersAutoQualify: true,
+    byeWeekForTopSeed: true,
+    useHeadToHeadTiebreaker: true,
+    usePointDifferentialTiebreaker: true,
   });
 
   // Fetch constraints on mount
@@ -38,10 +43,10 @@ export default function CreateLeaguePage() {
     loadConstraints();
   }, []);
 
-  // Calculate total teams
-  const totalTeams = formData.numberOfConferences * 
-                     formData.divisionsPerConference * 
-                     formData.teamsPerDivision;
+  // Calculate total teams and teams per conference
+  const teamsPerConference = formData.divisionsPerConference * formData.teamsPerDivision;
+  const totalTeams = formData.numberOfConferences * teamsPerConference;
+  const maxPlayoffTeams = Math.min(16, teamsPerConference);
 
   // Handle form submission
   async function handleSubmit(e: React.FormEvent) {
@@ -304,6 +309,101 @@ export default function CreateLeaguePage() {
               <p className="text-sm text-gray-500 mt-1">
                 Number of rest weeks each team receives during the season
               </p>
+            </div>
+          </div>
+
+          {/* Playoff Configuration Section */}
+          <div className="border-t border-zinc-600 pt-6">
+            <h2 className="text-xl font-semibold text-white mb-4">Playoff Configuration</h2>
+
+            {/* Playoff Teams per Conference */}
+            <div className="mb-6">
+              <label htmlFor="playoffTeams" className="block text-sm font-medium text-gray-300 mb-2">
+                Playoff Teams per Conference
+              </label>
+              <div className="flex items-center gap-4">
+                <input
+                  id="playoffTeams"
+                  type="range"
+                  min={2}
+                  max={maxPlayoffTeams}
+                  value={Math.min(formData.playoffTeamsPerConference ?? 7, maxPlayoffTeams)}
+                  onChange={(e) => setFormData({ ...formData, playoffTeamsPerConference: Number(e.target.value) })}
+                  className="flex-1"
+                />
+                <input
+                  type="number"
+                  min={2}
+                  max={maxPlayoffTeams}
+                  value={Math.min(formData.playoffTeamsPerConference ?? 7, maxPlayoffTeams)}
+                  onChange={(e) => setFormData({ ...formData, playoffTeamsPerConference: Math.min(Number(e.target.value), maxPlayoffTeams) })}
+                  className="w-20 bg-zinc-700 border border-zinc-600 rounded px-3 py-2 text-white text-center focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                {teamsPerConference} teams per conference (max {maxPlayoffTeams} playoff spots)
+              </p>
+            </div>
+
+            {/* Division Winners Auto Qualify */}
+            <div className="mb-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.divisionWinnersAutoQualify ?? true}
+                  onChange={(e) => setFormData({ ...formData, divisionWinnersAutoQualify: e.target.checked })}
+                  className="w-5 h-5 rounded bg-zinc-700 border-zinc-600 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-800"
+                />
+                <span className="text-gray-300">Division winners automatically qualify</span>
+              </label>
+              <p className="text-sm text-gray-500 mt-1 ml-8">
+                Division winners are guaranteed a playoff spot regardless of record
+              </p>
+            </div>
+
+            {/* Bye Week for Top Seed */}
+            <div className="mb-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.byeWeekForTopSeed ?? true}
+                  onChange={(e) => setFormData({ ...formData, byeWeekForTopSeed: e.target.checked })}
+                  className="w-5 h-5 rounded bg-zinc-700 border-zinc-600 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-800"
+                />
+                <span className="text-gray-300">First-round bye for top seed</span>
+              </label>
+              <p className="text-sm text-gray-500 mt-1 ml-8">
+                Top-seeded team in each conference skips the first playoff round
+              </p>
+            </div>
+
+            {/* Tiebreaker Options */}
+            <div className="border-t border-zinc-700 pt-4 mt-4">
+              <h3 className="text-sm font-medium text-gray-400 mb-3">Tiebreaker Rules</h3>
+              
+              <div className="mb-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.useHeadToHeadTiebreaker ?? true}
+                    onChange={(e) => setFormData({ ...formData, useHeadToHeadTiebreaker: e.target.checked })}
+                    className="w-5 h-5 rounded bg-zinc-700 border-zinc-600 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-800"
+                  />
+                  <span className="text-gray-300">Head-to-head record</span>
+                </label>
+              </div>
+
+              <div className="mb-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.usePointDifferentialTiebreaker ?? true}
+                    onChange={(e) => setFormData({ ...formData, usePointDifferentialTiebreaker: e.target.checked })}
+                    className="w-5 h-5 rounded bg-zinc-700 border-zinc-600 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-800"
+                  />
+                  <span className="text-gray-300">Point differential</span>
+                </label>
+              </div>
             </div>
           </div>
 

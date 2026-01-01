@@ -486,4 +486,232 @@ describe('CreateLeaguePage', () => {
       expect(oneWeekButton).toHaveClass('bg-zinc-700');
     });
   });
+
+  describe('Playoff Configuration', () => {
+    it('should display playoff configuration section', async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Playoff Configuration')).toBeInTheDocument();
+      });
+
+      expect(screen.getByLabelText(/Playoff Teams per Conference/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Division winners automatically qualify/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/First-round bye for top seed/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Head-to-head record/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Point differential/)).toBeInTheDocument();
+    });
+
+    it('should have correct default values for playoff settings', async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Playoff Configuration')).toBeInTheDocument();
+      });
+
+      const playoffTeamsSlider = screen.getByLabelText(/Playoff Teams per Conference/);
+      expect(playoffTeamsSlider).toHaveValue('7');
+
+      const divisionWinnersCheckbox = screen.getByLabelText(/Division winners automatically qualify/);
+      expect(divisionWinnersCheckbox).toBeChecked();
+
+      const byeWeekCheckbox = screen.getByLabelText(/First-round bye for top seed/);
+      expect(byeWeekCheckbox).toBeChecked();
+
+      const headToHeadCheckbox = screen.getByLabelText(/Head-to-head record/);
+      expect(headToHeadCheckbox).toBeChecked();
+
+      const pointDiffCheckbox = screen.getByLabelText(/Point differential/);
+      expect(pointDiffCheckbox).toBeChecked();
+    });
+
+    it('should update playoff teams slider value', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Playoff Configuration')).toBeInTheDocument();
+      });
+
+      const playoffTeamsNumberInput = screen.getAllByDisplayValue('7')[1];
+      await user.clear(playoffTeamsNumberInput);
+      await user.type(playoffTeamsNumberInput, '4');
+
+      await waitFor(() => {
+        const slider = screen.getByLabelText(/Playoff Teams per Conference/);
+        expect(slider).toHaveValue('4');
+      });
+    });
+
+    it('should toggle division winners auto qualify checkbox', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Playoff Configuration')).toBeInTheDocument();
+      });
+
+      const checkbox = screen.getByLabelText(/Division winners automatically qualify/);
+      expect(checkbox).toBeChecked();
+
+      await user.click(checkbox);
+      expect(checkbox).not.toBeChecked();
+
+      await user.click(checkbox);
+      expect(checkbox).toBeChecked();
+    });
+
+    it('should toggle bye week for top seed checkbox', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Playoff Configuration')).toBeInTheDocument();
+      });
+
+      const checkbox = screen.getByLabelText(/First-round bye for top seed/);
+      expect(checkbox).toBeChecked();
+
+      await user.click(checkbox);
+      expect(checkbox).not.toBeChecked();
+    });
+
+    it('should toggle head-to-head tiebreaker checkbox', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Playoff Configuration')).toBeInTheDocument();
+      });
+
+      const checkbox = screen.getByLabelText(/Head-to-head record/);
+      expect(checkbox).toBeChecked();
+
+      await user.click(checkbox);
+      expect(checkbox).not.toBeChecked();
+    });
+
+    it('should toggle point differential tiebreaker checkbox', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Playoff Configuration')).toBeInTheDocument();
+      });
+
+      const checkbox = screen.getByLabelText(/Point differential/);
+      expect(checkbox).toBeChecked();
+
+      await user.click(checkbox);
+      expect(checkbox).not.toBeChecked();
+    });
+
+    it('should limit max playoff teams to teams per conference', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Playoff Configuration')).toBeInTheDocument();
+      });
+
+      const divisionsInput = screen.getAllByDisplayValue('4')[1];
+      await user.clear(divisionsInput);
+      await user.type(divisionsInput, '1');
+
+      const teamsInput = screen.getAllByDisplayValue('4')[1];
+      await user.clear(teamsInput);
+      await user.type(teamsInput, '3');
+
+      await waitFor(() => {
+        const playoffSlider = screen.getByLabelText(/Playoff Teams per Conference/);
+        expect(playoffSlider).toHaveAttribute('max', '3');
+      });
+    });
+
+    it('should clamp playoff teams value when max decreases', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Playoff Configuration')).toBeInTheDocument();
+      });
+
+      const playoffInput = screen.getAllByDisplayValue('7')[1];
+      await user.clear(playoffInput);
+      await user.type(playoffInput, '16');
+
+      await waitFor(() => {
+        const slider = screen.getByLabelText(/Playoff Teams per Conference/);
+        expect(slider).toHaveValue('16');
+      });
+
+      const divisionsInput = screen.getAllByDisplayValue('4')[1];
+      await user.clear(divisionsInput);
+      await user.type(divisionsInput, '1');
+
+      const teamsInput = screen.getAllByDisplayValue('4')[1];
+      await user.clear(teamsInput);
+      await user.type(teamsInput, '4');
+
+      await waitFor(() => {
+        const playoffSlider = screen.getByLabelText(/Playoff Teams per Conference/);
+        expect(playoffSlider).toHaveValue('4');
+      });
+    });
+
+    it('should display teams per conference in helper text', async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Playoff Configuration')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText(/16 teams per conference/)).toBeInTheDocument();
+    });
+
+    it('should include playoff config in form submission', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/League Name/)).toBeInTheDocument();
+      });
+
+      const nameInput = screen.getByLabelText(/League Name/);
+      await user.type(nameInput, 'Playoff Test League');
+
+      const divisionWinnersCheckbox = screen.getByLabelText(/Division winners automatically qualify/);
+      await user.click(divisionWinnersCheckbox);
+
+      const byeWeekCheckbox = screen.getByLabelText(/First-round bye for top seed/);
+      await user.click(byeWeekCheckbox);
+
+      const submitButton = screen.getByRole('button', { name: /Create League/ });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockState.createLeagueFn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'Playoff Test League',
+            playoffTeamsPerConference: 7,
+            divisionWinnersAutoQualify: false,
+            byeWeekForTopSeed: false,
+            useHeadToHeadTiebreaker: true,
+            usePointDifferentialTiebreaker: true,
+          })
+        );
+      });
+    });
+
+    it('should enforce minimum of 2 playoff teams', async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByText('Playoff Configuration')).toBeInTheDocument();
+      });
+
+      const playoffSlider = screen.getByLabelText(/Playoff Teams per Conference/);
+      expect(playoffSlider).toHaveAttribute('min', '2');
+    });
+  });
 });

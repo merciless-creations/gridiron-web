@@ -38,6 +38,11 @@ export interface CreateLeagueRequest {
   regularSeasonGames?: number;
   /** Number of bye weeks per team (0-2, default 1) */
   byeWeeksPerTeam?: number;
+  playoffTeamsPerConference?: number;
+  divisionWinnersAutoQualify?: boolean;
+  byeWeekForTopSeed?: boolean;
+  useHeadToHeadTiebreaker?: boolean;
+  usePointDifferentialTiebreaker?: boolean;
 }
 
 export interface UpdateLeagueRequest {
