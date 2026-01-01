@@ -34,6 +34,10 @@ export interface CreateLeagueRequest {
   numberOfConferences: number;
   divisionsPerConference: number;
   teamsPerDivision: number;
+  /** Number of regular season games (10-18, default 17) */
+  regularSeasonGames?: number;
+  /** Number of bye weeks per team (0-2, default 1) */
+  byeWeeksPerTeam?: number;
 }
 
 export interface UpdateLeagueRequest {
