@@ -7,3 +7,6 @@ export * from './LeaguesPage';
 export * from './LeagueDetailPage';
 export { default as CreateLeaguePage } from './CreateLeaguePage';
 export { default as LeagueStructurePage } from './LeagueStructurePage';
+export { default as SeasonDashboardPage } from './SeasonDashboardPage';
+export { default as SchedulePage } from './SchedulePage';
+export { default as StandingsPage } from './StandingsPage';
