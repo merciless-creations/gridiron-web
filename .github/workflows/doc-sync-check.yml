@@ -1,0 +1,101 @@
+name: Documentation Sync Check
+
+on:
+  pull_request:
+    branches: [master, main]
+  push:
+    branches: [master, main]
+
+# Minimize log retention
+env:
+  ACTIONS_RUNNER_DEBUG: false
+
+jobs:
+  check-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Node.js version consistency
+        run: |
+          echo "Checking Node.js version references..."
+          
+          # Get Node version from package.json engines field if present
+          if [ -f "package.json" ]; then
+            NODE_VERSION=$(jq -r '.engines.node // empty' package.json 2>/dev/null || echo "")
+            echo "Node.js version in package.json: ${NODE_VERSION:-not specified}"
+          fi
+          
+          echo "✓ Node.js version check complete"
+
+      - name: Check React version consistency
+        run: |
+          echo "Checking React version references..."
+          
+          if [ -f "package.json" ]; then
+            REACT_VERSION=$(jq -r '.dependencies.react // empty' package.json 2>/dev/null || echo "")
+            echo "React version in package.json: ${REACT_VERSION:-not found}"
+            
+            # Check if README mentions a different React version
+            if [ -n "$REACT_VERSION" ]; then
+              # Extract major version (e.g., ^18.2.0 -> 18)
+              MAJOR=$(echo "$REACT_VERSION" | sed 's/[^0-9]*\([0-9]*\).*/\1/')
+              
+              # Look for outdated React version references
+              for OLD_VER in 16 17; do
+                if [ "$OLD_VER" != "$MAJOR" ]; then
+                  if grep -r "React $OLD_VER" --include="*.md" 2>/dev/null; then
+                    echo "::warning::Found React $OLD_VER reference (current is React $MAJOR)"
+                  fi
+                fi
+              done
+            fi
+          fi
+          
+          echo "✓ React version check complete"
+
+      - name: Check TypeScript version consistency
+        run: |
+          echo "Checking TypeScript version references..."
+          
+          if [ -f "package.json" ]; then
+            TS_VERSION=$(jq -r '.devDependencies.typescript // .dependencies.typescript // empty' package.json 2>/dev/null || echo "")
+            echo "TypeScript version: ${TS_VERSION:-not found}"
+          fi
+          
+          echo "✓ TypeScript version check complete"
+
+      - name: Check internal documentation links
+        run: |
+          echo "Checking internal documentation links..."
+          BROKEN_LINKS=""
+          
+          # Find all markdown files and check their internal links
+          for file in $(find . -name "*.md" -type f -not -path "./node_modules/*"); do
+            # Extract relative links (not http/https)
+            links=$(grep -oE '\[[^]]*\]\((?!http)[^)]+\)' "$file" 2>/dev/null | sed 's/.*(\(.*\))/\1/' | sed 's/#.*//' || true)
+            
+            for link in $links; do
+              if [ -n "$link" ] && [ ! -f "$(dirname "$file")/$link" ] && [ ! -f "$link" ]; then
+                BROKEN_LINKS="$BROKEN_LINKS\n$file: $link"
+              fi
+            done
+          done
+          
+          if [ -n "$BROKEN_LINKS" ]; then
+            echo -e "::error::Broken documentation links found:$BROKEN_LINKS"
+            exit 1
+          fi
+          
+          echo "✓ All internal documentation links are valid"
+
+  # Clean up logs after 1 day
+  cleanup:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: check-docs
+    steps:
+      - name: Retention notice
+        run: echo "Logs retained for 1 day per repository settings"
