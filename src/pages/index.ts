@@ -11,3 +11,5 @@ export { default as SeasonDashboardPage } from './SeasonDashboardPage';
 export { default as SchedulePage } from './SchedulePage';
 export { default as StandingsPage } from './StandingsPage';
 export * from './LandingPage';
+export * from './DashboardPage';
+export * from './LeagueManagePage';
