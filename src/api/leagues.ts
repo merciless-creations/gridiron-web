@@ -51,6 +51,13 @@ export const useLeagues = () => {
   });
 };
 
+export const useMyLeagues = () => {
+  return useQuery({
+    queryKey: ['leagues', 'mine'],
+    queryFn: leaguesApi.getAll,
+  });
+};
+
 export const useLeague = (id: number) => {
   return useQuery({
     queryKey: ['leagues', id],

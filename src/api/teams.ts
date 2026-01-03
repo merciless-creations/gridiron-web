@@ -28,6 +28,14 @@ export const useTeams = () => {
   });
 };
 
+export const useLeagueTeams = (leagueId: number) => {
+  return useQuery({
+    queryKey: ['leagues', leagueId, 'teams'],
+    queryFn: teamsApi.getAll,
+    enabled: !!leagueId,
+  });
+};
+
 export const useTeam = (id: number) => {
   return useQuery({
     queryKey: ['teams', id],
