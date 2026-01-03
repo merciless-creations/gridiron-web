@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Layout, ProtectedRoute } from './components';
-import { HomePage, TeamsPage, GameSimulationPage, ProfilePage, LeaguesPage, LeagueDetailPage, CreateLeaguePage, LeagueStructurePage, SeasonDashboardPage, SchedulePage, StandingsPage } from './pages';
+import { Layout, ProtectedRoute, AuthErrorBoundary } from './components';
+import { HomePage, TeamsPage, GameSimulationPage, ProfilePage, LeaguesPage, LeagueDetailPage, CreateLeaguePage, LeagueStructurePage, SeasonDashboardPage, SchedulePage, StandingsPage, LoginCallbackPage, LandingPage } from './pages';
 
 // Create a QueryClient instance for React Query
 const queryClient = new QueryClient({
@@ -16,11 +16,14 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Layout>
+      <AuthErrorBoundary>
+        <BrowserRouter>
+          <Layout>
           <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/auth/callback" element={<LoginCallbackPage />} />
             <Route
-              path="/"
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <HomePage />
@@ -108,8 +111,9 @@ function App() {
               }
             />
           </Routes>
-        </Layout>
-      </BrowserRouter>
+          </Layout>
+        </BrowserRouter>
+      </AuthErrorBoundary>
     </QueryClientProvider>
   );
 }

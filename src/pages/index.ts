@@ -10,3 +10,4 @@ export { default as LeagueStructurePage } from './LeagueStructurePage';
 export { default as SeasonDashboardPage } from './SeasonDashboardPage';
 export { default as SchedulePage } from './SchedulePage';
 export { default as StandingsPage } from './StandingsPage';
+export * from './LandingPage';
