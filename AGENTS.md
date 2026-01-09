@@ -55,17 +55,45 @@ npm run test
 npm run test:e2e
 ```
 
-### Mock Server
+### Mock Server (REQUIRED - NOT MSW)
+
+> ⚠️ **Use mock-server scenarios, NOT MSW or vi.mock() for API mocking**
 
 Both unit tests and E2E tests use a shared mock server located at `mock-server/`. The mock server provides:
 - All API endpoints matching the real backend
 - State reset via `POST /_reset` between tests
+- Scenario switching via `POST /_scenario` for error testing
 - Seed data in `mock-server/data/seed.json`
 
 For local development with mocked data:
 ```bash
 npm run dev:mock  # Runs Vite with mock server
 ```
+
+### Testing Philosophy
+
+> ⚠️ **The frontend responds to whatever the server sends—never assume server data shape**
+
+1. **Develop against mock-server first** — All new features must work against mock data before wiring to real APIs
+2. **Test all response scenarios** — Every API call should have tests for:
+   - ✅ Success (200) — Happy path with expected data
+   - ✅ Empty (200) — Empty arrays, null values
+   - ✅ Not Found (404) — Resource doesn't exist
+   - ✅ Unauthorized (401) — Token expired/invalid
+   - ✅ Forbidden (403) — No permission
+   - ✅ Server Error (500) — Backend failure
+3. **Never mock at the hook level** — Use `/_scenario` endpoint to trigger error states:
+   ```typescript
+   // ❌ WRONG - mocking at hook level
+   vi.mock('../api/teams', () => ({ useTeam: () => ({ error: true }) }));
+   
+   // ✅ CORRECT - use mock-server scenario
+   await fetch('http://localhost:3002/_scenario', {
+     method: 'POST',
+     body: JSON.stringify({ name: 'getTeam', scope: 'error' })
+   });
+   ```
+4. **Test UI responses, not server behavior** — We test how the app displays errors, loading states, and empty states—not whether the server returns the right data
 
 ## Coding Conventions
 

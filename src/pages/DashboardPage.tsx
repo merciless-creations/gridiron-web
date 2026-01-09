@@ -18,7 +18,7 @@ export function DashboardPage() {
     if (!team.hasViewed) {
       setWelcomeModalTeam(team);
     } else {
-      navigate(`/leagues/${team.leagueId}/teams/${team.teamId}`);
+      navigate(`/teams/${team.teamId}/manage`);
     }
   };
 
@@ -27,7 +27,7 @@ export function DashboardPage() {
     
     await takeControl.mutateAsync(welcomeModalTeam.teamId);
     setWelcomeModalTeam(null);
-    navigate(`/leagues/${welcomeModalTeam.leagueId}/teams/${welcomeModalTeam.teamId}`);
+    navigate(`/teams/${welcomeModalTeam.teamId}/manage`);
   };
 
   if (leaguesLoading || teamsLoading) {

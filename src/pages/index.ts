@@ -13,3 +13,4 @@ export { default as StandingsPage } from './StandingsPage';
 export * from './LandingPage';
 export * from './DashboardPage';
 export * from './LeagueManagePage';
+export * from './TeamManagePage';
