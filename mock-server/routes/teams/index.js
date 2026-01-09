@@ -39,6 +39,22 @@ const getTeam = {
         }
         return JSON.stringify(team);
       },
+      notFoundScenario: function (req, res) {
+        res.status(404);
+        return JSON.stringify({ error: 'Team not found', status: 404 });
+      },
+      errorScenario: function (req, res) {
+        res.status(500);
+        return JSON.stringify({ error: 'Internal server error', status: 500 });
+      },
+      unauthorizedScenario: function (req, res) {
+        res.status(401);
+        return JSON.stringify({ error: 'Unauthorized', status: 401 });
+      },
+      forbiddenScenario: function (req, res) {
+        res.status(403);
+        return JSON.stringify({ error: 'Forbidden - not your team', status: 403 });
+      },
     },
   ],
 };
