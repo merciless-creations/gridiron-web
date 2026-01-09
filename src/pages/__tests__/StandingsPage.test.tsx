@@ -208,7 +208,7 @@ describe('StandingsPage', () => {
 
   it('should render standings heading', () => {
     renderPage();
-    expect(screen.getByRole('heading', { name: 'Standings' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Standings & Leaders' })).toBeInTheDocument();
   });
 
   it('should display season info', () => {
@@ -331,5 +331,91 @@ describe('StandingsPage', () => {
     expect(screen.getAllByText('W').length).toBeGreaterThan(0);
     expect(screen.getAllByText('L').length).toBeGreaterThan(0);
     expect(screen.getAllByText('PCT').length).toBeGreaterThan(0);
+  });
+
+  // League Leaders tests
+  describe('League Leaders', () => {
+    it('should display league leaders section', () => {
+      renderPage();
+      expect(screen.getByText('League Leaders')).toBeInTheDocument();
+    });
+
+    it('should display show/hide leaders button', () => {
+      renderPage();
+      expect(screen.getByRole('button', { name: 'Hide Leaders' })).toBeInTheDocument();
+    });
+
+    it('should toggle leaders visibility', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      // Leaders should be visible by default
+      expect(screen.getByText('League Leaders')).toBeInTheDocument();
+
+      // Click to hide
+      await user.click(screen.getByRole('button', { name: 'Hide Leaders' }));
+      expect(screen.queryByText('League Leaders')).not.toBeInTheDocument();
+
+      // Click to show again
+      await user.click(screen.getByRole('button', { name: 'Show Leaders' }));
+      expect(screen.getByText('League Leaders')).toBeInTheDocument();
+    });
+
+    it('should display category tabs for leaders', () => {
+      renderPage();
+      expect(screen.getByRole('button', { name: /passing/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /rushing/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /receiving/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /defense/i })).toBeInTheDocument();
+    });
+
+    it('should display passing leaders by default', () => {
+      renderPage();
+      expect(screen.getByText('Passing Yards')).toBeInTheDocument();
+      expect(screen.getByText('Passing TDs')).toBeInTheDocument();
+      expect(screen.getByText('Passer Rating')).toBeInTheDocument();
+    });
+
+    it('should switch to rushing leaders', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.click(screen.getByRole('button', { name: /rushing/i }));
+
+      expect(screen.getByText('Rushing Yards')).toBeInTheDocument();
+      expect(screen.getByText('Rushing TDs')).toBeInTheDocument();
+      expect(screen.getByText('Yards Per Carry')).toBeInTheDocument();
+    });
+
+    it('should switch to receiving leaders', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.click(screen.getByRole('button', { name: /receiving/i }));
+
+      expect(screen.getByText('Receiving Yards')).toBeInTheDocument();
+      expect(screen.getByText('Receiving TDs')).toBeInTheDocument();
+      expect(screen.getByText('Receptions')).toBeInTheDocument();
+    });
+
+    it('should switch to defense leaders', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.click(screen.getByRole('button', { name: /defense/i }));
+
+      expect(screen.getByText('Sacks')).toBeInTheDocument();
+      expect(screen.getByText('Interceptions')).toBeInTheDocument();
+    });
+
+    it('should display placeholder data notice', () => {
+      renderPage();
+      expect(screen.getByText(/placeholder data/i)).toBeInTheDocument();
+    });
+
+    it('should display leader player names', () => {
+      renderPage();
+      expect(screen.getByText('Patrick Mahomes')).toBeInTheDocument();
+    });
   });
 });
