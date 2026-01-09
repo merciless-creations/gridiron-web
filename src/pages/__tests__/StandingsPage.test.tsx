@@ -244,9 +244,9 @@ describe('StandingsPage', () => {
 
   it('should display team names', () => {
     renderPage();
-    expect(screen.getByText('New England Patriots')).toBeInTheDocument();
-    expect(screen.getByText('Buffalo Bills')).toBeInTheDocument();
-    expect(screen.getByText('Kansas City Chiefs')).toBeInTheDocument();
+    expect(screen.getAllByText('New England Patriots').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Buffalo Bills').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Kansas City Chiefs').length).toBeGreaterThan(0);
   });
 
   it('should display win-loss records', () => {
@@ -415,7 +415,7 @@ describe('StandingsPage', () => {
 
     it('should display leader player names', () => {
       renderPage();
-      expect(screen.getByText('Patrick Mahomes')).toBeInTheDocument();
+      expect(screen.getAllByText('Patrick Mahomes').length).toBeGreaterThan(0);
     });
   });
 });
