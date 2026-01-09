@@ -1,6 +1,8 @@
 import { useParams, Link } from 'react-router-dom';
 import { useTeam } from '../api/teams';
 import { Loading } from '../components/Loading';
+import { ReadOnlyBanner } from '../components/ReadOnlyBanner';
+import { usePermissions } from '../hooks/usePermissions';
 import { useActiveContext } from '../contexts';
 
 export const TeamManagePage = () => {
@@ -9,14 +11,15 @@ export const TeamManagePage = () => {
   const { leagueId } = useActiveContext();
 
   const { data: team, isLoading, error } = useTeam(teamIdNum);
+  const permissions = usePermissions(teamIdNum);
 
-  if (isLoading) {
+  if (isLoading || permissions.isLoading) {
     return <Loading />;
   }
 
   if (error) {
     const status = (error as { response?: { status?: number } })?.response?.status;
-    
+
     if (status === 404) {
       return (
         <div className="text-center py-12">
@@ -70,18 +73,26 @@ export const TeamManagePage = () => {
   }
 
   const record = `${team.wins}-${team.losses}${team.ties > 0 ? `-${team.ties}` : ''}`;
+  const fullTeamName = `${team.city} ${team.name}`;
 
   return (
     <div className="space-y-6">
+      {/* Read-only banner for scouting mode */}
+      {permissions.isReadOnly && (
+        <ReadOnlyBanner teamName={fullTeamName} />
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <Link to="/dashboard" className="text-gridiron-accent hover:underline text-sm mb-2 inline-block">
             &larr; Back to Dashboard
           </Link>
           <h1 className="text-3xl font-bold">
-            {team.city} {team.name}
+            {fullTeamName}
           </h1>
-          <p className="text-gray-400">Team Management</p>
+          <p className="text-gray-400">
+            {permissions.isReadOnly ? 'Team Scouting' : 'Team Management'}
+          </p>
         </div>
         <div className="text-right">
           <div className="text-2xl font-bold">{record}</div>
@@ -114,35 +125,73 @@ export const TeamManagePage = () => {
       </div>
 
       <div className="card">
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+        <h2 className="text-xl font-semibold mb-4">
+          {permissions.isReadOnly ? 'View Options' : 'Quick Actions'}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link
-            to={`/teams/${teamId}/depth-chart`}
-            className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
-          >
-            <div className="font-semibold mb-1">Depth Chart</div>
-            <div className="text-gray-400 text-sm">Set your starting lineup and backups</div>
-          </Link>
-          <Link
-            to={`/teams/${teamId}/roster`}
-            className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
-          >
-            <div className="font-semibold mb-1">Full Roster</div>
-            <div className="text-gray-400 text-sm">View and manage your players</div>
-          </Link>
-          {leagueId && (
-            <Link
-              to={`/leagues/${leagueId}/standings`}
-              className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
-            >
-              <div className="font-semibold mb-1">League Standings</div>
-              <div className="text-gray-400 text-sm">View league rankings and leaders</div>
-            </Link>
+          {permissions.canEdit ? (
+            // Full edit mode - show management links
+            <>
+              <Link
+                to={`/teams/${teamId}/depth-chart`}
+                className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+              >
+                <div className="font-semibold mb-1">Depth Chart</div>
+                <div className="text-gray-400 text-sm">Set your starting lineup and backups</div>
+              </Link>
+              <Link
+                to={`/teams/${teamId}/roster`}
+                className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+              >
+                <div className="font-semibold mb-1">Full Roster</div>
+                <div className="text-gray-400 text-sm">View and manage your players</div>
+              </Link>
+              {leagueId && (
+                <Link
+                  to={`/leagues/${leagueId}/standings`}
+                  className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+                >
+                  <div className="font-semibold mb-1">League Standings</div>
+                  <div className="text-gray-400 text-sm">View league rankings and leaders</div>
+                </Link>
+              )}
+              <div className="block p-4 bg-gridiron-light rounded-lg opacity-50 cursor-not-allowed">
+                <div className="font-semibold mb-1">Upcoming Games</div>
+                <div className="text-gray-400 text-sm">Coming soon</div>
+              </div>
+            </>
+          ) : (
+            // Read-only scouting mode - show view-only links
+            <>
+              <Link
+                to={`/teams/${teamId}/depth-chart`}
+                className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+              >
+                <div className="font-semibold mb-1">View Depth Chart</div>
+                <div className="text-gray-400 text-sm">See their starting lineup and backups</div>
+              </Link>
+              <Link
+                to={`/teams/${teamId}/roster`}
+                className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+              >
+                <div className="font-semibold mb-1">View Roster</div>
+                <div className="text-gray-400 text-sm">Scout their players</div>
+              </Link>
+              {leagueId && (
+                <Link
+                  to={`/leagues/${leagueId}/standings`}
+                  className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+                >
+                  <div className="font-semibold mb-1">League Standings</div>
+                  <div className="text-gray-400 text-sm">View league rankings and leaders</div>
+                </Link>
+              )}
+              <div className="block p-4 bg-gridiron-light rounded-lg opacity-50 cursor-not-allowed">
+                <div className="font-semibold mb-1">Team Schedule</div>
+                <div className="text-gray-400 text-sm">Coming soon</div>
+              </div>
+            </>
           )}
-          <div className="block p-4 bg-gridiron-light rounded-lg opacity-50 cursor-not-allowed">
-            <div className="font-semibold mb-1">Upcoming Games</div>
-            <div className="text-gray-400 text-sm">Coming soon</div>
-          </div>
         </div>
       </div>
 
