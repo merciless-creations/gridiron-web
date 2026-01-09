@@ -48,6 +48,11 @@ preStart().then(() => {
   // Custom reset endpoint - must be before mock routes
   app.post('/_reset', (req, res) => {
     resetState();
+    // Also reset all route scenarios back to default
+    mockRoutes.forEach(route => {
+      route.testScenario = 'defaultScenario';
+      route.testScope = 'success';
+    });
     res.json({ success: true, message: 'Mock server state reset' });
   });
 
