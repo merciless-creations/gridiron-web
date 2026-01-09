@@ -10,3 +10,4 @@ export * from './WelcomeModal';
 export * from './AssignGmModal';
 export * from './Skeleton';
 export * from './ContextSwitcher';
+export * from './ReadOnlyBanner';

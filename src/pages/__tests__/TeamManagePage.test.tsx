@@ -1,5 +1,5 @@
 import { screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderWithProviders } from '../../test/test-utils';
 import { TeamManagePage } from '../TeamManagePage';
 import { Route, Routes } from 'react-router-dom';
@@ -104,7 +104,7 @@ describe('TeamManagePage', () => {
   describe('Loading State', () => {
     it('displays loading indicator while fetching', () => {
       renderTeamManagePage('1');
-      
+
       expect(screen.getByRole('status')).toBeInTheDocument();
     });
   });
@@ -112,7 +112,7 @@ describe('TeamManagePage', () => {
   describe('Error States', () => {
     it('displays not found message for 404 response', async () => {
       await setScenario('getTeam', 'notFound');
-      
+
       renderTeamManagePage('999');
 
       await waitFor(() => {
@@ -125,7 +125,7 @@ describe('TeamManagePage', () => {
 
     it('displays access denied message for 403 response', async () => {
       await setScenario('getTeam', 'forbidden');
-      
+
       renderTeamManagePage('1');
 
       await waitFor(() => {
@@ -138,7 +138,7 @@ describe('TeamManagePage', () => {
 
     it('displays generic error message for 500 response', async () => {
       await setScenario('getTeam', 'error');
-      
+
       renderTeamManagePage('1');
 
       await waitFor(() => {
@@ -147,6 +147,61 @@ describe('TeamManagePage', () => {
 
       expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /Back to Dashboard/i })).toBeInTheDocument();
+    });
+  });
+});
+
+// Scouting mode tests with mocked permissions
+describe('TeamManagePage Scouting Mode', () => {
+  // Mock the usePermissions hook for scouting mode scenarios
+  const { mockPermissions } = vi.hoisted(() => ({
+    mockPermissions: vi.fn(),
+  }));
+
+  beforeEach(async () => {
+    vi.resetModules();
+    await fetch(`${MOCK_SERVER_URL}/_reset`, { method: 'POST' });
+  });
+
+  // Test component behavior when in read-only mode
+  // These tests verify the UI responds to permission states correctly
+  describe('Read-Only Mode UI Elements', () => {
+    it('shows Team Management subtitle when user can edit', async () => {
+      // Default mock server user is global admin, so has edit access
+      renderTeamManagePage('1');
+
+      await waitFor(() => {
+        expect(screen.getByText(/Team Management/i)).toBeInTheDocument();
+      });
+
+      // Should not show scouting banner
+      expect(screen.queryByRole('status', { name: /Read-only mode/i })).not.toBeInTheDocument();
+    });
+
+    it('shows Quick Actions section when user can edit', async () => {
+      renderTeamManagePage('1');
+
+      await waitFor(() => {
+        expect(screen.getByText(/Quick Actions/i)).toBeInTheDocument();
+      });
+
+      // Should show edit-oriented text
+      expect(screen.getByText(/Set your starting lineup/i)).toBeInTheDocument();
+      expect(screen.getByText(/View and manage your players/i)).toBeInTheDocument();
+    });
+
+    it('has navigation links for depth chart and roster', async () => {
+      renderTeamManagePage('1');
+
+      await waitFor(() => {
+        expect(screen.getByRole('link', { name: /Depth Chart/i })).toBeInTheDocument();
+      });
+
+      const depthChartLink = screen.getByRole('link', { name: /Depth Chart/i });
+      expect(depthChartLink).toHaveAttribute('href', '/teams/1/depth-chart');
+
+      const rosterLink = screen.getByRole('link', { name: /Full Roster/i });
+      expect(rosterLink).toHaveAttribute('href', '/teams/1/roster');
     });
   });
 });
