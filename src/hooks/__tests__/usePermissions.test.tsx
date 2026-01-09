@@ -388,8 +388,33 @@ describe('usePermissions', () => {
         JSON.stringify({ leagueId: null, teamId: null })
       );
 
+      // Use a user with multiple leagues so auto-selection doesn't happen
+      const userWithMultipleLeagues = {
+        ...mockGm,
+        leagueRoles: [
+          {
+            id: 2,
+            leagueId: 1,
+            leagueName: 'Test League',
+            role: 'GeneralManager' as const,
+            teamId: 1,
+            teamName: 'Falcons',
+            assignedAt: '2024-01-01T00:00:00Z',
+          },
+          {
+            id: 3,
+            leagueId: 2,
+            leagueName: 'Second League',
+            role: 'GeneralManager' as const,
+            teamId: 5,
+            teamName: 'Eagles',
+            assignedAt: '2024-01-01T00:00:00Z',
+          },
+        ],
+      };
+
       mockState.useCurrentUser.mockReturnValue({
-        data: mockGm,
+        data: userWithMultipleLeagues,
         isLoading: false,
       });
       mockState.useMyTeams.mockReturnValue({

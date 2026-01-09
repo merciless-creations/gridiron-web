@@ -9,6 +9,8 @@ export default defineConfig({
     globalSetup: './src/test/globalSetup.ts',
     setupFiles: './src/test/setup.ts',
     css: true,
+    // Run test files sequentially to avoid mock server race conditions
+    fileParallelism: false,
     exclude: ['**/node_modules/**', '**/e2e/**'],
     env: {
       VITE_API_URL: 'http://localhost:3002/api',
