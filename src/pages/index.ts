@@ -14,3 +14,4 @@ export * from './LandingPage';
 export * from './DashboardPage';
 export * from './LeagueManagePage';
 export * from './TeamManagePage';
+export * from './RosterPage';

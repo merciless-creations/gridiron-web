@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Layout, ProtectedRoute, AuthErrorBoundary } from './components';
 import { ActiveContextProvider } from './contexts';
-import { HomePage, TeamsPage, GameSimulationPage, ProfilePage, LeaguesPage, LeagueDetailPage, CreateLeaguePage, LeagueStructurePage, SeasonDashboardPage, SchedulePage, StandingsPage, LoginCallbackPage, LandingPage, LeagueManagePage, TeamManagePage } from './pages';
+import { HomePage, TeamsPage, GameSimulationPage, ProfilePage, LeaguesPage, LeagueDetailPage, CreateLeaguePage, LeagueStructurePage, SeasonDashboardPage, SchedulePage, StandingsPage, LoginCallbackPage, LandingPage, LeagueManagePage, TeamManagePage, RosterPage } from './pages';
 
 // Create a QueryClient instance for React Query
 const queryClient = new QueryClient({
@@ -125,6 +125,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <TeamManagePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/teams/:teamId/roster"
+                  element={
+                    <ProtectedRoute>
+                      <RosterPage />
                     </ProtectedRoute>
                   }
                 />
