@@ -15,3 +15,4 @@ export * from './DashboardPage';
 export * from './LeagueManagePage';
 export * from './TeamManagePage';
 export * from './RosterPage';
+export * from './DepthChartPage';
