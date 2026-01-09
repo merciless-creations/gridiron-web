@@ -351,6 +351,36 @@ interface StandingsTableProps {
   onSort?: (field: SortField) => void;
 }
 
+interface SortableHeaderProps {
+  field: SortField;
+  label: string;
+  className?: string;
+  sortField?: SortField;
+  sortDirection?: SortDirection;
+  onSort?: (field: SortField) => void;
+}
+
+function SortableHeader({ field, label, className = '', sortField, sortDirection, onSort }: SortableHeaderProps) {
+  const isSorted = sortField === field;
+  const canSort = onSort !== undefined;
+
+  return (
+    <th
+      className={`px-4 py-3 text-center ${canSort ? 'cursor-pointer hover:text-white' : ''} ${className}`}
+      onClick={() => canSort && onSort(field)}
+    >
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {isSorted && (
+          <span className="text-emerald-400">
+            {sortDirection === 'desc' ? '↓' : '↑'}
+          </span>
+        )}
+      </span>
+    </th>
+  );
+}
+
 function StandingsTable({
   teams,
   compact,
@@ -368,27 +398,6 @@ function StandingsTable({
     );
   }
 
-  const SortableHeader = ({ field, label, className = '' }: { field: SortField; label: string; className?: string }) => {
-    const isSorted = sortField === field;
-    const canSort = onSort !== undefined;
-
-    return (
-      <th
-        className={`px-4 py-3 text-center ${canSort ? 'cursor-pointer hover:text-white' : ''} ${className}`}
-        onClick={() => canSort && onSort(field)}
-      >
-        <span className="inline-flex items-center gap-1">
-          {label}
-          {isSorted && (
-            <span className="text-emerald-400">
-              {sortDirection === 'desc' ? '↓' : '↑'}
-            </span>
-          )}
-        </span>
-      </th>
-    );
-  };
-
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -398,15 +407,15 @@ function StandingsTable({
             <th className="px-4 py-3">Team</th>
             {showConference && <th className="px-4 py-3 hidden md:table-cell">Conf</th>}
             {showDivision && <th className="px-4 py-3 hidden md:table-cell">Div</th>}
-            <SortableHeader field="wins" label="W" />
+            <SortableHeader field="wins" label="W" sortField={sortField} sortDirection={sortDirection} onSort={onSort} />
             <th className="px-4 py-3 text-center">L</th>
             {!compact && <th className="px-4 py-3 text-center hidden sm:table-cell">T</th>}
-            <SortableHeader field="winPercentage" label="PCT" />
+            <SortableHeader field="winPercentage" label="PCT" sortField={sortField} sortDirection={sortDirection} onSort={onSort} />
             {!compact && (
               <>
-                <SortableHeader field="pointsFor" label="PF" className="hidden lg:table-cell" />
-                <SortableHeader field="pointsAgainst" label="PA" className="hidden lg:table-cell" />
-                <SortableHeader field="pointDifferential" label="DIFF" className="hidden lg:table-cell" />
+                <SortableHeader field="pointsFor" label="PF" className="hidden lg:table-cell" sortField={sortField} sortDirection={sortDirection} onSort={onSort} />
+                <SortableHeader field="pointsAgainst" label="PA" className="hidden lg:table-cell" sortField={sortField} sortDirection={sortDirection} onSort={onSort} />
+                <SortableHeader field="pointDifferential" label="DIFF" className="hidden lg:table-cell" sortField={sortField} sortDirection={sortDirection} onSort={onSort} />
                 <th className="px-4 py-3 text-center hidden xl:table-cell">STRK</th>
               </>
             )}
