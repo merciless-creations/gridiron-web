@@ -153,11 +153,6 @@ describe('TeamManagePage', () => {
 
 // Scouting mode tests with mocked permissions
 describe('TeamManagePage Scouting Mode', () => {
-  // Mock the usePermissions hook for scouting mode scenarios
-  const { mockPermissions } = vi.hoisted(() => ({
-    mockPermissions: vi.fn(),
-  }));
-
   beforeEach(async () => {
     vi.resetModules();
     await fetch(`${MOCK_SERVER_URL}/_reset`, { method: 'POST' });
