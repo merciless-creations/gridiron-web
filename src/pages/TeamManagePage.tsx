@@ -1,10 +1,12 @@
 import { useParams, Link } from 'react-router-dom';
 import { useTeam } from '../api/teams';
 import { Loading } from '../components/Loading';
+import { useActiveContext } from '../contexts';
 
 export const TeamManagePage = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const teamIdNum = Number(teamId);
+  const { leagueId } = useActiveContext();
 
   const { data: team, isLoading, error } = useTeam(teamIdNum);
 
@@ -113,7 +115,7 @@ export const TeamManagePage = () => {
 
       <div className="card">
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
             to={`/teams/${teamId}/depth-chart`}
             className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
@@ -128,6 +130,15 @@ export const TeamManagePage = () => {
             <div className="font-semibold mb-1">Full Roster</div>
             <div className="text-gray-400 text-sm">View and manage your players</div>
           </Link>
+          {leagueId && (
+            <Link
+              to={`/leagues/${leagueId}/standings`}
+              className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+            >
+              <div className="font-semibold mb-1">League Standings</div>
+              <div className="text-gray-400 text-sm">View league rankings and leaders</div>
+            </Link>
+          )}
           <div className="block p-4 bg-gridiron-light rounded-lg opacity-50 cursor-not-allowed">
             <div className="font-semibold mb-1">Upcoming Games</div>
             <div className="text-gray-400 text-sm">Coming soon</div>
