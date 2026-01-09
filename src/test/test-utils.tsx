@@ -2,6 +2,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { render, type RenderOptions } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
+import { ActiveContextProvider } from '../contexts/ActiveContextProvider'
 
 // Create a new QueryClient for each test with retry disabled
 export const createTestQueryClient = () =>
@@ -28,7 +29,9 @@ const AllTheProviders = ({ children, initialEntries = ['/'] }: WrapperProps) => 
   return (
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={initialEntries}>
-        {children}
+        <ActiveContextProvider>
+          {children}
+        </ActiveContextProvider>
       </MemoryRouter>
     </QueryClientProvider>
   )
