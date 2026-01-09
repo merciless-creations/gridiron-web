@@ -32,12 +32,16 @@ vi.mock('../../api/teams', () => ({
   useLeagueTeams: () => mockState.useLeagueTeams(),
 }))
 
-vi.mock('../../api/teamAssignments', () => ({
-  useLeagueTeamAssignments: () => mockState.useLeagueTeamAssignments(),
-  useAssignGm: () => mockState.useAssignGm(),
-  useRemoveAssignment: () => mockState.useRemoveAssignment(),
-  useSelfAssign: () => mockState.useSelfAssign(),
-}))
+vi.mock('../../api/teamAssignments', async () => {
+  const actual = await vi.importActual('../../api/teamAssignments')
+  return {
+    ...actual,
+    useLeagueTeamAssignments: () => mockState.useLeagueTeamAssignments(),
+    useAssignGm: () => mockState.useAssignGm(),
+    useRemoveAssignment: () => mockState.useRemoveAssignment(),
+    useSelfAssign: () => mockState.useSelfAssign(),
+  }
+})
 
 import { LeagueManagePage } from '../LeagueManagePage'
 
