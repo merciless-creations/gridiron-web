@@ -10,9 +10,9 @@ type PositionFilter = 'all' | 'offense' | 'defense' | 'special';
 type SortField = 'name' | 'position' | 'number' | 'age' | 'salary' | 'overall';
 type SortDirection = 'asc' | 'desc';
 
-const OFFENSE_POSITIONS = [Position.QB, Position.RB, Position.WR, Position.TE, Position.OL];
-const DEFENSE_POSITIONS = [Position.DL, Position.LB, Position.CB, Position.S];
-const SPECIAL_POSITIONS = [Position.K, Position.P];
+const OFFENSE_POSITIONS: Position[] = [Position.QB, Position.RB, Position.WR, Position.TE, Position.OL];
+const DEFENSE_POSITIONS: Position[] = [Position.DL, Position.LB, Position.CB, Position.S];
+const SPECIAL_POSITIONS: Position[] = [Position.K, Position.P];
 
 // Calculate overall rating from key attributes
 function calculateOverall(player: Player): number {
