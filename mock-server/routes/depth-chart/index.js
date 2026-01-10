@@ -60,7 +60,7 @@ function createMockPlayer(id, firstName, lastName, position, number, overallRati
 
 // Generate depth chart for a team
 function generateDepthChart(teamId) {
-  let playerId = teamId * 1000;
+  let playerId = 1;
 
   return {
     teamId,
@@ -130,7 +130,7 @@ const mocks = [];
 // Get team depth chart
 const getDepthChart = {
   name: 'getDepthChart',
-  mockRoute: '^/api/teams/([0-9]+)/depth-chart$',
+  mockRoute: new RegExp(`^/api/teams/([0-9]+)/depth-chart$`).source,
   method: 'GET',
   testScope: 'success',
   testScenario: 'defaultScenario',

@@ -97,7 +97,7 @@ const mockLeagueLeaders = {
 // Get league leaders
 const getLeagueLeaders = {
   name: 'getLeagueLeaders',
-  mockRoute: '^/api/leagues-management/([0-9]+)/leaders$',
+  mockRoute: new RegExp(`^/api/leagues-management/([0-9]+)/leaders$`).source,
   method: 'GET',
   testScope: 'success',
   testScenario: 'defaultScenario',

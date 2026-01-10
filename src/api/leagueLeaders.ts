@@ -34,7 +34,7 @@ export interface LeagueLeadersResponse {
 }
 
 export const getLeagueLeaders = async (leagueId: number): Promise<LeagueLeadersResponse> => {
-  const response = await apiClient.get<LeagueLeadersResponse>(`/api/leagues-management/${leagueId}/leaders`);
+  const response = await apiClient.get<LeagueLeadersResponse>(`/leagues-management/${leagueId}/leaders`);
   return response.data;
 };
 

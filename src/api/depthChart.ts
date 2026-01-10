@@ -9,7 +9,7 @@ export interface DepthChartResponse {
 }
 
 export const getDepthChart = async (teamId: number): Promise<DepthChartResponse> => {
-  const response = await apiClient.get<DepthChartResponse>(`/api/teams/${teamId}/depth-chart`);
+  const response = await apiClient.get<DepthChartResponse>(`/teams/${teamId}/depth-chart`);
   return response.data;
 };
 
