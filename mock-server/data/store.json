@@ -1,1 +1,3 @@
-{}
+{
+  "getConstraintssuccessdefaultScenario": "{\"minConferences\":1,\"maxConferences\":4,\"minDivisionsPerConference\":1,\"maxDivisionsPerConference\":8,\"minTeamsPerDivision\":1,\"maxTeamsPerDivision\":8}"
+}
