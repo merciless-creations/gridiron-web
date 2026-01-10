@@ -24,10 +24,68 @@ preStart().then(() => {
   const mockRoutes = loadAllRoutes();
   console.log(`Total routes loaded: ${mockRoutes.length}`);
 
-  // Create mock API with json store for caching
+  // Define presets for Epic #49 (GM Invitation & Onboarding) testing
+  const presets = {
+    // Default: Mixed control states - good for general testing
+    'default': {
+      'getCurrentUser': { scenario: 'defaultScenario' },
+      'getMyTeams': { scenario: 'defaultScenario' },
+      'getLeagueTeamAssignments': { scenario: 'defaultScenario' },
+    },
+
+    // New GM who just received an invitation and is logging in for first time
+    'new-gm-pending': {
+      'getCurrentUser': { scenario: 'pendingUserScenario' },
+      'getMyTeams': { scenario: 'pendingUserScenario' },
+      'getLeagueTeamAssignments': { scenario: 'defaultScenario' },
+    },
+
+    // Commissioner view: Fresh league with all teams AI controlled
+    'fresh-league': {
+      'getCurrentUser': { scenario: 'defaultScenario' },
+      'getMyTeams': { scenario: 'defaultScenario' },
+      'getLeagueTeamAssignments': { scenario: 'allAiControlled' },
+    },
+
+    // Commissioner view: Many pending invitations sent
+    'many-pending': {
+      'getCurrentUser': { scenario: 'defaultScenario' },
+      'getMyTeams': { scenario: 'defaultScenario' },
+      'getLeagueTeamAssignments': { scenario: 'manyPending' },
+    },
+
+    // Full league: All teams have active GMs
+    'all-active': {
+      'getCurrentUser': { scenario: 'defaultScenario' },
+      'getMyTeams': { scenario: 'defaultScenario' },
+      'getLeagueTeamAssignments': { scenario: 'allActive' },
+    },
+
+    // New user: No teams assigned yet
+    'new-user': {
+      'getCurrentUser': { scenario: 'defaultScenario' },
+      'getMyTeams': { scenario: 'empty' },
+      'getLeagueTeamAssignments': { scenario: 'defaultScenario' },
+    },
+
+    // Error testing: API errors
+    'error-mode': {
+      'getMyTeams': { scope: 'error' },
+      'getLeagueTeamAssignments': { scope: 'error' },
+      'assignGm': { scope: 'error' },
+    },
+
+    // Slow network simulation
+    'slow-network': {
+      '*': { latency: 2000 },
+    },
+  };
+
+  // Create mock API with json store for caching and presets
   const mockApi = mock({
     mockRoutes,
     jsonStore: storeJsonFilePath,
+    presets,
   });
 
   // Create Express app manually for more control
@@ -74,7 +132,15 @@ preStart().then(() => {
     console.log('Available endpoints:');
     console.log('  POST /_reset - Reset all state');
     console.log('  POST /_scenario - Change route scenario');
+    console.log('  GET  /_preset - List available presets');
+    console.log('  POST /_preset - Activate a preset');
     console.log('  GET  /stop - Graceful shutdown');
+
+    console.log('\nAvailable presets (POST /_preset with {"name": "preset-name"}):');
+    Object.keys(presets).forEach(name => {
+      const routes = Object.keys(presets[name]).join(', ');
+      console.log(`  ${name}: ${routes}`);
+    });
 
     // List routes grouped by domain
     const routesByDomain = {};

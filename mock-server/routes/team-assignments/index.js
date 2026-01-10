@@ -1,5 +1,6 @@
 const mocks = [];
 
+// Default scenario: Mixed control states (1 active, 1 pending, 1 AI)
 const mockTeamAssignments = [
   {
     id: 1,
@@ -40,6 +41,30 @@ const mockTeamAssignments = [
     assignedAt: null,
     firstViewedAt: null,
   },
+];
+
+// Fresh league: All teams AI controlled (no GMs assigned)
+const allAiControlled = [
+  { id: 1, teamId: 1, teamName: 'Eagles', leagueId: 1, leagueName: 'Test League', email: null, displayName: null, controlState: 'AiControlled', hasViewed: false, assignedAt: null, firstViewedAt: null },
+  { id: 2, teamId: 2, teamName: 'Cowboys', leagueId: 1, leagueName: 'Test League', email: null, displayName: null, controlState: 'AiControlled', hasViewed: false, assignedAt: null, firstViewedAt: null },
+  { id: 3, teamId: 3, teamName: 'Giants', leagueId: 1, leagueName: 'Test League', email: null, displayName: null, controlState: 'AiControlled', hasViewed: false, assignedAt: null, firstViewedAt: null },
+  { id: 4, teamId: 4, teamName: 'Bears', leagueId: 1, leagueName: 'Test League', email: null, displayName: null, controlState: 'AiControlled', hasViewed: false, assignedAt: null, firstViewedAt: null },
+];
+
+// Many pending: Commissioner has invited several GMs, none have logged in yet
+const manyPending = [
+  { id: 1, teamId: 1, teamName: 'Eagles', leagueId: 1, leagueName: 'Test League', email: 'gm1@example.com', displayName: 'John Smith', controlState: 'Pending', hasViewed: false, assignedAt: '2024-01-01T00:00:00Z', firstViewedAt: null },
+  { id: 2, teamId: 2, teamName: 'Cowboys', leagueId: 1, leagueName: 'Test League', email: 'gm2@example.com', displayName: 'Jane Doe', controlState: 'Pending', hasViewed: false, assignedAt: '2024-01-01T00:00:00Z', firstViewedAt: null },
+  { id: 3, teamId: 3, teamName: 'Giants', leagueId: 1, leagueName: 'Test League', email: 'gm3@example.com', displayName: 'Bob Wilson', controlState: 'Pending', hasViewed: false, assignedAt: '2024-01-02T00:00:00Z', firstViewedAt: null },
+  { id: 4, teamId: 4, teamName: 'Bears', leagueId: 1, leagueName: 'Test League', email: null, displayName: null, controlState: 'AiControlled', hasViewed: false, assignedAt: null, firstViewedAt: null },
+];
+
+// All active: Full league with all GMs actively managing
+const allActive = [
+  { id: 1, teamId: 1, teamName: 'Eagles', leagueId: 1, leagueName: 'Test League', email: 'gm1@example.com', displayName: 'John Smith', controlState: 'HumanControlled', hasViewed: true, assignedAt: '2024-01-01T00:00:00Z', firstViewedAt: '2024-01-02T00:00:00Z' },
+  { id: 2, teamId: 2, teamName: 'Cowboys', leagueId: 1, leagueName: 'Test League', email: 'gm2@example.com', displayName: 'Jane Doe', controlState: 'HumanControlled', hasViewed: true, assignedAt: '2024-01-01T00:00:00Z', firstViewedAt: '2024-01-03T00:00:00Z' },
+  { id: 3, teamId: 3, teamName: 'Giants', leagueId: 1, leagueName: 'Test League', email: 'gm3@example.com', displayName: 'Bob Wilson', controlState: 'HumanControlled', hasViewed: true, assignedAt: '2024-01-02T00:00:00Z', firstViewedAt: '2024-01-04T00:00:00Z' },
+  { id: 4, teamId: 4, teamName: 'Bears', leagueId: 1, leagueName: 'Test League', email: 'gm4@example.com', displayName: 'Sarah Jones', controlState: 'HumanControlled', hasViewed: true, assignedAt: '2024-01-03T00:00:00Z', firstViewedAt: '2024-01-05T00:00:00Z' },
 ];
 
 const mockUserTeams = [
@@ -105,6 +130,15 @@ const getLeagueTeamAssignments = {
       },
       empty: function () {
         return JSON.stringify([]);
+      },
+      allAiControlled: function () {
+        return JSON.stringify(allAiControlled);
+      },
+      manyPending: function () {
+        return JSON.stringify(manyPending);
+      },
+      allActive: function () {
+        return JSON.stringify(allActive);
       },
     },
   ],
