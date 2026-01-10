@@ -1,3 +1,5 @@
 {
-  "getConstraintssuccessdefaultScenario": "{\"minConferences\":1,\"maxConferences\":4,\"minDivisionsPerConference\":1,\"maxDivisionsPerConference\":8,\"minTeamsPerDivision\":1,\"maxTeamsPerDivision\":8}"
+  "getConstraintssuccessdefaultScenario": "{\"minConferences\":1,\"maxConferences\":4,\"minDivisionsPerConference\":1,\"maxDivisionsPerConference\":8,\"minTeamsPerDivision\":1,\"maxTeamsPerDivision\":8}",
+  "getCurrentUsersuccessdefaultScenario": "{\"id\":1,\"email\":\"testuser@example.com\",\"displayName\":\"Test User\",\"isGlobalAdmin\":true,\"createdAt\":\"2024-01-15T10:00:00Z\",\"lastLoginAt\":\"2024-11-29T08:30:00Z\",\"leagueRoles\":[{\"id\":1,\"leagueId\":1,\"leagueName\":\"Test League\",\"role\":\"Commissioner\",\"teamId\":null,\"teamName\":null,\"assignedAt\":\"2024-01-15T10:00:00Z\"}]}",
+  "getMyTeamssuccessdefaultScenario": "[{\"teamId\":1,\"teamName\":\"Eagles\",\"leagueId\":1,\"leagueName\":\"Test League\",\"hasViewed\":true},{\"teamId\":5,\"teamName\":\"Falcons\",\"leagueId\":2,\"leagueName\":\"Another League\",\"hasViewed\":false}]"
 }
