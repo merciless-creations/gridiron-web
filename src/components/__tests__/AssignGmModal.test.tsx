@@ -240,7 +240,7 @@ describe('AssignGmModal', () => {
       }));
 
       // Since we can't easily change isPending dynamically, test the button text directly
-      const { rerender } = render(<AssignGmModal {...defaultProps} />, { wrapper: createWrapper() });
+      render(<AssignGmModal {...defaultProps} />, { wrapper: createWrapper() });
 
       // The button text should normally say "Assign GM"
       expect(screen.getByRole('button', { name: /assign gm/i })).toBeInTheDocument();
