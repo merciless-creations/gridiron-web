@@ -24,8 +24,9 @@ vi.mock('../../api/leagues', () => ({
 import { DashboardPage } from '../DashboardPage'
 
 const mockMyTeams = [
-  { teamId: 1, teamName: 'Eagles', leagueId: 1, leagueName: 'Test League', hasViewed: true },
-  { teamId: 2, teamName: 'Falcons', leagueId: 1, leagueName: 'Test League', hasViewed: false },
+  { teamId: 1, teamName: 'Eagles', leagueId: 1, leagueName: 'Test League', controlState: 'HumanControlled' as const, hasViewed: true },
+  { teamId: 2, teamName: 'Falcons', leagueId: 1, leagueName: 'Test League', controlState: 'Pending' as const, hasViewed: false },
+  { teamId: 3, teamName: 'Ravens', leagueId: 1, leagueName: 'Test League', controlState: 'AiControlled' as const, hasViewed: true },
 ]
 
 const mockMyLeagues = [
@@ -146,6 +147,7 @@ describe('DashboardPage', () => {
       await waitFor(() => {
         expect(screen.getByText('Eagles')).toBeInTheDocument()
         expect(screen.getByText('Falcons')).toBeInTheDocument()
+        expect(screen.getByText('Ravens')).toBeInTheDocument()
       })
     })
 
@@ -173,6 +175,30 @@ describe('DashboardPage', () => {
       // Check for animation classes
       const animatedElements = document.querySelectorAll('.animate-fade-in, .animate-slide-up')
       expect(animatedElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows AI-Controlled status indicator', async () => {
+      render(<DashboardPage />)
+      await waitFor(() => {
+        expect(screen.getByLabelText('AI-Controlled')).toBeInTheDocument()
+        expect(screen.getByText('AI-Controlled')).toBeInTheDocument()
+      })
+    })
+
+    it('shows Pending status indicator', async () => {
+      render(<DashboardPage />)
+      await waitFor(() => {
+        expect(screen.getByLabelText('Pending')).toBeInTheDocument()
+        expect(screen.getByText('Pending')).toBeInTheDocument()
+      })
+    })
+
+    it('shows Active status indicator for human-controlled teams', async () => {
+      render(<DashboardPage />)
+      await waitFor(() => {
+        expect(screen.getByLabelText('Active')).toBeInTheDocument()
+        expect(screen.getByText('Active')).toBeInTheDocument()
+      })
     })
   })
 

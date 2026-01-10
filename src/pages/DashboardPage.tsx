@@ -239,7 +239,7 @@ export function DashboardPage() {
               >
                 <div className="flex items-center gap-2">
                   {!team.hasViewed && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gridiron-accent/20 text-gridiron-accent">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gridiron-accent/20 text-gridiron-accent" aria-label="New team">
                       New
                     </span>
                   )}
@@ -247,6 +247,21 @@ export function DashboardPage() {
                   <span className="text-gridiron-gray text-sm">
                     ({team.leagueName})
                   </span>
+                  {team.controlState === 'AiControlled' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-purple-500/20 text-purple-300" aria-label="AI-Controlled">
+                      <span aria-hidden="true">&#x1F916;</span> AI-Controlled
+                    </span>
+                  )}
+                  {team.controlState === 'Pending' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-yellow-500/20 text-yellow-300" aria-label="Pending">
+                      <span aria-hidden="true">&#x23F3;</span> Pending
+                    </span>
+                  )}
+                  {team.controlState === 'HumanControlled' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-500/20 text-green-300" aria-label="Active">
+                      <span aria-hidden="true">&#x2705;</span> Active
+                    </span>
+                  )}
                 </div>
                 <button className="btn-secondary text-sm">
                   Manage
