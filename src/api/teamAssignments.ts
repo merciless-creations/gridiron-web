@@ -20,6 +20,7 @@ export interface UserTeamDto {
   teamName: string;
   leagueId: number;
   leagueName: string;
+  controlState: 'AiControlled' | 'Pending' | 'HumanControlled';
   hasViewed: boolean;
 }
 
