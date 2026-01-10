@@ -5,6 +5,21 @@
  */
 const { mockTeams } = require('../../state');
 
+// Pending user only sees their invited team
+const pendingUserTeam = {
+  id: 6,
+  divisionId: 3,
+  name: 'Giants',
+  city: 'New York',
+  budget: 210000000,
+  championships: 4,
+  wins: 6,
+  losses: 10,
+  ties: 0,
+  fanSupport: 80,
+  chemistry: 65,
+};
+
 const mocks = [];
 
 // List all teams
@@ -18,6 +33,9 @@ const listTeams = {
     {
       defaultScenario: function () {
         return JSON.stringify(mockTeams);
+      },
+      pendingUserScenario: function () {
+        return JSON.stringify([pendingUserTeam]);
       },
     },
   ],
