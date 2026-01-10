@@ -8,16 +8,24 @@ interface WelcomeModalProps {
 export function WelcomeModal({ teamName, onConfirm, onCancel, isLoading }: WelcomeModalProps) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-gridiron-dark rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="welcome-modal-title"
+        className="bg-gridiron-dark rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
+      >
         <div className="text-center">
           <span className="text-4xl mb-4 block">🏈</span>
-          <h2 className="text-2xl font-bold text-gridiron-light mb-2">
+          <h2
+            id="welcome-modal-title"
+            className="text-2xl font-bold text-gridiron-light mb-2"
+          >
             Welcome to the {teamName}!
           </h2>
         </div>
 
         <p className="text-gridiron-gray text-center mb-6">
-          You're now the GM of this team.
+          You're now the GM.
         </p>
 
         <div className="text-gridiron-light mb-6">
@@ -42,7 +50,7 @@ export function WelcomeModal({ teamName, onConfirm, onCancel, isLoading }: Welco
             className="btn-primary flex-1"
             disabled={isLoading}
           >
-            {isLoading ? 'Loading...' : "Let's Go!"}
+            {isLoading ? 'Confirming...' : 'Confirm'}
           </button>
         </div>
       </div>
