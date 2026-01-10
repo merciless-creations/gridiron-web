@@ -30,6 +30,7 @@ preStart().then(() => {
     'default': {
       'getCurrentUser': { scenario: 'defaultScenario' },
       'getMyTeams': { scenario: 'defaultScenario' },
+      'listLeagues': { scenario: 'defaultScenario' },
       'getLeagueTeamAssignments': { scenario: 'defaultScenario' },
     },
 
@@ -61,16 +62,18 @@ preStart().then(() => {
       'getLeagueTeamAssignments': { scenario: 'allActive' },
     },
 
-    // New user: No teams assigned yet
+    // New user: No teams or leagues assigned yet
     'new-user': {
       'getCurrentUser': { scenario: 'defaultScenario' },
       'getMyTeams': { scenario: 'empty' },
+      'listLeagues': { scenario: 'empty' },
       'getLeagueTeamAssignments': { scenario: 'defaultScenario' },
     },
 
     // Error testing: API errors
     'error-mode': {
       'getMyTeams': { scope: 'error' },
+      'listLeagues': { scope: 'error' },
       'getLeagueTeamAssignments': { scope: 'error' },
       'assignGm': { scope: 'error' },
     },
@@ -103,15 +106,103 @@ preStart().then(() => {
     next();
   });
 
+  // Track active preset
+  let activePreset = null;
+
   // Custom reset endpoint - must be before mock routes
   app.post('/_reset', (req, res) => {
     resetState();
+    activePreset = null;
     // Also reset all route scenarios back to default
     mockRoutes.forEach(route => {
       route.testScenario = 'defaultScenario';
       route.testScope = 'success';
+      route.latency = undefined;
     });
     res.json({ success: true, message: 'Mock server state reset' });
+  });
+
+  // Get available presets
+  app.get('/_preset', (req, res) => {
+    res.json({
+      active: activePreset,
+      available: Object.keys(presets),
+    });
+  });
+
+  // Activate a preset
+  app.post('/_preset', (req, res) => {
+    const { name } = req.body;
+
+    // Reset to default if null or 'default'
+    if (name === null || name === 'default') {
+      mockRoutes.forEach(route => {
+        route.testScenario = 'defaultScenario';
+        route.testScope = 'success';
+        route.latency = undefined;
+      });
+      activePreset = null;
+      return res.json({
+        success: true,
+        preset: null,
+        message: 'Reset to default configuration',
+        routesUpdated: mockRoutes.length,
+      });
+    }
+
+    // Check if preset exists
+    if (!presets[name]) {
+      return res.status(404).json({
+        success: false,
+        error: `Preset '${name}' not found`,
+        available: Object.keys(presets),
+      });
+    }
+
+    const preset = presets[name];
+    let routesUpdated = 0;
+
+    // Apply preset configuration to routes
+    mockRoutes.forEach(route => {
+      // Check for exact match
+      let config = preset[route.name];
+
+      // Check for wildcard
+      if (!config && preset['*']) {
+        config = preset['*'];
+      }
+
+      // Check for prefix match (e.g., 'get*')
+      if (!config) {
+        for (const pattern of Object.keys(preset)) {
+          if (pattern.endsWith('*') && route.name.startsWith(pattern.slice(0, -1))) {
+            config = preset[pattern];
+            break;
+          }
+        }
+      }
+
+      if (config) {
+        if (config.scenario !== undefined) {
+          route.testScenario = config.scenario;
+        }
+        if (config.scope !== undefined) {
+          route.testScope = config.scope;
+        }
+        if (config.latency !== undefined) {
+          route.latency = config.latency;
+        }
+        routesUpdated++;
+      }
+    });
+
+    activePreset = name;
+    res.json({
+      success: true,
+      preset: name,
+      message: `Preset '${name}' activated`,
+      routesUpdated,
+    });
   });
 
   // Graceful shutdown endpoint

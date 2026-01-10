@@ -231,6 +231,9 @@ const listLeagues = {
       defaultScenario: function () {
         return JSON.stringify(Array.from(state.getLeagues().values()));
       },
+      empty: function () {
+        return JSON.stringify([]);
+      },
     },
   ],
 };
