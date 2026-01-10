@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 const { mockState } = vi.hoisted(() => ({
   mockState: {
     useSeasonStandings: vi.fn(),
+    useLeagueLeaders: vi.fn(),
   },
 }));
 
@@ -19,6 +20,10 @@ vi.mock('react-router-dom', async () => {
 
 vi.mock('../../api/season', () => ({
   useSeasonStandings: () => mockState.useSeasonStandings(),
+}));
+
+vi.mock('../../api/leagueLeaders', () => ({
+  useLeagueLeaders: () => mockState.useLeagueLeaders(),
 }));
 
 import StandingsPage from '../StandingsPage';
@@ -160,6 +165,33 @@ describe('StandingsPage', () => {
     vi.clearAllMocks();
     mockState.useSeasonStandings = vi.fn().mockReturnValue({
       data: mockStandings,
+      isLoading: false,
+      error: null,
+    });
+    mockState.useLeagueLeaders = vi.fn().mockReturnValue({
+      data: {
+        leagueId: 1,
+        seasonId: 101,
+        passing: {
+          yards: [{ playerId: 1, playerName: 'Patrick Mahomes', teamName: 'Chiefs', teamCity: 'Kansas City', value: 4183 }],
+          touchdowns: [{ playerId: 1, playerName: 'Patrick Mahomes', teamName: 'Chiefs', teamCity: 'Kansas City', value: 38 }],
+          rating: [{ playerId: 1, playerName: 'Patrick Mahomes', teamName: 'Chiefs', teamCity: 'Kansas City', value: 112.4 }],
+        },
+        rushing: {
+          yards: [{ playerId: 10, playerName: 'Derrick Henry', teamName: 'Titans', teamCity: 'Tennessee', value: 1538 }],
+          touchdowns: [{ playerId: 10, playerName: 'Derrick Henry', teamName: 'Titans', teamCity: 'Tennessee', value: 15 }],
+          ypc: [{ playerId: 16, playerName: 'Kenneth Walker', teamName: 'Seahawks', teamCity: 'Seattle', value: 5.8 }],
+        },
+        receiving: {
+          yards: [{ playerId: 20, playerName: 'Tyreek Hill', teamName: 'Dolphins', teamCity: 'Miami', value: 1710 }],
+          touchdowns: [{ playerId: 20, playerName: 'Tyreek Hill', teamName: 'Dolphins', teamCity: 'Miami', value: 13 }],
+          receptions: [{ playerId: 20, playerName: 'Tyreek Hill', teamName: 'Dolphins', teamCity: 'Miami', value: 119 }],
+        },
+        defense: {
+          sacks: [{ playerId: 30, playerName: 'Micah Parsons', teamName: 'Cowboys', teamCity: 'Dallas', value: 16.5 }],
+          interceptions: [{ playerId: 40, playerName: 'Sauce Gardner', teamName: 'Jets', teamCity: 'New York', value: 7 }],
+        },
+      },
       isLoading: false,
       error: null,
     });
@@ -406,11 +438,6 @@ describe('StandingsPage', () => {
 
       expect(screen.getByText('Sacks')).toBeInTheDocument();
       expect(screen.getByText('Interceptions')).toBeInTheDocument();
-    });
-
-    it('should display placeholder data notice', () => {
-      renderPage();
-      expect(screen.getByText(/placeholder data/i)).toBeInTheDocument();
     });
 
     it('should display leader player names', () => {

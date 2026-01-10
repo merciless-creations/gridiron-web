@@ -1,114 +1,14 @@
 import { useParams, Link } from 'react-router-dom';
 import { useTeam } from '../api/teams';
+import { useDepthChart } from '../api/depthChart';
 import { Loading } from '../components/Loading';
 import { Position, PositionLabels } from '../types/enums';
 import type { Player } from '../types/Player';
 
-// Mock depth chart data until API is available
-const createMockPlayer = (
-  id: number,
-  firstName: string,
-  lastName: string,
-  position: Position,
-  number: number,
-  overallRating: number
-): Player => ({
-  id,
-  teamId: 1,
-  position,
-  number,
-  firstName,
-  lastName,
-  age: 25 + Math.floor(Math.random() * 10),
-  exp: Math.floor(Math.random() * 12),
-  height: "6'2\"",
-  college: 'State University',
-  speed: 70 + Math.floor(Math.random() * 25),
-  strength: 70 + Math.floor(Math.random() * 25),
-  agility: 70 + Math.floor(Math.random() * 25),
-  awareness: overallRating,
-  fragility: 50 + Math.floor(Math.random() * 30),
-  morale: 70 + Math.floor(Math.random() * 25),
-  discipline: 70 + Math.floor(Math.random() * 25),
-  passing: position === Position.QB ? overallRating : 30,
-  catching: ([Position.WR, Position.TE, Position.RB] as Position[]).includes(position) ? overallRating : 30,
-  rushing: ([Position.RB, Position.QB] as Position[]).includes(position) ? overallRating : 30,
-  blocking: ([Position.OL, Position.TE] as Position[]).includes(position) ? overallRating : 30,
-  tackling: ([Position.DL, Position.LB, Position.CB, Position.S] as Position[]).includes(position) ? overallRating : 30,
-  coverage: ([Position.CB, Position.S, Position.LB] as Position[]).includes(position) ? overallRating : 30,
-  kicking: ([Position.K, Position.P] as Position[]).includes(position) ? overallRating : 30,
-  contractYears: 1 + Math.floor(Math.random() * 4),
-  salary: 1000000 + Math.floor(Math.random() * 20000000),
-  potential: 60 + Math.floor(Math.random() * 35),
-  progression: 50 + Math.floor(Math.random() * 40),
-  health: 85 + Math.floor(Math.random() * 15),
-  isRetired: false,
-  isInjured: false,
-});
-
-const mockDepthChart: Record<Position, Player[]> = {
-  [Position.QB]: [
-    createMockPlayer(1, 'Marcus', 'Williams', Position.QB, 12, 88),
-    createMockPlayer(2, 'Jake', 'Thompson', Position.QB, 7, 72),
-  ],
-  [Position.RB]: [
-    createMockPlayer(3, 'DeShawn', 'Jackson', Position.RB, 28, 85),
-    createMockPlayer(4, 'Tyler', 'Mitchell', Position.RB, 32, 76),
-    createMockPlayer(5, 'Chris', 'Davis', Position.RB, 45, 68),
-  ],
-  [Position.WR]: [
-    createMockPlayer(6, 'Antonio', 'Brown', Position.WR, 84, 91),
-    createMockPlayer(7, 'Jarvis', 'Smith', Position.WR, 11, 82),
-    createMockPlayer(8, 'Michael', 'Thomas', Position.WR, 13, 79),
-    createMockPlayer(9, 'Brandon', 'Cook', Position.WR, 88, 74),
-  ],
-  [Position.TE]: [
-    createMockPlayer(10, 'Travis', 'Kelley', Position.TE, 87, 86),
-    createMockPlayer(11, 'Mark', 'Andrews', Position.TE, 89, 74),
-  ],
-  [Position.OL]: [
-    createMockPlayer(12, 'Jason', 'Peters', Position.OL, 71, 84),
-    createMockPlayer(13, 'Lane', 'Johnson', Position.OL, 65, 82),
-    createMockPlayer(14, 'Brandon', 'Scherff', Position.OL, 75, 80),
-    createMockPlayer(15, 'Zack', 'Martin', Position.OL, 70, 78),
-    createMockPlayer(16, 'Tyron', 'Smith', Position.OL, 77, 76),
-    createMockPlayer(17, 'David', 'Bakhtiari', Position.OL, 69, 72),
-  ],
-  [Position.DL]: [
-    createMockPlayer(18, 'Aaron', 'Donald', Position.DL, 99, 94),
-    createMockPlayer(19, 'Chris', 'Jones', Position.DL, 95, 87),
-    createMockPlayer(20, 'Cameron', 'Heyward', Position.DL, 97, 82),
-    createMockPlayer(21, 'Fletcher', 'Cox', Position.DL, 91, 78),
-  ],
-  [Position.LB]: [
-    createMockPlayer(22, 'Bobby', 'Wagner', Position.LB, 54, 89),
-    createMockPlayer(23, 'Fred', 'Warner', Position.LB, 52, 86),
-    createMockPlayer(24, 'Darius', 'Leonard', Position.LB, 53, 83),
-    createMockPlayer(25, 'Lavonte', 'David', Position.LB, 58, 76),
-  ],
-  [Position.CB]: [
-    createMockPlayer(26, 'Jalen', 'Ramsey', Position.CB, 20, 92),
-    createMockPlayer(27, 'Marlon', 'Humphrey', Position.CB, 21, 85),
-    createMockPlayer(28, 'Tre', 'White', Position.CB, 27, 80),
-    createMockPlayer(29, 'Darius', 'Slay', Position.CB, 24, 77),
-  ],
-  [Position.S]: [
-    createMockPlayer(30, 'Derwin', 'James', Position.S, 33, 90),
-    createMockPlayer(31, 'Jessie', 'Bates', Position.S, 30, 84),
-    createMockPlayer(32, 'Antoine', 'Winfield', Position.S, 31, 78),
-  ],
-  [Position.K]: [
-    createMockPlayer(33, 'Justin', 'Tucker', Position.K, 9, 95),
-  ],
-  [Position.P]: [
-    createMockPlayer(34, 'Michael', 'Dickson', Position.P, 4, 88),
-  ],
-};
-
 interface PositionGroupProps {
   title: string;
   positions: Position[];
-  depthChart: Record<Position, Player[]>;
+  depthChart: Partial<Record<Position, Player[]>>;
   isOwner: boolean;
 }
 
@@ -256,10 +156,14 @@ export const DepthChartPage = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const teamIdNum = Number(teamId);
 
-  const { data: team, isLoading, error } = useTeam(teamIdNum);
+  const { data: team, isLoading: teamLoading, error: teamError } = useTeam(teamIdNum);
+  const { data: depthChartData, isLoading: depthChartLoading, error: depthChartError } = useDepthChart(teamIdNum);
 
   // For now, assume the viewer is the owner (this would come from auth context in real app)
   const isOwner = true;
+
+  const isLoading = teamLoading || depthChartLoading;
+  const error = teamError || depthChartError;
 
   if (isLoading) {
     return <Loading />;
@@ -382,21 +286,21 @@ export const DepthChartPage = () => {
       <PositionGroup
         title="Offense"
         positions={offensePositions}
-        depthChart={mockDepthChart}
+        depthChart={depthChartData?.positions ?? {}}
         isOwner={isOwner}
       />
 
       <PositionGroup
         title="Defense"
         positions={defensePositions}
-        depthChart={mockDepthChart}
+        depthChart={depthChartData?.positions ?? {}}
         isOwner={isOwner}
       />
 
       <PositionGroup
         title="Special Teams"
         positions={specialTeamsPositions}
-        depthChart={mockDepthChart}
+        depthChart={depthChartData?.positions ?? {}}
         isOwner={isOwner}
       />
     </div>
