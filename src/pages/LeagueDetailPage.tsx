@@ -318,10 +318,16 @@ export const LeagueDetailPage = () => {
                             className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                               role.role === 'Commissioner'
                                 ? 'bg-purple-500/20 text-purple-300'
-                                : 'bg-gridiron-accent/20 text-gridiron-accent'
+                                : role.controlState === 'Pending'
+                                  ? 'bg-yellow-500/20 text-yellow-300'
+                                  : 'bg-gridiron-accent/20 text-gridiron-accent'
                             }`}
                           >
-                            {role.role === 'Commissioner' ? '👑 Commissioner' : `📋 GM - ${role.teamName}`}
+                            {role.role === 'Commissioner'
+                              ? '👑 Commissioner'
+                              : role.controlState === 'Pending'
+                                ? `⏳ ${role.teamName} (Invited)`
+                                : `📋 ${role.teamName}`}
                           </span>
                         ))}
                     </div>

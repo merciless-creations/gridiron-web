@@ -59,6 +59,18 @@ const mockUserTeams = [
   },
 ];
 
+// Pending user only sees the team they're invited to
+const pendingUserTeams = [
+  {
+    teamId: 6,
+    teamName: 'Giants',
+    leagueId: 1,
+    leagueName: 'Test League',
+    hasViewed: false,
+    controlState: 'Pending',
+  },
+];
+
 const getMyTeams = {
   name: 'getMyTeams',
   mockRoute: '/api/users/me/teams',
@@ -69,6 +81,9 @@ const getMyTeams = {
     {
       defaultScenario: function () {
         return JSON.stringify(mockUserTeams);
+      },
+      pendingUserScenario: function () {
+        return JSON.stringify(pendingUserTeams);
       },
       empty: function () {
         return JSON.stringify([]);

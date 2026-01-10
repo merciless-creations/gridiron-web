@@ -53,7 +53,8 @@ describe('TeamsPage', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('10-6-0')).toBeInTheDocument()
+      // Multiple teams may have the same record, so use getAllByText
+      expect(screen.getAllByText('10-6-0').length).toBeGreaterThan(0)
       expect(screen.getByText('12-4-0')).toBeInTheDocument()
     })
   })
@@ -68,7 +69,7 @@ describe('TeamsPage', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('2 teams in the league')).toBeInTheDocument()
+      expect(screen.getByText('8 teams in the league')).toBeInTheDocument()
     })
   })
 

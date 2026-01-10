@@ -2,6 +2,8 @@
  * User and role types matching backend UserDto
  */
 
+export type ControlState = 'HumanControlled' | 'Pending' | 'AiControlled';
+
 export interface UserLeagueRole {
   id: number;
   leagueId: number;
@@ -9,6 +11,7 @@ export interface UserLeagueRole {
   role: 'Commissioner' | 'GeneralManager';
   teamId: number | null;
   teamName: string | null;
+  controlState?: ControlState;
   assignedAt: string;
 }
 
