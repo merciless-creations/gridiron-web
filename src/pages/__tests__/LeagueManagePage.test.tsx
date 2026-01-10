@@ -294,20 +294,51 @@ describe('LeagueManagePage', () => {
     it('calls self-assign mutation when clicking button', async () => {
       const mockSelfAssignMutateAsync = vi.fn().mockResolvedValue({})
       mockState.useSelfAssign.mockReturnValue({ mutateAsync: mockSelfAssignMutateAsync, isPending: false })
-      
+
       const user = userEvent.setup()
       render(<LeagueManagePage />)
-      
+
       await waitFor(() => {
         expect(screen.getByText('Cowboys')).toBeInTheDocument()
       })
-      
+
       const selfAssignButtons = screen.getAllByRole('button', { name: /i'll take this/i })
       await user.click(selfAssignButtons[0])
-      
+
       await waitFor(() => {
         expect(mockSelfAssignMutateAsync).toHaveBeenCalled()
       })
+    })
+
+    it('disables self-assign button during loading state', async () => {
+      mockState.useSelfAssign.mockReturnValue({ mutateAsync: vi.fn(), isPending: true })
+
+      render(<LeagueManagePage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('Cowboys')).toBeInTheDocument()
+      })
+
+      const selfAssignButtons = screen.getAllByRole('button', { name: /i'll take this/i })
+      expect(selfAssignButtons[0]).toBeDisabled()
+    })
+
+    it('only shows self-assign button for AI-controlled teams', async () => {
+      mockState.useSelfAssign.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+
+      render(<LeagueManagePage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('Cowboys')).toBeInTheDocument()
+      })
+
+      // Cowboys is AI-controlled (no assignment), should have self-assign button
+      const selfAssignButtons = screen.getAllByRole('button', { name: /i'll take this/i })
+      expect(selfAssignButtons).toHaveLength(1) // Only one team (Cowboys) is AI-controlled
+
+      // Eagles and Falcons are assigned, should have Remove GM buttons instead
+      const removeButtons = screen.getAllByRole('button', { name: /remove/i })
+      expect(removeButtons).toHaveLength(2) // Eagles (HumanControlled) and Falcons (Pending)
     })
   })
 })
