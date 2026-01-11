@@ -15,14 +15,14 @@ const MOCK_SERVER_URL = 'http://localhost:3001'
 
 /**
  * Helper to switch mock server scenario for a specific route
- * @param name - The route name (e.g., 'getLeague')
+ * @param route - The route name (e.g., 'getLeague')
  * @param scenario - The scenario name (e.g., 'fullyFilledLeague')
  */
-async function setScenario(name: string, scenario: string) {
+async function setScenario(route: string, scenario: string) {
   const response = await fetch(`${MOCK_SERVER_URL}/_scenario`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, scenario }),
+    body: JSON.stringify({ route, scenario }),
   })
   if (!response.ok) {
     const text = await response.text()

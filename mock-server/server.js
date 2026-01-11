@@ -167,6 +167,41 @@ preStart().then(() => {
     res.json({ success: true, message: 'Mock server state reset' });
   });
 
+  // Change scenario for a specific route
+  app.post('/_scenario', (req, res) => {
+    const { route: routeName, scenario, scope } = req.body;
+
+    if (!routeName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Route name is required',
+      });
+    }
+
+    const route = mockRoutes.find(r => r.name === routeName);
+    if (!route) {
+      return res.status(404).json({
+        success: false,
+        error: `Route '${routeName}' not found`,
+        available: mockRoutes.map(r => r.name),
+      });
+    }
+
+    if (scenario !== undefined) {
+      route.testScenario = scenario;
+    }
+    if (scope !== undefined) {
+      route.testScope = scope;
+    }
+
+    res.json({
+      success: true,
+      route: routeName,
+      scenario: route.testScenario,
+      scope: route.testScope,
+    });
+  });
+
   // Get available presets
   app.get('/_preset', (req, res) => {
     res.json({
