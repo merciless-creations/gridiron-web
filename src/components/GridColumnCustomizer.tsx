@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { usePreferences } from '../contexts';
 
 interface ColumnDefinition {
@@ -34,13 +34,27 @@ export function GridColumnCustomizer({
   const gridPrefs = preferences.grids?.[gridKey];
   const visibleColumns = gridPrefs?.columns ?? columns.filter(c => c.defaultVisible !== false).map(c => c.key);
 
-  // Track local state for optimistic updates
-  const [localColumns, setLocalColumns] = useState<string[]>(visibleColumns);
+  // Track local state for optimistic updates - null means use preferences
+  const [localColumnsOverride, setLocalColumnsOverride] = useState<string[] | null>(null);
 
-  // Sync local state when preferences change
-  useEffect(() => {
-    setLocalColumns(visibleColumns);
-  }, [visibleColumns.join(',')]);
+  // Derive actual columns from local override or preferences
+  const localColumns = useMemo(() => {
+    return localColumnsOverride ?? visibleColumns;
+  }, [localColumnsOverride, visibleColumns]);
+
+  // Wrapper to update local columns
+  const setLocalColumns = useCallback((columns: string[] | ((prev: string[]) => string[])) => {
+    if (typeof columns === 'function') {
+      setLocalColumnsOverride(prev => columns(prev ?? visibleColumns));
+    } else {
+      setLocalColumnsOverride(columns);
+    }
+  }, [visibleColumns]);
+
+  // Drag and drop state
+  const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+  const dragCounter = useRef(0);
 
   const toggleColumn = useCallback((columnKey: string) => {
     setLocalColumns(prev => {
@@ -57,18 +71,41 @@ export function GridColumnCustomizer({
 
       return newColumns;
     });
-  }, [gridKey, onChange, setGridPreferences]);
+  }, [gridKey, onChange, setGridPreferences, setLocalColumns]);
 
   const moveColumn = useCallback((columnKey: string, direction: 'up' | 'down') => {
-    setLocalColumns(prev => {
-      const index = prev.indexOf(columnKey);
-      if (index === -1) return prev;
+    // Compute the new columns array outside of setState to avoid closure issues
+    const currentColumns = [...localColumns];
+    const index = currentColumns.indexOf(columnKey);
+    if (index === -1) return;
 
-      const newIndex = direction === 'up' ? index - 1 : index + 1;
-      if (newIndex < 0 || newIndex >= prev.length) return prev;
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= currentColumns.length) return;
+
+    // Swap the columns
+    [currentColumns[index], currentColumns[newIndex]] = [currentColumns[newIndex], currentColumns[index]];
+
+    // Update local state
+    setLocalColumns(currentColumns);
+
+    // Call onChange for immediate UI feedback
+    onChange?.(currentColumns);
+
+    // Persist to preferences
+    setGridPreferences(gridKey, { columns: currentColumns });
+  }, [gridKey, localColumns, onChange, setGridPreferences, setLocalColumns]);
+
+  const moveColumnToPosition = useCallback((fromKey: string, toKey: string) => {
+    setLocalColumns(prev => {
+      const fromIndex = prev.indexOf(fromKey);
+      const toIndex = prev.indexOf(toKey);
+      if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return prev;
 
       const newColumns = [...prev];
-      [newColumns[index], newColumns[newIndex]] = [newColumns[newIndex], newColumns[index]];
+      // Remove from original position
+      newColumns.splice(fromIndex, 1);
+      // Insert at new position
+      newColumns.splice(toIndex, 0, fromKey);
 
       // Call onChange for immediate UI feedback
       onChange?.(newColumns);
@@ -78,14 +115,78 @@ export function GridColumnCustomizer({
 
       return newColumns;
     });
-  }, [gridKey, onChange, setGridPreferences]);
+  }, [gridKey, onChange, setGridPreferences, setLocalColumns]);
 
   const resetToDefaults = useCallback(() => {
     const defaultColumns = columns.filter(c => c.defaultVisible !== false).map(c => c.key);
     setLocalColumns(defaultColumns);
     onChange?.(defaultColumns);
     setGridPreferences(gridKey, { columns: defaultColumns });
-  }, [columns, gridKey, onChange, setGridPreferences]);
+  }, [columns, gridKey, onChange, setGridPreferences, setLocalColumns]);
+
+  // Drag handlers
+  const handleDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
+    setDraggedColumn(columnKey);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', columnKey);
+    // Add a slight delay to allow the drag image to be captured
+    setTimeout(() => {
+      const target = e.target as HTMLElement;
+      target.style.opacity = '0.5';
+    }, 0);
+  }, []);
+
+  const handleDragEnd = useCallback((e: React.DragEvent) => {
+    const target = e.target as HTMLElement;
+    target.style.opacity = '1';
+    setDraggedColumn(null);
+    setDragOverColumn(null);
+    dragCounter.current = 0;
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent, columnKey: string) => {
+    e.preventDefault();
+    dragCounter.current++;
+    if (draggedColumn && columnKey !== draggedColumn && localColumns.includes(columnKey)) {
+      setDragOverColumn(columnKey);
+    }
+  }, [draggedColumn, localColumns]);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setDragOverColumn(null);
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, targetKey: string) => {
+    e.preventDefault();
+    const sourceKey = e.dataTransfer.getData('text/plain');
+    if (sourceKey && targetKey !== sourceKey && localColumns.includes(targetKey)) {
+      moveColumnToPosition(sourceKey, targetKey);
+    }
+    setDraggedColumn(null);
+    setDragOverColumn(null);
+    dragCounter.current = 0;
+  }, [localColumns, moveColumnToPosition]);
+
+  // Sort columns: visible ones first in their order, then hidden ones
+  const sortedColumns = [...columns].sort((a, b) => {
+    const aVisible = localColumns.includes(a.key);
+    const bVisible = localColumns.includes(b.key);
+    if (aVisible && bVisible) {
+      return localColumns.indexOf(a.key) - localColumns.indexOf(b.key);
+    }
+    if (aVisible) return -1;
+    if (bVisible) return 1;
+    return 0;
+  });
 
   return (
     <div className={`relative ${className}`}>
@@ -141,22 +242,44 @@ export function GridColumnCustomizer({
             </div>
 
             <div className="max-h-80 overflow-y-auto p-2">
-              {columns.map((column) => {
+              {sortedColumns.map((column) => {
                 const isVisible = localColumns.includes(column.key);
                 const visibleIndex = localColumns.indexOf(column.key);
+                const isDragging = draggedColumn === column.key;
+                const isDragOver = dragOverColumn === column.key;
 
                 return (
                   <div
                     key={column.key}
+                    draggable={isVisible}
+                    onDragStart={(e) => handleDragStart(e, column.key)}
+                    onDragEnd={handleDragEnd}
+                    onDragEnter={(e) => handleDragEnter(e, column.key)}
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, column.key)}
                     className={`
-                      flex items-center gap-2 px-3 py-2 rounded-md
+                      flex items-center gap-2 px-3 py-2 rounded-md transition-all
                       ${isVisible ? 'bg-gridiron-bg-tertiary' : 'opacity-50'}
+                      ${isVisible ? 'cursor-grab active:cursor-grabbing' : ''}
+                      ${isDragging ? 'opacity-50' : ''}
+                      ${isDragOver ? 'border-2 border-gridiron-accent border-dashed' : 'border-2 border-transparent'}
                     `}
                     data-testid={`column-item-${column.key}`}
                   >
+                    {/* Drag handle (only for visible columns) */}
+                    {isVisible && (
+                      <svg className="w-4 h-4 text-gridiron-text-muted flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+                      </svg>
+                    )}
+
                     {/* Visibility toggle */}
                     <button
-                      onClick={() => toggleColumn(column.key)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColumn(column.key);
+                      }}
                       className="flex-shrink-0"
                       aria-label={`${isVisible ? 'Hide' : 'Show'} ${column.label} column`}
                       data-testid={`column-toggle-${column.key}`}
@@ -173,7 +296,7 @@ export function GridColumnCustomizer({
                     </button>
 
                     {/* Column label */}
-                    <span className="flex-1 text-sm text-gridiron-text-primary">
+                    <span className="flex-1 text-sm text-gridiron-text-primary select-none">
                       {column.label}
                     </span>
 
@@ -181,7 +304,10 @@ export function GridColumnCustomizer({
                     {isVisible && (
                       <div className="flex gap-1">
                         <button
-                          onClick={() => moveColumn(column.key, 'up')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            moveColumn(column.key, 'up');
+                          }}
                           disabled={visibleIndex === 0}
                           className="p-1 text-gridiron-text-muted hover:text-gridiron-text-primary disabled:opacity-30"
                           aria-label={`Move ${column.label} up`}
@@ -192,7 +318,10 @@ export function GridColumnCustomizer({
                           </svg>
                         </button>
                         <button
-                          onClick={() => moveColumn(column.key, 'down')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            moveColumn(column.key, 'down');
+                          }}
                           disabled={visibleIndex === localColumns.length - 1}
                           className="p-1 text-gridiron-text-muted hover:text-gridiron-text-primary disabled:opacity-30"
                           aria-label={`Move ${column.label} down`}

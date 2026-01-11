@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePlayers } from '../api/players';
 import { useTeam } from '../api/teams';
@@ -59,6 +59,34 @@ const ROSTER_COLUMNS = [
   { key: 'health', label: 'Health', defaultVisible: true },
 ];
 
+// Sortable columns mapping
+const SORTABLE_COLUMNS: Record<string, SortField | null> = {
+  number: 'number',
+  name: 'name',
+  position: 'position',
+  overall: 'overall',
+  age: 'age',
+  salary: 'salary',
+  exp: null,
+  college: null,
+  contract: null,
+  health: null,
+};
+
+// Column header configurations
+const COLUMN_HEADER_CONFIG: Record<string, { label: string; className: string }> = {
+  number: { label: '#', className: 'px-4 py-3' },
+  name: { label: 'Name', className: 'px-4 py-3' },
+  position: { label: 'Pos', className: 'px-4 py-3' },
+  overall: { label: 'OVR', className: 'px-4 py-3 text-center' },
+  age: { label: 'Age', className: 'px-4 py-3 text-center' },
+  exp: { label: 'Exp', className: 'px-4 py-3 text-center' },
+  college: { label: 'College', className: 'px-4 py-3' },
+  salary: { label: 'Salary', className: 'px-4 py-3 text-right' },
+  contract: { label: 'Contract', className: 'px-4 py-3 text-center' },
+  health: { label: 'Health', className: 'px-4 py-3 text-center' },
+};
+
 export const RosterPage = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const teamIdNum = Number(teamId);
@@ -76,21 +104,20 @@ export const RosterPage = () => {
   );
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Track visible columns from preferences
-  const [visibleColumns, setVisibleColumns] = useState<string[]>(
-    gridPrefs?.columns ?? ROSTER_COLUMNS.filter(c => c.defaultVisible).map(c => c.key)
-  );
+  // Track visible columns - use local state for optimistic updates, fall back to preferences
+  const [localColumns, setLocalColumns] = useState<string[] | null>(null);
 
-  // Sync visible columns when preferences change
-  useEffect(() => {
-    if (gridPrefs?.columns) {
-      setVisibleColumns(gridPrefs.columns);
+  // Derive visible columns from local state or preferences
+  const visibleColumns = useMemo(() => {
+    if (localColumns !== null) {
+      return localColumns;
     }
-  }, [gridPrefs?.columns?.join(',')]);
+    return gridPrefs?.columns ?? ROSTER_COLUMNS.filter(c => c.defaultVisible).map(c => c.key);
+  }, [localColumns, gridPrefs?.columns]);
 
-  // Handle column visibility changes
+  // Handle column visibility changes - update local state for immediate feedback
   const handleColumnsChange = useCallback((columns: string[]) => {
-    setVisibleColumns(columns);
+    setLocalColumns(columns);
   }, []);
 
   const { data: team, isLoading: teamLoading, error: teamError } = useTeam(teamIdNum);
@@ -313,66 +340,22 @@ export const RosterPage = () => {
           <table className="w-full">
             <thead>
               <tr className="text-left text-xs text-gridiron-text-secondary uppercase tracking-wider border-b border-gridiron-border-subtle">
-                {visibleColumns.includes('number') && (
-                  <th
-                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary"
-                    onClick={() => handleSort('number')}
-                  >
-                    #{getSortIndicator('number')}
-                  </th>
-                )}
-                {visibleColumns.includes('name') && (
-                  <th
-                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary"
-                    onClick={() => handleSort('name')}
-                  >
-                    Name{getSortIndicator('name')}
-                  </th>
-                )}
-                {visibleColumns.includes('position') && (
-                  <th
-                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary"
-                    onClick={() => handleSort('position')}
-                  >
-                    Pos{getSortIndicator('position')}
-                  </th>
-                )}
-                {visibleColumns.includes('overall') && (
-                  <th
-                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary text-center"
-                    onClick={() => handleSort('overall')}
-                  >
-                    OVR{getSortIndicator('overall')}
-                  </th>
-                )}
-                {visibleColumns.includes('age') && (
-                  <th
-                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary text-center"
-                    onClick={() => handleSort('age')}
-                  >
-                    Age{getSortIndicator('age')}
-                  </th>
-                )}
-                {visibleColumns.includes('exp') && (
-                  <th className="px-4 py-3 text-center">Exp</th>
-                )}
-                {visibleColumns.includes('college') && (
-                  <th className="px-4 py-3">College</th>
-                )}
-                {visibleColumns.includes('salary') && (
-                  <th
-                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary text-right"
-                    onClick={() => handleSort('salary')}
-                  >
-                    Salary{getSortIndicator('salary')}
-                  </th>
-                )}
-                {visibleColumns.includes('contract') && (
-                  <th className="px-4 py-3 text-center">Contract</th>
-                )}
-                {visibleColumns.includes('health') && (
-                  <th className="px-4 py-3 text-center">Health</th>
-                )}
+                {visibleColumns.map((columnKey) => {
+                  const config = COLUMN_HEADER_CONFIG[columnKey];
+                  const sortableField = SORTABLE_COLUMNS[columnKey];
+
+                  if (!config) return null;
+
+                  return (
+                    <th
+                      key={columnKey}
+                      className={`${config.className} ${sortableField ? 'cursor-pointer hover:text-gridiron-text-primary' : ''}`}
+                      onClick={sortableField ? () => handleSort(sortableField) : undefined}
+                    >
+                      {config.label}{sortableField ? getSortIndicator(sortableField) : ''}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-700">
@@ -408,59 +391,86 @@ function PlayerRow({ player, visibleColumns }: PlayerRowProps) {
     overall >= 65 ? 'text-orange-400' :
     'text-red-400';
 
+  // Render cell based on column key
+  const renderCell = (columnKey: string) => {
+    switch (columnKey) {
+      case 'number':
+        return (
+          <td key={columnKey} className="px-4 py-3 text-gridiron-text-secondary font-mono">
+            {player.number}
+          </td>
+        );
+      case 'name':
+        return (
+          <td key={columnKey} className="px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-gridiron-text-primary font-medium">
+                {player.firstName} {player.lastName}
+              </span>
+              {player.isInjured && (
+                <span className="px-1.5 py-0.5 text-xs bg-gridiron-loss text-white rounded">INJ</span>
+              )}
+            </div>
+          </td>
+        );
+      case 'position':
+        return (
+          <td key={columnKey} className="px-4 py-3">
+            <span className={`px-2 py-1 text-xs font-medium rounded ${getPositionColor(player.position)}`}>
+              {PositionLabels[player.position]}
+            </span>
+          </td>
+        );
+      case 'overall':
+        return (
+          <td key={columnKey} className="px-4 py-3 text-center">
+            <span className={`font-bold ${overallColor}`}>{overall}</span>
+          </td>
+        );
+      case 'age':
+        return (
+          <td key={columnKey} className="px-4 py-3 text-center text-gridiron-text-secondary">
+            {player.age}
+          </td>
+        );
+      case 'exp':
+        return (
+          <td key={columnKey} className="px-4 py-3 text-center text-gridiron-text-secondary">
+            {player.exp} yr
+          </td>
+        );
+      case 'college':
+        return (
+          <td key={columnKey} className="px-4 py-3 text-gridiron-text-secondary">
+            {player.college}
+          </td>
+        );
+      case 'salary':
+        return (
+          <td key={columnKey} className="px-4 py-3 text-right text-gridiron-text-secondary">
+            {formatSalary(player.salary)}
+          </td>
+        );
+      case 'contract':
+        return (
+          <td key={columnKey} className="px-4 py-3 text-center text-gridiron-text-secondary">
+            {player.contractYears} yr
+          </td>
+        );
+      case 'health':
+        return (
+          <td key={columnKey} className="px-4 py-3 text-center">
+            <HealthBar health={player.health} />
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <tr className="hover:bg-gridiron-bg-tertiary/50 transition-colors">
-      {visibleColumns.includes('number') && (
-        <td className="px-4 py-3 text-gridiron-text-secondary font-mono">{player.number}</td>
-      )}
-      {visibleColumns.includes('name') && (
-        <td className="px-4 py-3">
-          <div className="flex items-center gap-2">
-            <span className="text-gridiron-text-primary font-medium">
-              {player.firstName} {player.lastName}
-            </span>
-            {player.isInjured && (
-              <span className="px-1.5 py-0.5 text-xs bg-gridiron-loss text-white rounded">INJ</span>
-            )}
-          </div>
-        </td>
-      )}
-      {visibleColumns.includes('position') && (
-        <td className="px-4 py-3">
-          <span className={`px-2 py-1 text-xs font-medium rounded ${getPositionColor(player.position)}`}>
-            {PositionLabels[player.position]}
-          </span>
-        </td>
-      )}
-      {visibleColumns.includes('overall') && (
-        <td className="px-4 py-3 text-center">
-          <span className={`font-bold ${overallColor}`}>{overall}</span>
-        </td>
-      )}
-      {visibleColumns.includes('age') && (
-        <td className="px-4 py-3 text-center text-gridiron-text-secondary">{player.age}</td>
-      )}
-      {visibleColumns.includes('exp') && (
-        <td className="px-4 py-3 text-center text-gridiron-text-secondary">{player.exp} yr</td>
-      )}
-      {visibleColumns.includes('college') && (
-        <td className="px-4 py-3 text-gridiron-text-secondary">{player.college}</td>
-      )}
-      {visibleColumns.includes('salary') && (
-        <td className="px-4 py-3 text-right text-gridiron-text-secondary">
-          {formatSalary(player.salary)}
-        </td>
-      )}
-      {visibleColumns.includes('contract') && (
-        <td className="px-4 py-3 text-center text-gridiron-text-secondary">
-          {player.contractYears} yr
-        </td>
-      )}
-      {visibleColumns.includes('health') && (
-        <td className="px-4 py-3 text-center">
-          <HealthBar health={player.health} />
-        </td>
-      )}
+      {visibleColumns.map(renderCell)}
     </tr>
   );
 }

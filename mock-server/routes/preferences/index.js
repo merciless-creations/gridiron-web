@@ -134,8 +134,16 @@ const resetPreferences = () => {
   userPreferences = {};
 };
 
+// Getters and setters for direct access (bypasses mock-json-api caching)
+const getPreferencesState = () => userPreferences;
+const setPreferencesState = (prefs) => {
+  userPreferences = prefs;
+};
+
 mocks.push(getPreferences);
 mocks.push(updatePreferences);
 
 exports.mocks = mocks;
 exports.resetPreferences = resetPreferences;
+exports.getPreferences = getPreferencesState;
+exports.setPreferences = setPreferencesState;

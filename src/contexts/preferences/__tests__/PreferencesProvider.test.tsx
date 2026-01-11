@@ -1,11 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
 import { PreferencesProvider } from '../PreferencesProvider';
 import { usePreferences } from '../usePreferences';
-import type { UserPreferences } from '../../../types/Preferences';
 
 // Mock the API hooks
 const mockPreferencesData = {

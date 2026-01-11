@@ -135,7 +135,10 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
 
   // Remove team color scheme
   const removeTeamColorScheme = useCallback(async (teamId: number) => {
-    const { [teamId]: removed, ...rest } = preferences.ui?.teamColorSchemes ?? {};
+    const currentSchemes = preferences.ui?.teamColorSchemes ?? {};
+    const rest = Object.fromEntries(
+      Object.entries(currentSchemes).filter(([key]) => key !== String(teamId))
+    );
     await updatePreferences({
       ui: {
         ...preferences.ui,

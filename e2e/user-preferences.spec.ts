@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 const MOCK_SERVER_URL = 'http://localhost:3001';
 
 test.describe('User Preferences', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async () => {
     // Reset mock server state
     await fetch(`${MOCK_SERVER_URL}/_reset`, { method: 'POST' });
   });
@@ -102,6 +102,9 @@ test.describe('User Preferences', () => {
   });
 
   test.describe('Grid Column Customization', () => {
+    // Run these tests serially to avoid mock server state conflicts
+    test.describe.configure({ mode: 'serial' });
+
     test('shows column customizer on roster page', async ({ page }) => {
       // Navigate to a team roster page
       await page.goto('/teams/1/roster');
@@ -145,7 +148,7 @@ test.describe('User Preferences', () => {
       // (The actual verification depends on how the table is structured)
     });
 
-    test('can reorder columns', async ({ page }) => {
+    test('can reorder columns with buttons', async ({ page }) => {
       await page.goto('/teams/1/roster');
       await page.waitForLoadState('networkidle');
 
@@ -160,6 +163,169 @@ test.describe('User Preferences', () => {
         // Wait for update
         await page.waitForTimeout(300);
       }
+    });
+
+    test('verifies initial column order before drag', async ({ page }) => {
+      await page.goto('/teams/1/roster');
+      await page.waitForLoadState('networkidle');
+
+      // Open column customizer
+      await page.getByTestId('column-customizer-toggle').click();
+      await expect(page.getByTestId('column-customizer-panel')).toBeVisible();
+
+      // Get the column items and check their order
+      const panel = page.getByTestId('column-customizer-panel');
+      const columnItems = panel.locator('[data-testid^="column-item-"]');
+
+      const itemCount = await columnItems.count();
+      const itemLabels: string[] = [];
+      for (let i = 0; i < itemCount; i++) {
+        const item = columnItems.nth(i);
+        const testId = await item.getAttribute('data-testid');
+        itemLabels.push(testId || '');
+      }
+
+      // Log and verify initial order: should be number, name, position, overall, age, exp, college, salary, contract, health
+      console.log('Initial column order:', itemLabels);
+
+      // Verify default order
+      expect(itemLabels[0]).toBe('column-item-number');
+      expect(itemLabels[1]).toBe('column-item-name');
+      expect(itemLabels[2]).toBe('column-item-position');
+    });
+
+    test('can reorder Pos column above Name using up button', async ({ page }) => {
+      // Capture browser console logs
+      page.on('console', msg => {
+        if (msg.text().includes('GridColumnCustomizer') || msg.text().includes('columns')) {
+          console.log('BROWSER:', msg.text());
+        }
+      });
+
+      await page.goto('/teams/1/roster');
+      await page.waitForLoadState('networkidle');
+
+      // Open column customizer
+      await page.getByTestId('column-customizer-toggle').click();
+      await expect(page.getByTestId('column-customizer-panel')).toBeVisible();
+
+      // Verify initial order: #, Name, Pos
+      const panel = page.getByTestId('column-customizer-panel');
+      let columnItems = panel.locator('[data-testid^="column-item-"]');
+
+      const initialLabels: string[] = [];
+      const initialCount = await columnItems.count();
+      for (let i = 0; i < initialCount; i++) {
+        const testId = await columnItems.nth(i).getAttribute('data-testid');
+        initialLabels.push(testId || '');
+      }
+      console.log('Initial order:', initialLabels);
+      expect(initialLabels.slice(0, 3)).toEqual(['column-item-number', 'column-item-name', 'column-item-position']);
+
+      // Click the up button on position to move it above name
+      const upButton = page.getByTestId('column-up-position');
+      await expect(upButton).toBeVisible();
+      await upButton.click();
+
+      // Wait for update
+      await page.waitForTimeout(500);
+
+      // Log and verify new order in panel: #, Pos, Name
+      columnItems = panel.locator('[data-testid^="column-item-"]');
+      const afterCount = await columnItems.count();
+      const afterLabels: string[] = [];
+      for (let i = 0; i < afterCount; i++) {
+        const testId = await columnItems.nth(i).getAttribute('data-testid');
+        afterLabels.push(testId || '');
+      }
+      console.log('After reorder:', afterLabels);
+      expect(afterLabels.slice(0, 3)).toEqual(['column-item-number', 'column-item-position', 'column-item-name']);
+
+      // Close panel and verify grid header order
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(100);
+
+      const tableHeaders = page.locator('table thead th');
+      const headerTexts = await tableHeaders.allTextContents();
+      console.log('Table headers:', headerTexts);
+
+      expect(headerTexts[0]).toContain('#');
+      expect(headerTexts[1]).toContain('Pos');
+      expect(headerTexts[2]).toContain('Name');
+    });
+
+    test('can drag and drop Pos column above Name column', async ({ page }) => {
+      await page.goto('/teams/1/roster');
+      await page.waitForLoadState('networkidle');
+
+      // Open column customizer
+      await page.getByTestId('column-customizer-toggle').click();
+      await expect(page.getByTestId('column-customizer-panel')).toBeVisible();
+
+      // Get the column items
+      const positionItem = page.getByTestId('column-item-position');
+      const nameItem = page.getByTestId('column-item-name');
+
+      await expect(positionItem).toBeVisible();
+      await expect(nameItem).toBeVisible();
+
+      // Use Playwright's native dragTo with force
+      await positionItem.dragTo(nameItem, { force: true });
+
+      // Wait for the reorder to complete
+      await page.waitForTimeout(500);
+
+      // Verify the order in the column selector panel
+      const panel = page.getByTestId('column-customizer-panel');
+      const columnItems = panel.locator('[data-testid^="column-item-"]');
+
+      const itemLabels: string[] = [];
+      for (let i = 0; i < 3; i++) {
+        const testId = await columnItems.nth(i).getAttribute('data-testid');
+        itemLabels.push(testId || '');
+      }
+
+      // The first three should be number, position, name
+      expect(itemLabels).toEqual(['column-item-number', 'column-item-position', 'column-item-name']);
+
+      // Close panel and verify grid header order
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(100);
+
+      const tableHeaders = page.locator('table thead th');
+      const headerTexts = await tableHeaders.allTextContents();
+
+      expect(headerTexts[0]).toContain('#');
+      expect(headerTexts[1]).toContain('Pos');
+      expect(headerTexts[2]).toContain('Name');
+    });
+
+    test('drag and drop column reorder persists after page reload', async ({ page }) => {
+      await page.goto('/teams/1/roster');
+      await page.waitForLoadState('networkidle');
+
+      // Open column customizer and drag position above name
+      await page.getByTestId('column-customizer-toggle').click();
+      await expect(page.getByTestId('column-customizer-panel')).toBeVisible();
+
+      const positionItem = page.getByTestId('column-item-position');
+      const nameItem = page.getByTestId('column-item-name');
+      await positionItem.dragTo(nameItem);
+
+      // Wait for save
+      await page.waitForTimeout(500);
+
+      // Reload the page
+      await page.reload();
+      await page.waitForLoadState('networkidle');
+
+      // Verify the grid header order is still #, Pos, Name
+      const tableHeaders = page.locator('table thead th');
+      const headerTexts = await tableHeaders.allTextContents();
+
+      expect(headerTexts[0]).toContain('#');
+      expect(headerTexts[1]).toContain('Pos');
+      expect(headerTexts[2]).toContain('Name');
     });
 
     test('can reset columns to defaults', async ({ page }) => {
@@ -202,6 +368,9 @@ test.describe('User Preferences', () => {
   });
 
   test.describe('Team Color Scheme Editor', () => {
+    // Run these tests serially to avoid mock server state conflicts
+    test.describe.configure({ mode: 'serial' });
+
     test('shows color editor on team manage page for GMs', async ({ page }) => {
       // Navigate to team management page
       await page.goto('/teams/1/manage');
@@ -270,7 +439,6 @@ test.describe('User Preferences', () => {
 
       // Edit color
       const primaryInput = page.getByTestId('primary-color-hex');
-      const originalValue = await primaryInput.inputValue();
       await primaryInput.clear();
       await primaryInput.fill('#FF0000');
 

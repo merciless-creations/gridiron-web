@@ -16,6 +16,65 @@ interface TeamColorSchemeEditorProps {
 }
 
 /**
+ * Preview component showing how the colors look
+ */
+function ColorPreview({ colors, teamName }: { colors: TeamColorScheme; teamName: string }) {
+  return (
+    <div className="flex items-center gap-4 p-4 rounded-lg border border-gridiron-border-subtle">
+      <div
+        className="w-16 h-16 rounded-lg flex items-center justify-center text-xl font-bold"
+        style={{
+          backgroundColor: colors.primary,
+          color: colors.secondary,
+        }}
+        data-testid="color-preview"
+      >
+        {teamName.substring(0, 2).toUpperCase()}
+      </div>
+      <div className="flex-1">
+        <div
+          className="font-semibold text-lg mb-1"
+          style={{ color: colors.primary }}
+        >
+          {teamName}
+        </div>
+        <div className="flex gap-2">
+          <span
+            className="px-2 py-0.5 rounded text-xs font-medium"
+            style={{
+              backgroundColor: colors.primary,
+              color: colors.secondary,
+            }}
+          >
+            Primary
+          </span>
+          <span
+            className="px-2 py-0.5 rounded text-xs font-medium"
+            style={{
+              backgroundColor: colors.secondary,
+              color: colors.primary,
+            }}
+          >
+            Secondary
+          </span>
+          {colors.accent && (
+            <span
+              className="px-2 py-0.5 rounded text-xs font-medium"
+              style={{
+                backgroundColor: colors.accent,
+                color: colors.primary,
+              }}
+            >
+              Accent
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Color input with preview
  */
 function ColorInput({
@@ -101,61 +160,6 @@ export function TeamColorSchemeEditor({
     setIsEditing(false);
   }, [teamId, defaultColors, removeTeamColorScheme]);
 
-  // Preview component showing how the colors look
-  const ColorPreview = ({ colors }: { colors: TeamColorScheme }) => (
-    <div className="flex items-center gap-4 p-4 rounded-lg border border-gridiron-border-subtle">
-      <div
-        className="w-16 h-16 rounded-lg flex items-center justify-center text-xl font-bold"
-        style={{
-          backgroundColor: colors.primary,
-          color: colors.secondary,
-        }}
-        data-testid="color-preview"
-      >
-        {teamName.substring(0, 2).toUpperCase()}
-      </div>
-      <div className="flex-1">
-        <div
-          className="font-semibold text-lg mb-1"
-          style={{ color: colors.primary }}
-        >
-          {teamName}
-        </div>
-        <div className="flex gap-2">
-          <span
-            className="px-2 py-0.5 rounded text-xs font-medium"
-            style={{
-              backgroundColor: colors.primary,
-              color: colors.secondary,
-            }}
-          >
-            Primary
-          </span>
-          <span
-            className="px-2 py-0.5 rounded text-xs font-medium"
-            style={{
-              backgroundColor: colors.secondary,
-              color: colors.primary,
-            }}
-          >
-            Secondary
-          </span>
-          {colors.accent && (
-            <span
-              className="px-2 py-0.5 rounded text-xs font-medium"
-              style={{
-                backgroundColor: colors.accent,
-                color: colors.primary,
-              }}
-            >
-              Accent
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className={`card ${className}`} data-testid="team-color-editor">
       <div className="flex items-center justify-between mb-4">
@@ -174,7 +178,7 @@ export function TeamColorSchemeEditor({
       </div>
 
       {/* Preview */}
-      <ColorPreview colors={isEditing ? editColors : currentColors} />
+      <ColorPreview colors={isEditing ? editColors : currentColors} teamName={teamName} />
 
       {/* Editor */}
       {isEditing && (
