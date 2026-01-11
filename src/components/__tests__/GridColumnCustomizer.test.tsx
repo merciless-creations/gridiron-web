@@ -540,6 +540,94 @@ describe('GridColumnCustomizer', () => {
     });
   });
 
+  describe('API Call Efficiency', () => {
+    it('makes only one API call when toggling a column', async () => {
+      mockSetGridPreferences.mockClear();
+
+      render(<GridColumnCustomizer gridKey="roster" columns={testColumns} />);
+
+      fireEvent.click(screen.getByTestId('column-customizer-toggle'));
+
+      // Toggle a column
+      fireEvent.click(screen.getByTestId('column-toggle-name'));
+
+      await waitFor(() => {
+        // Should only be called once, not twice
+        expect(mockSetGridPreferences).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('makes only one API call when moving a column up', async () => {
+      mockSetGridPreferences.mockClear();
+
+      render(<GridColumnCustomizer gridKey="roster" columns={testColumns} />);
+
+      fireEvent.click(screen.getByTestId('column-customizer-toggle'));
+
+      // Move position column up
+      fireEvent.click(screen.getByTestId('column-up-position'));
+
+      await waitFor(() => {
+        expect(mockSetGridPreferences).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('makes only one API call when moving a column down', async () => {
+      mockSetGridPreferences.mockClear();
+
+      render(<GridColumnCustomizer gridKey="roster" columns={testColumns} />);
+
+      fireEvent.click(screen.getByTestId('column-customizer-toggle'));
+
+      // Move position column down
+      fireEvent.click(screen.getByTestId('column-down-position'));
+
+      await waitFor(() => {
+        expect(mockSetGridPreferences).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('makes only one API call when resetting to defaults', async () => {
+      mockSetGridPreferences.mockClear();
+
+      render(<GridColumnCustomizer gridKey="roster" columns={testColumns} />);
+
+      fireEvent.click(screen.getByTestId('column-customizer-toggle'));
+
+      // Reset to defaults
+      fireEvent.click(screen.getByTestId('reset-columns'));
+
+      await waitFor(() => {
+        expect(mockSetGridPreferences).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('makes only one API call when drag-and-drop reordering', async () => {
+      mockSetGridPreferences.mockClear();
+
+      render(<GridColumnCustomizer gridKey="roster" columns={testColumns} />);
+
+      fireEvent.click(screen.getByTestId('column-customizer-toggle'));
+
+      const sourceColumn = screen.getByTestId('column-item-name');
+      const targetColumn = screen.getByTestId('column-item-overall');
+
+      const dataTransfer = {
+        effectAllowed: '',
+        dropEffect: '',
+        setData: vi.fn(),
+        getData: vi.fn(() => 'name'),
+      };
+
+      fireEvent.dragStart(sourceColumn, { dataTransfer });
+      fireEvent.drop(targetColumn, { dataTransfer });
+
+      await waitFor(() => {
+        expect(mockSetGridPreferences).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
   describe('Column Ordering', () => {
     it('visible columns appear before hidden columns', () => {
       render(<GridColumnCustomizer gridKey="roster" columns={testColumns} />);
