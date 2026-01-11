@@ -132,6 +132,24 @@ describe('LeagueDetailPage', () => {
         expect(screen.queryByTestId('division-1')).not.toBeInTheDocument()
       })
     })
+
+    it('team links navigate to team manage page', async () => {
+      const user = userEvent.setup()
+      render(<LeagueDetailPage />)
+
+      await waitFor(() => {
+        expect(screen.getByTestId('conference-1')).toBeInTheDocument()
+      })
+
+      // Expand conference to see teams
+      await user.click(screen.getByTestId('conference-1'))
+
+      await waitFor(() => {
+        // Team links should point to /teams/:teamId/manage
+        const teamLink = screen.getByTestId('team-1')
+        expect(teamLink).toHaveAttribute('href', '/teams/1/manage')
+      })
+    })
   })
 
   describe('Commissioner Controls', () => {

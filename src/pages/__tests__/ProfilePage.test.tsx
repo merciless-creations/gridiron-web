@@ -91,7 +91,8 @@ describe('ProfilePage', () => {
 
       await waitFor(() => {
         // Mock user is Commissioner of "Test League"
-        expect(screen.getByText('Test League')).toBeInTheDocument()
+        // Use getAllByText since league name appears in both leagues and teams sections
+        expect(screen.getAllByText('Test League').length).toBeGreaterThan(0)
       })
     })
 
@@ -108,8 +109,41 @@ describe('ProfilePage', () => {
       render(<ProfilePage />)
 
       await waitFor(() => {
-        const leagueLink = screen.getByRole('link', { name: /Test League/ })
-        expect(leagueLink).toHaveAttribute('href', '/leagues/1')
+        // Find links containing "Test League" and verify one points to leagues page
+        const leagueLinks = screen.getAllByRole('link', { name: /Test League/ })
+        const leaguePageLink = leagueLinks.find(link => link.getAttribute('href') === '/leagues/1')
+        expect(leaguePageLink).toBeDefined()
+      })
+    })
+  })
+
+  describe('My Teams Section', () => {
+    it('displays my teams section when user has teams', async () => {
+      render(<ProfilePage />)
+
+      await waitFor(() => {
+        // Mock user has 1 team (Falcons as GeneralManager)
+        expect(screen.getByRole('heading', { name: /My Teams \(1\)/ })).toBeInTheDocument()
+      })
+    })
+
+    it('displays team cards for teams user manages', async () => {
+      render(<ProfilePage />)
+
+      await waitFor(() => {
+        // Mock user is GeneralManager of "Falcons"
+        expect(screen.getByText('Falcons')).toBeInTheDocument()
+      })
+    })
+
+    it('team cards are clickable links to team manage page', async () => {
+      render(<ProfilePage />)
+
+      await waitFor(() => {
+        // Find all Falcons links and verify at least one has correct href
+        const teamLinks = screen.getAllByRole('link', { name: /Falcons/ })
+        const teamManageLink = teamLinks.find(link => link.getAttribute('href') === '/teams/1/manage')
+        expect(teamManageLink).toBeDefined()
       })
     })
   })

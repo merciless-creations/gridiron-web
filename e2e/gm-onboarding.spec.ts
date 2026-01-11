@@ -67,10 +67,10 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
 
       await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible()
 
-      // Should show empty state for teams
+      // Should show empty state for teams with info about commissioner invites
       await expect(page.getByText('No Teams Assigned')).toBeVisible()
-      await expect(page.getByText("You haven't been assigned to manage any teams yet")).toBeVisible()
-      await expect(page.getByRole('link', { name: 'Browse Leagues' })).toBeVisible()
+      await expect(page.getByText(/when a commissioner invites you/i)).toBeVisible()
+      await expect(page.getByRole('link', { name: 'Create Your Own League' })).toBeVisible()
     })
 
     test('displays empty state when user has no leagues', async ({ page }) => {
@@ -575,17 +575,17 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
       await expect(page).toHaveURL('/leagues/create')
     })
 
-    test('empty state "Browse Leagues" navigates to leagues page', async ({ page }) => {
+    test('empty state "Create Your Own League" navigates to league creation', async ({ page }) => {
       await activatePreset(page, 'new-user')
       await page.goto('/dashboard')
 
       await expect(page.getByText('No Teams Assigned')).toBeVisible()
 
-      // Click browse leagues link
-      await page.getByRole('link', { name: 'Browse Leagues' }).click()
+      // Click create league link in the teams empty state
+      await page.getByRole('link', { name: 'Create Your Own League' }).click()
 
-      // Should navigate to leagues page
-      await expect(page).toHaveURL('/leagues')
+      // Should navigate to league creation page
+      await expect(page).toHaveURL('/leagues/create')
     })
 
     // Note: Landing page doesn't have a Dashboard link - users access dashboard after login
