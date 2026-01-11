@@ -139,8 +139,13 @@ export function getPositionSkills(position: Position): Skill[] {
 
 /**
  * Check if a skill is relevant for a given position
+ * Universal attributes are always relevant for all positions
  */
 export function isSkillRelevant(position: Position, skill: Skill): boolean {
+  // Universal attributes are always relevant
+  if (UNIVERSAL_ATTRIBUTES.includes(skill)) {
+    return true;
+  }
   const skills = getPositionSkills(position);
   return skills.includes(skill);
 }
@@ -201,10 +206,12 @@ export const ROSTER_GRID_POSITIONS: Record<RosterGridType, Position[]> = {
 /**
  * Get the union of all skills relevant to positions in a grid type
  * Used to determine which skill columns are available in each grid
+ * Universal attributes are always included in every grid
  */
 export function getGridSkills(gridType: RosterGridType): Skill[] {
   const positions = ROSTER_GRID_POSITIONS[gridType];
-  const skillSet = new Set<Skill>();
+  // Always start with universal attributes
+  const skillSet = new Set<Skill>(UNIVERSAL_ATTRIBUTES);
 
   for (const position of positions) {
     const skills = getPositionSkills(position);

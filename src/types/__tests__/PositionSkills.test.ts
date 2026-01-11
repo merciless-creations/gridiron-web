@@ -121,11 +121,16 @@ describe('PositionSkills', () => {
       expect(isSkillRelevant(Position.WR, 'blocking')).toBe(false);
     });
 
-    it('returns true for universal attributes that are in position skills', () => {
-      // Speed is relevant for most positions
-      expect(isSkillRelevant(Position.QB, 'speed')).toBe(true);
-      expect(isSkillRelevant(Position.RB, 'speed')).toBe(true);
-      expect(isSkillRelevant(Position.WR, 'speed')).toBe(true);
+    it('returns true for universal attributes for ALL positions', () => {
+      // Universal attributes are always relevant regardless of position
+      const allPositions = Object.values(Position).filter(v => typeof v === 'number') as Position[];
+
+      allPositions.forEach(position => {
+        expect(isSkillRelevant(position, 'speed')).toBe(true);
+        expect(isSkillRelevant(position, 'strength')).toBe(true);
+        expect(isSkillRelevant(position, 'agility')).toBe(true);
+        expect(isSkillRelevant(position, 'awareness')).toBe(true);
+      });
     });
   });
 
@@ -169,6 +174,18 @@ describe('PositionSkills', () => {
   });
 
   describe('getGridSkills', () => {
+    it('all grids include universal attributes', () => {
+      const gridTypes: ('all' | 'offense' | 'defense' | 'specialTeams')[] = ['all', 'offense', 'defense', 'specialTeams'];
+
+      gridTypes.forEach(gridType => {
+        const skills = getGridSkills(gridType);
+        expect(skills).toContain('speed');
+        expect(skills).toContain('strength');
+        expect(skills).toContain('agility');
+        expect(skills).toContain('awareness');
+      });
+    });
+
     it('all grid returns all skills', () => {
       const allGridSkills = getGridSkills('all');
 
