@@ -1,11 +1,12 @@
 /**
- * User Preferences routes
+ * User Preferences routes (stateless)
+ *
  * - GET /api/users/me/preferences - Get current user's preferences
  * - PUT /api/users/me/preferences - Update current user's preferences
+ *
+ * This mock server is STATELESS. Use scenarios to test different preference states.
+ * To model persistence in tests, change scenarios between actions in your test script.
  */
-
-// In-memory store for preferences (reset on server restart)
-let userPreferences = {};
 
 const mocks = [];
 
@@ -19,7 +20,7 @@ const getPreferences = {
   jsonTemplate: [
     {
       defaultScenario: function () {
-        return JSON.stringify({ preferences: userPreferences });
+        return JSON.stringify({ preferences: {} });
       },
       emptyScenario: function () {
         return JSON.stringify({ preferences: {} });
@@ -68,6 +69,20 @@ const getPreferences = {
           },
         });
       },
+      customColumnsScenario: function () {
+        return JSON.stringify({
+          preferences: {
+            grids: {
+              rosterAll: {
+                columns: ['name', 'position', 'overall', 'speed', 'strength'],
+              },
+              rosterOffense: {
+                columns: ['name', 'position', 'passing', 'rushing', 'catching'],
+              },
+            },
+          },
+        });
+      },
     },
     {
       // Error scenarios
@@ -87,7 +102,7 @@ const getPreferences = {
   ],
 };
 
-// Update user preferences
+// Update user preferences - echoes back the request body (stateless)
 const updatePreferences = {
   name: 'updatePreferences',
   mockRoute: '/api/users/me/preferences',
@@ -97,12 +112,12 @@ const updatePreferences = {
   jsonTemplate: [
     {
       defaultScenario: function (req) {
+        // Echo back the preferences from the request (stateless mock)
         const body = req.body;
         if (body && body.preferences) {
-          userPreferences = body.preferences;
-          return JSON.stringify({ preferences: userPreferences });
+          return JSON.stringify({ preferences: body.preferences });
         }
-        return JSON.stringify({ preferences: userPreferences });
+        return JSON.stringify({ preferences: {} });
       },
     },
     {
@@ -129,21 +144,7 @@ const updatePreferences = {
   ],
 };
 
-// Reset preferences (for testing)
-const resetPreferences = () => {
-  userPreferences = {};
-};
-
-// Getters and setters for direct access (bypasses mock-json-api caching)
-const getPreferencesState = () => userPreferences;
-const setPreferencesState = (prefs) => {
-  userPreferences = prefs;
-};
-
 mocks.push(getPreferences);
 mocks.push(updatePreferences);
 
 exports.mocks = mocks;
-exports.resetPreferences = resetPreferences;
-exports.getPreferences = getPreferencesState;
-exports.setPreferences = setPreferencesState;

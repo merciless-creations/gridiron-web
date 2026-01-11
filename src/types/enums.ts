@@ -56,3 +56,32 @@ export const PositionLabels: Record<Position, string> = {
   [Position.K]: 'K',
   [Position.P]: 'P',
 };
+
+// Player status for filtering and display
+export const PlayerStatus = {
+  Active: 0,
+  Injured: 1,
+  Retired: 2,
+} as const;
+
+export type PlayerStatus = typeof PlayerStatus[keyof typeof PlayerStatus];
+
+export const PlayerStatusLabels: Record<PlayerStatus, string> = {
+  [PlayerStatus.Active]: 'Active',
+  [PlayerStatus.Injured]: 'Injured',
+  [PlayerStatus.Retired]: 'Retired',
+};
+
+// Short labels for compact display
+export const PlayerStatusShortLabels: Record<PlayerStatus, string> = {
+  [PlayerStatus.Active]: 'ACT',
+  [PlayerStatus.Injured]: 'INJ',
+  [PlayerStatus.Retired]: 'RET',
+};
+
+// CSS classes for status badges
+export const PlayerStatusColors: Record<PlayerStatus, string> = {
+  [PlayerStatus.Active]: 'bg-gridiron-win text-white',
+  [PlayerStatus.Injured]: 'bg-gridiron-loss text-white',
+  [PlayerStatus.Retired]: 'bg-gridiron-text-muted text-gridiron-bg-primary',
+};

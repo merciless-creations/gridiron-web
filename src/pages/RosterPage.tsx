@@ -2,10 +2,22 @@ import { useState, useMemo, useCallback } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { usePlayers } from '../api/players';
 import { useTeam } from '../api/teams';
-import { Loading, GridColumnCustomizer } from '../components';
+import {
+  Loading,
+  GridColumnCustomizer,
+  ColumnFilterPopover,
+  type NumericFilterValue,
+  passesFilter,
+} from '../components';
 import { usePreferences } from '../contexts';
 import type { GridKey } from '../contexts/preferences/types';
-import { Position, PositionLabels } from '../types/enums';
+import {
+  Position,
+  PositionLabels,
+  PlayerStatus,
+  PlayerStatusShortLabels,
+  PlayerStatusColors,
+} from '../types/enums';
 import type { Player } from '../types/Player';
 import {
   type Skill,
@@ -16,6 +28,12 @@ import {
   getGridSkills,
   isSkillRelevant,
 } from '../types/PositionSkills';
+
+// Columns that support numeric filtering
+const NUMERIC_COLUMNS: Set<string> = new Set([
+  'number', 'age', 'exp', 'salary', 'overall', 'health',
+  ...ALL_SKILLS,
+]);
 
 type SortField = 'name' | 'position' | 'number' | 'age' | 'salary' | 'overall' | Skill;
 
@@ -61,11 +79,22 @@ function formatSalary(salary: number): string {
   return `$${(salary / 1000).toFixed(0)}K`;
 }
 
+// Get player status from player data
+function getPlayerStatus(player: Player): PlayerStatus {
+  if (player.isRetired) return PlayerStatus.Retired;
+  if (player.isInjured) return PlayerStatus.Injured;
+  return PlayerStatus.Active;
+}
+
+// Statuses available for filtering (Active/Retired excluded - use no filter for "all")
+const FILTERABLE_STATUSES: PlayerStatus[] = [PlayerStatus.Injured];
+
 // Base column definitions (non-skill columns)
 const BASE_COLUMNS = [
   { key: 'number', label: '#', defaultVisible: true },
   { key: 'name', label: 'Name', defaultVisible: true },
   { key: 'position', label: 'Pos', defaultVisible: true },
+  { key: 'status', label: 'Status', defaultVisible: true },
   { key: 'overall', label: 'OVR', defaultVisible: true },
   { key: 'age', label: 'Age', defaultVisible: true },
   { key: 'exp', label: 'Exp', defaultVisible: false },
@@ -95,6 +124,7 @@ const SORTABLE_COLUMNS: Record<string, SortField | null> = {
   number: 'number',
   name: 'name',
   position: 'position',
+  status: null,
   overall: 'overall',
   age: 'age',
   salary: 'salary',
@@ -111,6 +141,7 @@ const COLUMN_HEADER_CONFIG: Record<string, { label: string; className: string }>
   number: { label: '#', className: 'px-4 py-3' },
   name: { label: 'Name', className: 'px-4 py-3' },
   position: { label: 'Pos', className: 'px-4 py-3' },
+  status: { label: 'Status', className: 'px-4 py-3 text-center' },
   overall: { label: 'OVR', className: 'px-4 py-3 text-center' },
   age: { label: 'Age', className: 'px-4 py-3 text-center' },
   exp: { label: 'Exp', className: 'px-4 py-3 text-center' },
@@ -154,11 +185,31 @@ export const RosterPage = () => {
   // Track visible columns - use local state for optimistic updates, fall back to preferences
   const [localColumns, setLocalColumns] = useState<string[] | null>(null);
 
-  // Reset local columns when tab changes
+  // Position filter state - load from preferences, empty means all positions in the tab
+  const [positionFilter, setPositionFilter] = useState<Position[]>(
+    () => (gridPrefs?.positionFilter as Position[]) ?? []
+  );
+
+  // Status filter state - load from preferences, empty means all statuses
+  const [statusFilter, setStatusFilter] = useState<PlayerStatus[]>(
+    () => (gridPrefs?.statusFilter as PlayerStatus[]) ?? []
+  );
+
+  // Numeric column filters - load from preferences
+  const [columnFilters, setColumnFilters] = useState<Record<string, NumericFilterValue | null>>(
+    () => (gridPrefs?.numericFilters as Record<string, NumericFilterValue | null>) ?? {}
+  );
+
+  // Reset state when tab changes
   const [prevTab, setPrevTab] = useState(activeTab);
   if (prevTab !== activeTab) {
     setPrevTab(activeTab);
     setLocalColumns(null);
+    // Load filters from new tab's preferences
+    const newGridPrefs = preferences.grids?.[GRID_TYPE_TO_KEY[activeTab]];
+    setPositionFilter((newGridPrefs?.positionFilter as Position[]) ?? []);
+    setStatusFilter((newGridPrefs?.statusFilter as PlayerStatus[]) ?? []);
+    setColumnFilters((newGridPrefs?.numericFilters as Record<string, NumericFilterValue | null>) ?? {});
   }
 
   // Derive visible columns from local state or preferences
@@ -181,6 +232,52 @@ export const RosterPage = () => {
   const handleColumnsChange = useCallback((columns: string[]) => {
     setLocalColumns(columns);
   }, []);
+
+  // Handle position filter change (local state only, persist on close)
+  const handlePositionFilterChange = useCallback((positions: Position[]) => {
+    setPositionFilter(positions);
+  }, []);
+
+  // Handle status filter change (local state only, persist on close)
+  const handleStatusFilterChange = useCallback((statuses: PlayerStatus[]) => {
+    setStatusFilter(statuses);
+  }, []);
+
+  // Handle column filter change (local state only, persist on close)
+  const handleColumnFilterChange = useCallback((columnKey: string, filter: NumericFilterValue | null) => {
+    setColumnFilters(prev => ({ ...prev, [columnKey]: filter }));
+  }, []);
+
+  // Persist filters when popover closes
+  const handleFilterClose = useCallback(() => {
+    // Build clean numeric filters (remove nulls)
+    const cleanFilters: Record<string, NumericFilterValue> = {};
+    for (const [key, value] of Object.entries(columnFilters)) {
+      if (value !== null) {
+        cleanFilters[key] = value;
+      }
+    }
+
+    // Persist position, status, and numeric filters
+    setGridPreferences(gridKey, {
+      positionFilter: positionFilter,
+      statusFilter: statusFilter,
+      numericFilters: cleanFilters,
+    });
+  }, [columnFilters, positionFilter, statusFilter, gridKey, setGridPreferences]);
+
+  // Clear all filters
+  const clearAllFilters = useCallback(() => {
+    setSearchQuery('');
+    setPositionFilter([]);
+    setStatusFilter([]);
+    setColumnFilters({});
+    // Persist cleared filters
+    setGridPreferences(gridKey, { positionFilter: [], statusFilter: [], numericFilters: {} });
+  }, [gridKey, setGridPreferences]);
+
+  // Check if any filters are active
+  const hasActiveFilters = searchQuery !== '' || positionFilter.length > 0 || statusFilter.length > 0 || Object.values(columnFilters).some(f => f !== null);
 
   // Handle tab change
   const handleTabChange = useCallback((tab: RosterGridType) => {
@@ -206,6 +303,16 @@ export const RosterPage = () => {
     const allowedPositions = ROSTER_GRID_POSITIONS[activeTab];
     filtered = filtered.filter(p => allowedPositions.includes(p.position));
 
+    // Apply position filter dropdown (within the allowed positions for this tab)
+    if (positionFilter.length > 0) {
+      filtered = filtered.filter(p => positionFilter.includes(p.position));
+    }
+
+    // Apply status filter
+    if (statusFilter.length > 0) {
+      filtered = filtered.filter(p => statusFilter.includes(getPlayerStatus(p)));
+    }
+
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -213,6 +320,31 @@ export const RosterPage = () => {
         `${p.firstName} ${p.lastName}`.toLowerCase().includes(query) ||
         PositionLabels[p.position].toLowerCase().includes(query)
       );
+    }
+
+    // Apply column filters
+    for (const [columnKey, filter] of Object.entries(columnFilters)) {
+      if (!filter) continue;
+
+      filtered = filtered.filter(player => {
+        let value: number | null | undefined;
+
+        // Get the value based on column key
+        if (columnKey === 'overall') {
+          value = calculateOverall(player);
+        } else if (ALL_SKILLS.includes(columnKey as Skill)) {
+          // For skills, only filter players where the skill is relevant
+          const skill = columnKey as Skill;
+          if (!isSkillRelevant(player.position, skill)) {
+            return false; // Exclude non-relevant skills from filter results
+          }
+          value = player[skill as keyof Player] as number;
+        } else if (columnKey in player) {
+          value = player[columnKey as keyof Player] as number;
+        }
+
+        return passesFilter(value, filter);
+      });
     }
 
     // Apply sorting
@@ -267,7 +399,7 @@ export const RosterPage = () => {
     });
 
     return filtered;
-  }, [players, activeTab, searchQuery, sortField, sortDirection]);
+  }, [players, activeTab, positionFilter, statusFilter, searchQuery, columnFilters, sortField, sortDirection]);
 
   const handleSort = (field: SortField) => {
     let newDirection: 'asc' | 'desc' = 'asc';
@@ -377,13 +509,13 @@ export const RosterPage = () => {
             </div>
 
             {/* Search and Column Customizer */}
-            <div className="flex flex-1 gap-4 md:justify-end">
+            <div className="flex flex-1 gap-3 md:justify-end flex-wrap">
               <input
                 type="text"
-                placeholder="Search by name or position..."
+                placeholder="Search by name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field flex-1 md:max-w-xs"
+                className="input-field flex-1 md:max-w-xs md:flex-none"
                 data-testid="roster-search"
               />
               <GridColumnCustomizer
@@ -391,6 +523,18 @@ export const RosterPage = () => {
                 columns={availableColumns}
                 onChange={handleColumnsChange}
               />
+              {hasActiveFilters && (
+                <button
+                  onClick={clearAllFilters}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors"
+                  data-testid="clear-all-filters"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Clear Filters
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -405,17 +549,45 @@ export const RosterPage = () => {
                 {visibleColumns.map((columnKey) => {
                   const config = COLUMN_HEADER_CONFIG[columnKey];
                   const sortableField = SORTABLE_COLUMNS[columnKey];
+                  const isNumeric = NUMERIC_COLUMNS.has(columnKey);
+                  const isPosition = columnKey === 'position';
+                  const isStatus = columnKey === 'status';
+                  const hasFilter = isNumeric || isPosition || isStatus;
+
+                  // Determine filter type
+                  const filterType = isPosition ? 'position' : isStatus ? 'status' : 'numeric';
 
                   if (!config) return null;
 
                   return (
                     <th
                       key={columnKey}
-                      className={`${config.className} ${sortableField ? 'cursor-pointer hover:text-gridiron-text-primary' : ''}`}
-                      onClick={sortableField ? () => handleSort(sortableField) : undefined}
+                      className={`${config.className}`}
                       data-testid={`column-header-${columnKey}`}
                     >
-                      {config.label}{sortableField ? getSortIndicator(sortableField) : ''}
+                      <div className="flex items-center gap-1">
+                        <span
+                          className={sortableField ? 'cursor-pointer hover:text-gridiron-text-primary' : ''}
+                          onClick={sortableField ? () => handleSort(sortableField) : undefined}
+                        >
+                          {config.label}{sortableField ? getSortIndicator(sortableField) : ''}
+                        </span>
+                        {hasFilter && (
+                          <ColumnFilterPopover
+                            columnKey={columnKey}
+                            type={filterType}
+                            numericFilter={isNumeric ? columnFilters[columnKey] ?? null : undefined}
+                            onNumericFilterChange={isNumeric ? (filter) => handleColumnFilterChange(columnKey, filter) : undefined}
+                            positionFilter={isPosition ? positionFilter : undefined}
+                            availablePositions={isPosition ? ROSTER_GRID_POSITIONS[activeTab] : undefined}
+                            onPositionFilterChange={isPosition ? handlePositionFilterChange : undefined}
+                            statusFilter={isStatus ? statusFilter : undefined}
+                            availableStatuses={isStatus ? FILTERABLE_STATUSES : undefined}
+                            onStatusFilterChange={isStatus ? handleStatusFilterChange : undefined}
+                            onClose={handleFilterClose}
+                          />
+                        )}
+                      </div>
                     </th>
                   );
                 })}
@@ -483,14 +655,9 @@ function PlayerRow({ player, visibleColumns }: PlayerRowProps) {
       case 'name':
         return (
           <td key={columnKey} className="px-4 py-3" data-testid={`cell-${columnKey}`}>
-            <div className="flex items-center gap-2">
-              <span className="text-gridiron-text-primary font-medium">
-                {player.firstName} {player.lastName}
-              </span>
-              {player.isInjured && (
-                <span className="px-1.5 py-0.5 text-xs bg-gridiron-loss text-white rounded">INJ</span>
-              )}
-            </div>
+            <span className="text-gridiron-text-primary font-medium">
+              {player.firstName} {player.lastName}
+            </span>
           </td>
         );
       case 'position':
@@ -501,6 +668,18 @@ function PlayerRow({ player, visibleColumns }: PlayerRowProps) {
             </span>
           </td>
         );
+      case 'status': {
+        const status = getPlayerStatus(player);
+        return (
+          <td key={columnKey} className="px-4 py-3 text-center" data-testid={`cell-${columnKey}`}>
+            {status !== PlayerStatus.Active && (
+              <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${PlayerStatusColors[status]}`}>
+                {PlayerStatusShortLabels[status]}
+              </span>
+            )}
+          </td>
+        );
+      }
       case 'overall':
         return (
           <td key={columnKey} className="px-4 py-3 text-center" data-testid={`cell-${columnKey}`}>

@@ -12,11 +12,22 @@ export interface TeamColorScheme {
   accent?: string;
 }
 
+export interface NumericFilter {
+  operator: '>' | '<' | '>=' | '<=' | '=' | '<>';
+  value: number;
+}
+
 export interface GridPreferences {
   columns?: string[];
   columnWidths?: Record<string, number>;
   sortColumn?: string;
   sortDirection?: SortDirection;
+  /** Numeric column filters (e.g., age: { operator: '>', value: 25 }) */
+  numericFilters?: Record<string, NumericFilter>;
+  /** Position filter (array of Position enum values) */
+  positionFilter?: number[];
+  /** Status filter (array of PlayerStatus enum values) */
+  statusFilter?: number[];
 }
 
 export interface UIPreferences {
@@ -47,7 +58,7 @@ export interface PreferencesResponse {
  * Default preferences to use when none are set
  */
 // Base columns for all roster grids
-const BASE_ROSTER_COLUMNS = ['number', 'name', 'position', 'overall', 'age'];
+const BASE_ROSTER_COLUMNS = ['number', 'name', 'position', 'status', 'overall', 'age'];
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
   ui: {
@@ -56,7 +67,7 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   },
   grids: {
     roster: {
-      columns: ['number', 'name', 'position', 'overall', 'age', 'exp', 'college', 'salary', 'contract', 'health'],
+      columns: ['number', 'name', 'position', 'status', 'overall', 'age', 'exp', 'college', 'salary', 'contract', 'health'],
       columnWidths: {},
       sortColumn: 'position',
       sortDirection: 'asc',
