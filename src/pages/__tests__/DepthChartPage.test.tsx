@@ -6,11 +6,11 @@ import { Route, Routes } from 'react-router-dom';
 
 const MOCK_SERVER_URL = 'http://localhost:3002';
 
-const setScenario = async (name: string, scope: string) => {
+const setScenario = async (route: string, scope: string) => {
   await fetch(`${MOCK_SERVER_URL}/_scenario`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, scope }),
+    body: JSON.stringify({ route, scope }),
   });
 };
 

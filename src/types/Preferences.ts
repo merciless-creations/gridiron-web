@@ -12,11 +12,22 @@ export interface TeamColorScheme {
   accent?: string;
 }
 
+export interface NumericFilter {
+  operator: '>' | '<' | '>=' | '<=' | '=' | '<>';
+  value: number;
+}
+
 export interface GridPreferences {
   columns?: string[];
   columnWidths?: Record<string, number>;
   sortColumn?: string;
   sortDirection?: SortDirection;
+  /** Numeric column filters (e.g., age: { operator: '>', value: 25 }) */
+  numericFilters?: Record<string, NumericFilter>;
+  /** Position filter (array of Position enum values) */
+  positionFilter?: number[];
+  /** Status filter (array of PlayerStatus enum values) */
+  statusFilter?: number[];
 }
 
 export interface UIPreferences {
@@ -26,6 +37,10 @@ export interface UIPreferences {
 
 export interface GridsPreferences {
   roster?: GridPreferences;
+  rosterAll?: GridPreferences;
+  rosterOffense?: GridPreferences;
+  rosterDefense?: GridPreferences;
+  rosterSpecialTeams?: GridPreferences;
   depthChart?: GridPreferences;
   standings?: GridPreferences;
 }
@@ -42,6 +57,9 @@ export interface PreferencesResponse {
 /**
  * Default preferences to use when none are set
  */
+// Base columns for all roster grids
+const BASE_ROSTER_COLUMNS = ['number', 'name', 'position', 'status', 'overall', 'age'];
+
 export const DEFAULT_PREFERENCES: UserPreferences = {
   ui: {
     theme: 'system',
@@ -49,7 +67,31 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   },
   grids: {
     roster: {
-      columns: ['number', 'name', 'position', 'overall', 'age', 'exp', 'college', 'salary', 'contract', 'health'],
+      columns: ['number', 'name', 'position', 'status', 'overall', 'age', 'exp', 'college', 'salary', 'contract', 'health'],
+      columnWidths: {},
+      sortColumn: 'position',
+      sortDirection: 'asc',
+    },
+    rosterAll: {
+      columns: [...BASE_ROSTER_COLUMNS, 'speed', 'strength', 'agility', 'awareness'],
+      columnWidths: {},
+      sortColumn: 'position',
+      sortDirection: 'asc',
+    },
+    rosterOffense: {
+      columns: [...BASE_ROSTER_COLUMNS, 'speed', 'agility', 'passing', 'catching', 'rushing', 'blocking'],
+      columnWidths: {},
+      sortColumn: 'position',
+      sortDirection: 'asc',
+    },
+    rosterDefense: {
+      columns: [...BASE_ROSTER_COLUMNS, 'speed', 'strength', 'tackling', 'coverage', 'awareness'],
+      columnWidths: {},
+      sortColumn: 'position',
+      sortDirection: 'asc',
+    },
+    rosterSpecialTeams: {
+      columns: [...BASE_ROSTER_COLUMNS, 'kicking', 'awareness'],
       columnWidths: {},
       sortColumn: 'position',
       sortDirection: 'asc',
@@ -85,6 +127,22 @@ export function mergeWithDefaults(userPrefs: UserPreferences): UserPreferences {
       roster: {
         ...DEFAULT_PREFERENCES.grids?.roster,
         ...userPrefs.grids?.roster,
+      },
+      rosterAll: {
+        ...DEFAULT_PREFERENCES.grids?.rosterAll,
+        ...userPrefs.grids?.rosterAll,
+      },
+      rosterOffense: {
+        ...DEFAULT_PREFERENCES.grids?.rosterOffense,
+        ...userPrefs.grids?.rosterOffense,
+      },
+      rosterDefense: {
+        ...DEFAULT_PREFERENCES.grids?.rosterDefense,
+        ...userPrefs.grids?.rosterDefense,
+      },
+      rosterSpecialTeams: {
+        ...DEFAULT_PREFERENCES.grids?.rosterSpecialTeams,
+        ...userPrefs.grids?.rosterSpecialTeams,
       },
       depthChart: {
         ...DEFAULT_PREFERENCES.grids?.depthChart,

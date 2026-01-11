@@ -1,13 +1,17 @@
 /**
- * User Preferences routes
+ * User Preferences routes (stateful for E2E testing)
+ *
  * - GET /api/users/me/preferences - Get current user's preferences
  * - PUT /api/users/me/preferences - Update current user's preferences
+ *
+ * This mock server maintains state within a session for E2E testing.
+ * State is reset when the server restarts or when /_reset is called.
  */
 
-// In-memory store for preferences (reset on server restart)
-let userPreferences = {};
-
 const mocks = [];
+
+// In-memory store for preferences (stateful)
+let storedPreferences = {};
 
 // Get user preferences
 const getPreferences = {
@@ -19,7 +23,8 @@ const getPreferences = {
   jsonTemplate: [
     {
       defaultScenario: function () {
-        return JSON.stringify({ preferences: userPreferences });
+        // Return stored preferences (stateful)
+        return JSON.stringify({ preferences: storedPreferences });
       },
       emptyScenario: function () {
         return JSON.stringify({ preferences: {} });
@@ -59,11 +64,34 @@ const getPreferences = {
           },
         });
       },
+      darkThemeScenario: function () {
+        return JSON.stringify({
+          preferences: {
+            ui: {
+              theme: 'dark',
+            },
+          },
+        });
+      },
       systemThemeScenario: function () {
         return JSON.stringify({
           preferences: {
             ui: {
               theme: 'system',
+            },
+          },
+        });
+      },
+      customColumnsScenario: function () {
+        return JSON.stringify({
+          preferences: {
+            grids: {
+              rosterAll: {
+                columns: ['name', 'position', 'overall', 'speed', 'strength'],
+              },
+              rosterOffense: {
+                columns: ['name', 'position', 'passing', 'rushing', 'catching'],
+              },
             },
           },
         });
@@ -87,7 +115,7 @@ const getPreferences = {
   ],
 };
 
-// Update user preferences
+// Update user preferences - stores and returns the preferences (stateful)
 const updatePreferences = {
   name: 'updatePreferences',
   mockRoute: '/api/users/me/preferences',
@@ -97,12 +125,13 @@ const updatePreferences = {
   jsonTemplate: [
     {
       defaultScenario: function (req) {
+        // Store the preferences (stateful mock)
         const body = req.body;
         if (body && body.preferences) {
-          userPreferences = body.preferences;
-          return JSON.stringify({ preferences: userPreferences });
+          storedPreferences = body.preferences;
+          return JSON.stringify({ preferences: storedPreferences });
         }
-        return JSON.stringify({ preferences: userPreferences });
+        return JSON.stringify({ preferences: storedPreferences });
       },
     },
     {
@@ -129,15 +158,9 @@ const updatePreferences = {
   ],
 };
 
-// Reset preferences (for testing)
+// Export a reset function that can be called to clear stored preferences
 const resetPreferences = () => {
-  userPreferences = {};
-};
-
-// Getters and setters for direct access (bypasses mock-json-api caching)
-const getPreferencesState = () => userPreferences;
-const setPreferencesState = (prefs) => {
-  userPreferences = prefs;
+  storedPreferences = {};
 };
 
 mocks.push(getPreferences);
@@ -145,5 +168,3 @@ mocks.push(updatePreferences);
 
 exports.mocks = mocks;
 exports.resetPreferences = resetPreferences;
-exports.getPreferences = getPreferencesState;
-exports.setPreferences = setPreferencesState;

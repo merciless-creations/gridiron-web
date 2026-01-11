@@ -14,3 +14,6 @@ export * from './ReadOnlyBanner';
 export * from './ThemeSwitcher';
 export * from './GridColumnCustomizer';
 export * from './TeamColorSchemeEditor';
+export * from './NumericFilter';
+export * from './PositionFilter';
+export * from './ColumnFilterPopover';

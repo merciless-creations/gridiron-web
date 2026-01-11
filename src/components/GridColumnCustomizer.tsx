@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { usePreferences } from '../contexts';
+import type { GridKey } from '../contexts/preferences/types';
 
 interface ColumnDefinition {
   key: string;
@@ -9,7 +10,7 @@ interface ColumnDefinition {
 
 interface GridColumnCustomizerProps {
   /** Which grid these settings apply to */
-  gridKey: 'roster' | 'depthChart' | 'standings';
+  gridKey: GridKey;
   /** Available column definitions */
   columns: ColumnDefinition[];
   /** Callback when columns change (for immediate UI updates) */
@@ -42,36 +43,27 @@ export function GridColumnCustomizer({
     return localColumnsOverride ?? visibleColumns;
   }, [localColumnsOverride, visibleColumns]);
 
-  // Wrapper to update local columns
-  const setLocalColumns = useCallback((columns: string[] | ((prev: string[]) => string[])) => {
-    if (typeof columns === 'function') {
-      setLocalColumnsOverride(prev => columns(prev ?? visibleColumns));
-    } else {
-      setLocalColumnsOverride(columns);
-    }
-  }, [visibleColumns]);
-
   // Drag and drop state
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const dragCounter = useRef(0);
 
   const toggleColumn = useCallback((columnKey: string) => {
-    setLocalColumns(prev => {
-      const isVisible = prev.includes(columnKey);
-      const newColumns = isVisible
-        ? prev.filter(k => k !== columnKey)
-        : [...prev, columnKey];
+    // Compute new columns outside setState to avoid side effects in callback
+    const isVisible = localColumns.includes(columnKey);
+    const newColumns = isVisible
+      ? localColumns.filter(k => k !== columnKey)
+      : [...localColumns, columnKey];
 
-      // Call onChange for immediate UI feedback
-      onChange?.(newColumns);
+    // Update local state
+    setLocalColumnsOverride(newColumns);
 
-      // Persist to preferences
-      setGridPreferences(gridKey, { columns: newColumns });
+    // Call onChange for immediate UI feedback
+    onChange?.(newColumns);
 
-      return newColumns;
-    });
-  }, [gridKey, onChange, setGridPreferences, setLocalColumns]);
+    // Persist to preferences
+    setGridPreferences(gridKey, { columns: newColumns });
+  }, [gridKey, localColumns, onChange, setGridPreferences]);
 
   const moveColumn = useCallback((columnKey: string, direction: 'up' | 'down') => {
     // Compute the new columns array outside of setState to avoid closure issues
@@ -86,43 +78,42 @@ export function GridColumnCustomizer({
     [currentColumns[index], currentColumns[newIndex]] = [currentColumns[newIndex], currentColumns[index]];
 
     // Update local state
-    setLocalColumns(currentColumns);
+    setLocalColumnsOverride(currentColumns);
 
     // Call onChange for immediate UI feedback
     onChange?.(currentColumns);
 
     // Persist to preferences
     setGridPreferences(gridKey, { columns: currentColumns });
-  }, [gridKey, localColumns, onChange, setGridPreferences, setLocalColumns]);
+  }, [gridKey, localColumns, onChange, setGridPreferences]);
 
   const moveColumnToPosition = useCallback((fromKey: string, toKey: string) => {
-    setLocalColumns(prev => {
-      const fromIndex = prev.indexOf(fromKey);
-      const toIndex = prev.indexOf(toKey);
-      if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return prev;
+    const fromIndex = localColumns.indexOf(fromKey);
+    const toIndex = localColumns.indexOf(toKey);
+    if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
 
-      const newColumns = [...prev];
-      // Remove from original position
-      newColumns.splice(fromIndex, 1);
-      // Insert at new position
-      newColumns.splice(toIndex, 0, fromKey);
+    const newColumns = [...localColumns];
+    // Remove from original position
+    newColumns.splice(fromIndex, 1);
+    // Insert at new position
+    newColumns.splice(toIndex, 0, fromKey);
 
-      // Call onChange for immediate UI feedback
-      onChange?.(newColumns);
+    // Update local state
+    setLocalColumnsOverride(newColumns);
 
-      // Persist to preferences
-      setGridPreferences(gridKey, { columns: newColumns });
+    // Call onChange for immediate UI feedback
+    onChange?.(newColumns);
 
-      return newColumns;
-    });
-  }, [gridKey, onChange, setGridPreferences, setLocalColumns]);
+    // Persist to preferences
+    setGridPreferences(gridKey, { columns: newColumns });
+  }, [gridKey, localColumns, onChange, setGridPreferences]);
 
   const resetToDefaults = useCallback(() => {
     const defaultColumns = columns.filter(c => c.defaultVisible !== false).map(c => c.key);
-    setLocalColumns(defaultColumns);
+    setLocalColumnsOverride(defaultColumns);
     onChange?.(defaultColumns);
     setGridPreferences(gridKey, { columns: defaultColumns });
-  }, [columns, gridKey, onChange, setGridPreferences, setLocalColumns]);
+  }, [columns, gridKey, onChange, setGridPreferences]);
 
   // Drag handlers
   const handleDragStart = useCallback((e: React.DragEvent, columnKey: string) => {

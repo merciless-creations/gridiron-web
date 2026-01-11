@@ -19,7 +19,6 @@ preStart().then(() => {
   const { loadAllRoutes } = require('./routes');
   const { resetState } = require('./state');
   const storeJsonFilePath = require('./common/store-json-file-path');
-  const { resetPreferences } = require('./routes/preferences');
 
   // Load all routes from files
   console.log('Loading mock routes...');
@@ -149,26 +148,9 @@ preStart().then(() => {
   // Track active preset
   let activePreset = null;
 
-  // Custom preferences endpoints - bypass mock-json-api caching
-  // Import preferences state
-  const { getPreferences, setPreferences } = require('./routes/preferences');
-
-  app.get('/api/users/me/preferences', (req, res) => {
-    res.json({ preferences: getPreferences() });
-  });
-
-  app.put('/api/users/me/preferences', (req, res) => {
-    const body = req.body;
-    if (body && body.preferences) {
-      setPreferences(body.preferences);
-    }
-    res.json({ preferences: getPreferences() });
-  });
-
   // Custom reset endpoint - must be before mock routes
   app.post('/_reset', (req, res) => {
     resetState();
-    resetPreferences();
     activePreset = null;
     // Also reset all route scenarios back to default
     mockRoutes.forEach(route => {
@@ -183,6 +165,41 @@ preStart().then(() => {
       console.warn('Could not clear store.json:', err);
     }
     res.json({ success: true, message: 'Mock server state reset' });
+  });
+
+  // Change scenario for a specific route
+  app.post('/_scenario', (req, res) => {
+    const { route: routeName, scenario, scope } = req.body;
+
+    if (!routeName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Route name is required',
+      });
+    }
+
+    const route = mockRoutes.find(r => r.name === routeName);
+    if (!route) {
+      return res.status(404).json({
+        success: false,
+        error: `Route '${routeName}' not found`,
+        available: mockRoutes.map(r => r.name),
+      });
+    }
+
+    if (scenario !== undefined) {
+      route.testScenario = scenario;
+    }
+    if (scope !== undefined) {
+      route.testScope = scope;
+    }
+
+    res.json({
+      success: true,
+      route: routeName,
+      scenario: route.testScenario,
+      scope: route.testScope,
+    });
   });
 
   // Get available presets

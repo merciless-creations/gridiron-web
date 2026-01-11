@@ -7,11 +7,11 @@ import { Route, Routes } from 'react-router-dom';
 
 const MOCK_SERVER_URL = 'http://localhost:3002';
 
-const setScenario = async (name: string, scope: string) => {
+const setScenario = async (route: string, scope: string) => {
   await fetch(`${MOCK_SERVER_URL}/_scenario`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, scope }),
+    body: JSON.stringify({ route, scope }),
   });
 };
 
@@ -53,25 +53,24 @@ describe('RosterPage', () => {
       renderRosterPage('1');
 
       await waitFor(() => {
-        expect(screen.getByText(/Name/i)).toBeInTheDocument();
+        expect(screen.getByTestId('column-header-name')).toBeInTheDocument();
       });
 
-      expect(screen.getByText(/Pos/i)).toBeInTheDocument();
-      expect(screen.getByText(/OVR/i)).toBeInTheDocument();
-      // Check for Age column header specifically by looking at multiple matches
-      expect(screen.getAllByText(/Age/i).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByTestId('column-header-position')).toBeInTheDocument();
+      expect(screen.getByTestId('column-header-overall')).toBeInTheDocument();
+      expect(screen.getByTestId('column-header-age')).toBeInTheDocument();
     });
 
     it('displays position filter tabs', async () => {
       renderRosterPage('1');
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /All/i })).toBeInTheDocument();
+        expect(screen.getByTestId('roster-tab-all')).toBeInTheDocument();
       });
 
-      expect(screen.getByRole('button', { name: /Offense/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Defense/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Special Teams/i })).toBeInTheDocument();
+      expect(screen.getByTestId('roster-tab-offense')).toBeInTheDocument();
+      expect(screen.getByTestId('roster-tab-defense')).toBeInTheDocument();
+      expect(screen.getByTestId('roster-tab-specialTeams')).toBeInTheDocument();
     });
 
     it('displays back to team management link', async () => {
@@ -89,7 +88,7 @@ describe('RosterPage', () => {
       renderRosterPage('1');
 
       await waitFor(() => {
-        expect(screen.getByPlaceholderText(/Search by name or position/i)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText(/Search by name/i)).toBeInTheDocument();
       });
     });
   });
@@ -100,14 +99,14 @@ describe('RosterPage', () => {
       renderRosterPage('1');
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /Offense/i })).toBeInTheDocument();
+        expect(screen.getByTestId('roster-tab-offense')).toBeInTheDocument();
       });
 
       // Click offense filter
-      await user.click(screen.getByRole('button', { name: /Offense/i }));
+      await user.click(screen.getByTestId('roster-tab-offense'));
 
       // The offense button should be highlighted (has different styling)
-      const offenseButton = screen.getByRole('button', { name: /Offense/i });
+      const offenseButton = screen.getByTestId('roster-tab-offense');
       expect(offenseButton).toHaveClass('bg-emerald-600');
     });
 
@@ -116,10 +115,10 @@ describe('RosterPage', () => {
       renderRosterPage('1');
 
       await waitFor(() => {
-        expect(screen.getByPlaceholderText(/Search by name or position/i)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText(/Search by name/i)).toBeInTheDocument();
       });
 
-      const searchInput = screen.getByPlaceholderText(/Search by name or position/i);
+      const searchInput = screen.getByPlaceholderText(/Search by name/i);
       await user.type(searchInput, 'QB');
 
       // Search input should have the value
@@ -143,7 +142,7 @@ describe('RosterPage', () => {
       // Should show sort indicator (the actual sorting is handled in component)
       // This test verifies the click handler works
       await waitFor(() => {
-        expect(nameHeader.textContent).toContain('^');
+        expect(nameHeader.textContent).toContain('↑');
       });
     });
   });
