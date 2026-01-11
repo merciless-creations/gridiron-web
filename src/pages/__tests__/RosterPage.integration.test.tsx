@@ -17,7 +17,7 @@ const useTestData = async () => {
   await fetch(`${MOCK_SERVER_URL}/_scenario`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'listPlayers', scenario: 'testDataScenario' }),
+    body: JSON.stringify({ route: 'listPlayers', scenario: 'testDataScenario' }),
   });
 };
 
