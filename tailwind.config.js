@@ -4,19 +4,21 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: ['class', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
         'gridiron': {
-          'bg-primary': '#0a0a0f',
-          'bg-secondary': '#12121a',
-          'bg-tertiary': '#1a1a24',
-          'bg-card': '#1e1e2a',
-          'border-subtle': '#2a2a3a',
-          'border-emphasis': '#3a3a4a',
-          'text-primary': '#ffffff',
-          'text-secondary': '#a0a0b0',
-          'text-muted': '#606070',
+          // Dark theme colors (default)
+          'bg-primary': 'var(--gridiron-bg-primary)',
+          'bg-secondary': 'var(--gridiron-bg-secondary)',
+          'bg-tertiary': 'var(--gridiron-bg-tertiary)',
+          'bg-card': 'var(--gridiron-bg-card)',
+          'border-subtle': 'var(--gridiron-border-subtle)',
+          'border-emphasis': 'var(--gridiron-border-emphasis)',
+          'text-primary': 'var(--gridiron-text-primary)',
+          'text-secondary': 'var(--gridiron-text-secondary)',
+          'text-muted': 'var(--gridiron-text-muted)',
           'accent': '#00d4aa',
           'win': '#22c55e',
           'loss': '#ef4444',

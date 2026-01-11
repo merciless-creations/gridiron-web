@@ -4,3 +4,4 @@ export * from './Team';
 export * from './Game';
 export * from './League';
 export * from './Season';
+export * from './Preferences';

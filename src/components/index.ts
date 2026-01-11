@@ -11,3 +11,6 @@ export * from './AssignGmModal';
 export * from './Skeleton';
 export * from './ContextSwitcher';
 export * from './ReadOnlyBanner';
+export * from './ThemeSwitcher';
+export * from './GridColumnCustomizer';
+export * from './TeamColorSchemeEditor';
