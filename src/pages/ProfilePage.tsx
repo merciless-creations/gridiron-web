@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCurrentUser } from '../api';
-import { Loading, ErrorMessage } from '../components';
+import { Loading, ErrorMessage, ThemeSwitcher } from '../components';
+import { usePreferences } from '../contexts';
 
 export const ProfilePage = () => {
   const { data: user, isLoading, error } = useCurrentUser();
+  const { resetPreferences, isSaving } = usePreferences();
   const [copiedUserId, setCopiedUserId] = useState(false);
 
   const copyUserId = () => {
@@ -137,6 +139,50 @@ export const ProfilePage = () => {
                 Last Login
               </label>
               <div className="text-sm text-gridiron-text-primary">{formatDate(user.lastLoginAt)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Preferences Section */}
+      <div className="card max-w-2xl mx-auto" data-testid="preferences-section">
+        <h2 className="text-2xl font-display font-semibold text-gridiron-text-primary mb-4">
+          Preferences
+        </h2>
+
+        <div className="space-y-6">
+          {/* Theme Preference */}
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-medium text-gridiron-text-secondary block mb-1">
+                Theme
+              </label>
+              <p className="text-xs text-gridiron-text-muted">
+                Choose your preferred color scheme
+              </p>
+            </div>
+            <ThemeSwitcher />
+          </div>
+
+          {/* Reset Preferences */}
+          <div className="pt-4 border-t border-gridiron-border-subtle">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-sm font-medium text-gridiron-text-secondary block mb-1">
+                  Reset All Preferences
+                </label>
+                <p className="text-xs text-gridiron-text-muted">
+                  Restore theme, grid columns, and team colors to defaults
+                </p>
+              </div>
+              <button
+                onClick={() => resetPreferences()}
+                disabled={isSaving}
+                className="btn-secondary text-sm"
+                data-testid="reset-preferences-button"
+              >
+                {isSaving ? 'Resetting...' : 'Reset to Defaults'}
+              </button>
             </div>
           </div>
         </div>

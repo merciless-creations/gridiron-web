@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Layout, ProtectedRoute, AuthErrorBoundary } from './components';
-import { ActiveContextProvider } from './contexts';
+import { ActiveContextProvider, PreferencesProvider } from './contexts';
 import { TeamsPage, GameSimulationPage, ProfilePage, LeaguesPage, LeagueDetailPage, CreateLeaguePage, LeagueStructurePage, SeasonDashboardPage, SchedulePage, StandingsPage, LoginCallbackPage, LandingPage, LeagueManagePage, TeamManagePage, RosterPage, DepthChartPage, DashboardPage } from './pages';
 
 // Create a QueryClient instance for React Query
@@ -19,8 +19,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthErrorBoundary>
         <ActiveContextProvider>
-          <BrowserRouter>
-            <Layout>
+          <PreferencesProvider>
+            <BrowserRouter>
+              <Layout>
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/auth/callback" element={<LoginCallbackPage />} />
@@ -144,9 +145,10 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-              </Routes>
-            </Layout>
-          </BrowserRouter>
+                </Routes>
+              </Layout>
+            </BrowserRouter>
+          </PreferencesProvider>
         </ActiveContextProvider>
       </AuthErrorBoundary>
     </QueryClientProvider>

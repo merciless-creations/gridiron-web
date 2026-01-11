@@ -1,14 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePlayers } from '../api/players';
 import { useTeam } from '../api/teams';
-import { Loading } from '../components/Loading';
+import { Loading, GridColumnCustomizer } from '../components';
+import { usePreferences } from '../contexts';
 import { Position, PositionLabels } from '../types/enums';
 import type { Player } from '../types/Player';
 
 type PositionFilter = 'all' | 'offense' | 'defense' | 'special';
 type SortField = 'name' | 'position' | 'number' | 'age' | 'salary' | 'overall';
-type SortDirection = 'asc' | 'desc';
 
 const OFFENSE_POSITIONS: Position[] = [Position.QB, Position.RB, Position.WR, Position.TE, Position.OL];
 const DEFENSE_POSITIONS: Position[] = [Position.DL, Position.LB, Position.CB, Position.S];
@@ -45,14 +45,53 @@ function formatSalary(salary: number): string {
   return `$${(salary / 1000).toFixed(0)}K`;
 }
 
+// Column definitions for the roster grid
+const ROSTER_COLUMNS = [
+  { key: 'number', label: '#', defaultVisible: true },
+  { key: 'name', label: 'Name', defaultVisible: true },
+  { key: 'position', label: 'Pos', defaultVisible: true },
+  { key: 'overall', label: 'OVR', defaultVisible: true },
+  { key: 'age', label: 'Age', defaultVisible: true },
+  { key: 'exp', label: 'Exp', defaultVisible: true },
+  { key: 'college', label: 'College', defaultVisible: true },
+  { key: 'salary', label: 'Salary', defaultVisible: true },
+  { key: 'contract', label: 'Contract', defaultVisible: true },
+  { key: 'health', label: 'Health', defaultVisible: true },
+];
+
 export const RosterPage = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const teamIdNum = Number(teamId);
 
+  // Get preferences
+  const { preferences, setGridPreferences } = usePreferences();
+  const gridPrefs = preferences.grids?.roster;
+
   const [positionFilter, setPositionFilter] = useState<PositionFilter>('all');
-  const [sortField, setSortField] = useState<SortField>('position');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [sortField, setSortField] = useState<SortField>(
+    (gridPrefs?.sortColumn as SortField) ?? 'position'
+  );
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
+    gridPrefs?.sortDirection ?? 'asc'
+  );
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Track visible columns from preferences
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(
+    gridPrefs?.columns ?? ROSTER_COLUMNS.filter(c => c.defaultVisible).map(c => c.key)
+  );
+
+  // Sync visible columns when preferences change
+  useEffect(() => {
+    if (gridPrefs?.columns) {
+      setVisibleColumns(gridPrefs.columns);
+    }
+  }, [gridPrefs?.columns?.join(',')]);
+
+  // Handle column visibility changes
+  const handleColumnsChange = useCallback((columns: string[]) => {
+    setVisibleColumns(columns);
+  }, []);
 
   const { data: team, isLoading: teamLoading, error: teamError } = useTeam(teamIdNum);
   const { data: players, isLoading: playersLoading, error: playersError } = usePlayers(teamIdNum);
@@ -119,12 +158,18 @@ export const RosterPage = () => {
   }, [players, positionFilter, searchQuery, sortField, sortDirection]);
 
   const handleSort = (field: SortField) => {
+    let newDirection: 'asc' | 'desc' = 'asc';
     if (sortField === field) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+      newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      setSortDirection(newDirection);
     } else {
       setSortField(field);
-      setSortDirection('asc');
     }
+    // Persist sort preferences
+    setGridPreferences('roster', {
+      sortColumn: field,
+      sortDirection: newDirection,
+    });
   };
 
   const getSortIndicator = (field: SortField) => {
@@ -199,7 +244,7 @@ export const RosterPage = () => {
       <div className="card">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Position Filter Tabs */}
-          <div className="inline-flex rounded-lg bg-gridiron-light p-1">
+          <div className="inline-flex rounded-lg bg-gridiron-bg-tertiary p-1">
             <button
               onClick={() => setPositionFilter('all')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -249,9 +294,16 @@ export const RosterPage = () => {
               placeholder="Search by name or position..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-gridiron-light text-white placeholder-gray-500 border border-zinc-700 focus:border-emerald-500 focus:outline-none"
+              className="input-field"
             />
           </div>
+
+          {/* Column Customizer */}
+          <GridColumnCustomizer
+            gridKey="roster"
+            columns={ROSTER_COLUMNS}
+            onChange={handleColumnsChange}
+          />
         </div>
       </div>
 
@@ -260,59 +312,79 @@ export const RosterPage = () => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="text-left text-xs text-gray-400 uppercase tracking-wider border-b border-zinc-700">
-                <th
-                  className="px-4 py-3 cursor-pointer hover:text-white"
-                  onClick={() => handleSort('number')}
-                >
-                  #{getSortIndicator('number')}
-                </th>
-                <th
-                  className="px-4 py-3 cursor-pointer hover:text-white"
-                  onClick={() => handleSort('name')}
-                >
-                  Name{getSortIndicator('name')}
-                </th>
-                <th
-                  className="px-4 py-3 cursor-pointer hover:text-white"
-                  onClick={() => handleSort('position')}
-                >
-                  Pos{getSortIndicator('position')}
-                </th>
-                <th
-                  className="px-4 py-3 cursor-pointer hover:text-white text-center"
-                  onClick={() => handleSort('overall')}
-                >
-                  OVR{getSortIndicator('overall')}
-                </th>
-                <th
-                  className="px-4 py-3 cursor-pointer hover:text-white text-center hidden md:table-cell"
-                  onClick={() => handleSort('age')}
-                >
-                  Age{getSortIndicator('age')}
-                </th>
-                <th className="px-4 py-3 text-center hidden lg:table-cell">Exp</th>
-                <th className="px-4 py-3 hidden xl:table-cell">College</th>
-                <th
-                  className="px-4 py-3 cursor-pointer hover:text-white text-right hidden md:table-cell"
-                  onClick={() => handleSort('salary')}
-                >
-                  Salary{getSortIndicator('salary')}
-                </th>
-                <th className="px-4 py-3 text-center hidden md:table-cell">Contract</th>
-                <th className="px-4 py-3 text-center hidden lg:table-cell">Health</th>
+              <tr className="text-left text-xs text-gridiron-text-secondary uppercase tracking-wider border-b border-gridiron-border-subtle">
+                {visibleColumns.includes('number') && (
+                  <th
+                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary"
+                    onClick={() => handleSort('number')}
+                  >
+                    #{getSortIndicator('number')}
+                  </th>
+                )}
+                {visibleColumns.includes('name') && (
+                  <th
+                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary"
+                    onClick={() => handleSort('name')}
+                  >
+                    Name{getSortIndicator('name')}
+                  </th>
+                )}
+                {visibleColumns.includes('position') && (
+                  <th
+                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary"
+                    onClick={() => handleSort('position')}
+                  >
+                    Pos{getSortIndicator('position')}
+                  </th>
+                )}
+                {visibleColumns.includes('overall') && (
+                  <th
+                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary text-center"
+                    onClick={() => handleSort('overall')}
+                  >
+                    OVR{getSortIndicator('overall')}
+                  </th>
+                )}
+                {visibleColumns.includes('age') && (
+                  <th
+                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary text-center"
+                    onClick={() => handleSort('age')}
+                  >
+                    Age{getSortIndicator('age')}
+                  </th>
+                )}
+                {visibleColumns.includes('exp') && (
+                  <th className="px-4 py-3 text-center">Exp</th>
+                )}
+                {visibleColumns.includes('college') && (
+                  <th className="px-4 py-3">College</th>
+                )}
+                {visibleColumns.includes('salary') && (
+                  <th
+                    className="px-4 py-3 cursor-pointer hover:text-gridiron-text-primary text-right"
+                    onClick={() => handleSort('salary')}
+                  >
+                    Salary{getSortIndicator('salary')}
+                  </th>
+                )}
+                {visibleColumns.includes('contract') && (
+                  <th className="px-4 py-3 text-center">Contract</th>
+                )}
+                {visibleColumns.includes('health') && (
+                  <th className="px-4 py-3 text-center">Health</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-700">
               {filteredPlayers.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={visibleColumns.length} className="px-4 py-8 text-center text-gridiron-text-muted">
                     No players found
                   </td>
                 </tr>
               ) : (
                 filteredPlayers.map((player) => (
-                  <PlayerRow key={player.id} player={player} />
+                  <PlayerRow key={player.id} player={player} visibleColumns={visibleColumns} />
                 ))
               )}
             </tbody>
@@ -325,49 +397,70 @@ export const RosterPage = () => {
 
 interface PlayerRowProps {
   player: Player;
+  visibleColumns: string[];
 }
 
-function PlayerRow({ player }: PlayerRowProps) {
+function PlayerRow({ player, visibleColumns }: PlayerRowProps) {
   const overall = calculateOverall(player);
   const overallColor =
-    overall >= 85 ? 'text-emerald-400' :
+    overall >= 85 ? 'text-gridiron-accent' :
     overall >= 75 ? 'text-yellow-400' :
     overall >= 65 ? 'text-orange-400' :
     'text-red-400';
 
   return (
-    <tr className="hover:bg-zinc-700/30 transition-colors">
-      <td className="px-4 py-3 text-gray-400 font-mono">{player.number}</td>
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="text-white font-medium">
-            {player.firstName} {player.lastName}
+    <tr className="hover:bg-gridiron-bg-tertiary/50 transition-colors">
+      {visibleColumns.includes('number') && (
+        <td className="px-4 py-3 text-gridiron-text-secondary font-mono">{player.number}</td>
+      )}
+      {visibleColumns.includes('name') && (
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-gridiron-text-primary font-medium">
+              {player.firstName} {player.lastName}
+            </span>
+            {player.isInjured && (
+              <span className="px-1.5 py-0.5 text-xs bg-gridiron-loss text-white rounded">INJ</span>
+            )}
+          </div>
+        </td>
+      )}
+      {visibleColumns.includes('position') && (
+        <td className="px-4 py-3">
+          <span className={`px-2 py-1 text-xs font-medium rounded ${getPositionColor(player.position)}`}>
+            {PositionLabels[player.position]}
           </span>
-          {player.isInjured && (
-            <span className="px-1.5 py-0.5 text-xs bg-red-600 text-white rounded">INJ</span>
-          )}
-        </div>
-      </td>
-      <td className="px-4 py-3">
-        <span className={`px-2 py-1 text-xs font-medium rounded ${getPositionColor(player.position)}`}>
-          {PositionLabels[player.position]}
-        </span>
-      </td>
-      <td className="px-4 py-3 text-center">
-        <span className={`font-bold ${overallColor}`}>{overall}</span>
-      </td>
-      <td className="px-4 py-3 text-center text-gray-400 hidden md:table-cell">{player.age}</td>
-      <td className="px-4 py-3 text-center text-gray-400 hidden lg:table-cell">{player.exp} yr</td>
-      <td className="px-4 py-3 text-gray-400 hidden xl:table-cell">{player.college}</td>
-      <td className="px-4 py-3 text-right text-gray-400 hidden md:table-cell">
-        {formatSalary(player.salary)}
-      </td>
-      <td className="px-4 py-3 text-center text-gray-400 hidden md:table-cell">
-        {player.contractYears} yr
-      </td>
-      <td className="px-4 py-3 text-center hidden lg:table-cell">
-        <HealthBar health={player.health} />
-      </td>
+        </td>
+      )}
+      {visibleColumns.includes('overall') && (
+        <td className="px-4 py-3 text-center">
+          <span className={`font-bold ${overallColor}`}>{overall}</span>
+        </td>
+      )}
+      {visibleColumns.includes('age') && (
+        <td className="px-4 py-3 text-center text-gridiron-text-secondary">{player.age}</td>
+      )}
+      {visibleColumns.includes('exp') && (
+        <td className="px-4 py-3 text-center text-gridiron-text-secondary">{player.exp} yr</td>
+      )}
+      {visibleColumns.includes('college') && (
+        <td className="px-4 py-3 text-gridiron-text-secondary">{player.college}</td>
+      )}
+      {visibleColumns.includes('salary') && (
+        <td className="px-4 py-3 text-right text-gridiron-text-secondary">
+          {formatSalary(player.salary)}
+        </td>
+      )}
+      {visibleColumns.includes('contract') && (
+        <td className="px-4 py-3 text-center text-gridiron-text-secondary">
+          {player.contractYears} yr
+        </td>
+      )}
+      {visibleColumns.includes('health') && (
+        <td className="px-4 py-3 text-center">
+          <HealthBar health={player.health} />
+        </td>
+      )}
     </tr>
   );
 }
@@ -378,20 +471,20 @@ interface HealthBarProps {
 
 function HealthBar({ health }: HealthBarProps) {
   const color =
-    health >= 80 ? 'bg-emerald-500' :
+    health >= 80 ? 'bg-gridiron-win' :
     health >= 60 ? 'bg-yellow-500' :
     health >= 40 ? 'bg-orange-500' :
-    'bg-red-500';
+    'bg-gridiron-loss';
 
   return (
     <div className="flex items-center gap-2">
-      <div className="w-16 h-2 bg-zinc-700 rounded-full overflow-hidden">
+      <div className="w-16 h-2 bg-gridiron-bg-tertiary rounded-full overflow-hidden">
         <div
           className={`h-full ${color} rounded-full transition-all`}
           style={{ width: `${health}%` }}
         />
       </div>
-      <span className="text-xs text-gray-400">{health}</span>
+      <span className="text-xs text-gridiron-text-muted">{health}</span>
     </div>
   );
 }

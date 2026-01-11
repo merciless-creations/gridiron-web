@@ -6,3 +6,4 @@ export * from './users';
 export * from './leagues';
 export * from './season';
 export * from './teamAssignments';
+export * from './preferences';

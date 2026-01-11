@@ -1,7 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useTeam } from '../api/teams';
-import { Loading } from '../components/Loading';
-import { ReadOnlyBanner } from '../components/ReadOnlyBanner';
+import { Loading, ReadOnlyBanner, TeamColorSchemeEditor } from '../components';
 import { usePermissions } from '../hooks/usePermissions';
 import { useActiveContext } from '../contexts';
 
@@ -199,19 +198,31 @@ export const TeamManagePage = () => {
         <h2 className="text-xl font-semibold mb-4">Season Stats</h2>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
-            <div className="text-3xl font-bold text-green-400">{team.wins}</div>
-            <div className="text-gray-400 text-sm">Wins</div>
+            <div className="text-3xl font-bold text-gridiron-win">{team.wins}</div>
+            <div className="text-gridiron-text-secondary text-sm">Wins</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-red-400">{team.losses}</div>
-            <div className="text-gray-400 text-sm">Losses</div>
+            <div className="text-3xl font-bold text-gridiron-loss">{team.losses}</div>
+            <div className="text-gridiron-text-secondary text-sm">Losses</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-gray-400">{team.ties}</div>
-            <div className="text-gray-400 text-sm">Ties</div>
+            <div className="text-3xl font-bold text-gridiron-text-muted">{team.ties}</div>
+            <div className="text-gridiron-text-secondary text-sm">Ties</div>
           </div>
         </div>
       </div>
+
+      {/* Team Color Customization - Only for team owners */}
+      {permissions.canEdit && (
+        <TeamColorSchemeEditor
+          teamId={teamIdNum}
+          teamName={fullTeamName}
+          defaultColors={{
+            primary: '#00d4aa', // Gridiron accent color
+            secondary: '#1a1a24', // Gridiron bg-tertiary
+          }}
+        />
+      )}
     </div>
   );
 };
