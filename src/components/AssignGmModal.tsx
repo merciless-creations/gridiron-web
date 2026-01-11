@@ -97,7 +97,7 @@ export function AssignGmModal({ leagueId, teamId, teamName, onClose, onSuccess }
           Assign GM to {teamName}
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
             <label htmlFor="email-input" className="block text-gridiron-gray text-sm mb-1">
               Email Address

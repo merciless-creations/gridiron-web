@@ -22,6 +22,14 @@ const pendingUserTeam = {
 
 const mocks = [];
 
+// Teams data for four-team scenarios (matches team assignments data)
+const fourTeamsData = [
+  { id: 1, divisionId: 1, name: 'Eagles', city: 'Philadelphia', budget: 210000000, championships: 1, wins: 12, losses: 4, ties: 0, fanSupport: 85, chemistry: 90 },
+  { id: 2, divisionId: 1, name: 'Cowboys', city: 'Dallas', budget: 225000000, championships: 5, wins: 9, losses: 7, ties: 0, fanSupport: 95, chemistry: 70 },
+  { id: 3, divisionId: 2, name: 'Giants', city: 'New York', budget: 210000000, championships: 4, wins: 6, losses: 10, ties: 0, fanSupport: 80, chemistry: 65 },
+  { id: 4, divisionId: 2, name: 'Bears', city: 'Chicago', budget: 200000000, championships: 1, wins: 8, losses: 8, ties: 0, fanSupport: 80, chemistry: 75 },
+];
+
 // List all teams
 const listTeams = {
   name: 'listTeams',
@@ -36,6 +44,10 @@ const listTeams = {
       },
       pendingUserScenario: function () {
         return JSON.stringify([pendingUserTeam]);
+      },
+      // Teams for four-team scenarios (allAiControlled, manyPending, allActive)
+      fourTeams: function () {
+        return JSON.stringify(fourTeamsData);
       },
     },
   ],
