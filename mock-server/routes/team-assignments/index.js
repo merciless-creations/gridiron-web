@@ -119,7 +119,7 @@ const getMyTeams = {
 
 const getLeagueTeamAssignments = {
   name: 'getLeagueTeamAssignments',
-  mockRoute: '^/api/leagues/([0-9]+)/teams/assignments$',
+  mockRoute: '^/api/leagues/([0-9]+)/team-assignments$',
   method: 'GET',
   testScope: 'success',
   testScenario: 'defaultScenario',
@@ -157,6 +157,15 @@ const getLeagueTeams = {
           { id: 1, name: 'Eagles' },
           { id: 2, name: 'Cowboys' },
           { id: 3, name: 'Giants' },
+        ]);
+      },
+      // 4 teams for scenarios that have 4 assignments (allAiControlled, manyPending, allActive)
+      fourTeams: function () {
+        return JSON.stringify([
+          { id: 1, name: 'Eagles' },
+          { id: 2, name: 'Cowboys' },
+          { id: 3, name: 'Giants' },
+          { id: 4, name: 'Bears' },
         ]);
       },
     },

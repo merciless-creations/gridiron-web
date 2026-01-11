@@ -219,10 +219,7 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
     })
   })
 
-  // Skip League Management tests for now - they need the mock data to be aligned
-  // between getLeagueTeams and getLeagueTeamAssignments endpoints
-  // TODO: Fix mock data alignment to enable these tests
-  test.describe.skip('Commissioner - League Management Page', () => {
+  test.describe('Commissioner - League Management Page', () => {
     test('displays all teams with correct status indicators in fresh league', async ({ page }) => {
       await activatePreset(page, 'fresh-league')
       await page.goto('/leagues/1/manage')
@@ -291,8 +288,7 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
     })
   })
 
-  // Skip Assign GM Modal tests - dependent on League Management page working
-  test.describe.skip('Commissioner - Assign GM Modal', () => {
+  test.describe('Commissioner - Assign GM Modal', () => {
     test('opens assign GM modal for AI-controlled team', async ({ page }) => {
       await activatePreset(page, 'fresh-league')
       await page.goto('/leagues/1/manage')
@@ -435,8 +431,7 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
     })
   })
 
-  // Skip Self-Assign tests - dependent on League Management page working
-  test.describe.skip('Commissioner - Self-Assign Flow', () => {
+  test.describe('Commissioner - Self-Assign Flow', () => {
     test('commissioner can self-assign to AI-controlled team', async ({ page }) => {
       await activatePreset(page, 'fresh-league')
       await page.goto('/leagues/1/manage')
@@ -453,8 +448,7 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
     })
   })
 
-  // Skip Remove Assignment tests - dependent on League Management page working
-  test.describe.skip('Commissioner - Remove Assignment', () => {
+  test.describe('Commissioner - Remove Assignment', () => {
     test('displays remove button for assigned teams', async ({ page }) => {
       await activatePreset(page, 'all-active')
       await page.goto('/leagues/1/manage')
@@ -501,8 +495,7 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
       await expect(page.getByText(/Error loading team management/)).toBeVisible({ timeout: 10000 })
     })
 
-    // Skip - depends on League Management page
-    test.skip('assign GM modal handles API error gracefully', async ({ page }) => {
+    test('assign GM modal handles API error gracefully', async ({ page }) => {
       // First load with fresh-league to get the modal open
       await activatePreset(page, 'fresh-league')
       await page.goto('/leagues/1/manage')
@@ -627,8 +620,7 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
       await expect(page.locator('#welcome-modal-title')).toBeVisible()
     })
 
-    // Skip - depends on League Management page
-    test.skip('assign GM modal has proper aria attributes', async ({ page }) => {
+    test('assign GM modal has proper aria attributes', async ({ page }) => {
       await activatePreset(page, 'fresh-league')
       await page.goto('/leagues/1/manage')
 
@@ -653,8 +645,7 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
       await expect(page.locator('[aria-label="New team"]')).toBeVisible()
     })
 
-    // Skip - depends on League Management page
-    test.skip('error messages are announced via alert role', async ({ page }) => {
+    test('error messages are announced via alert role', async ({ page }) => {
       await activatePreset(page, 'fresh-league')
       await page.goto('/leagues/1/manage')
 
@@ -670,8 +661,7 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
       await expect(errorMessage).toBeVisible()
     })
 
-    // Skip - depends on League Management page
-    test.skip('form inputs have associated labels', async ({ page }) => {
+    test('form inputs have associated labels', async ({ page }) => {
       await activatePreset(page, 'fresh-league')
       await page.goto('/leagues/1/manage')
 
@@ -688,8 +678,7 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
   })
 
   test.describe('Complete User Journeys', () => {
-    // Skip - depends on League Management page
-    test.skip('Journey: Commissioner creates fresh league and assigns all GMs', async ({ page }) => {
+    test('Journey: Commissioner creates fresh league and assigns all GMs', async ({ page }) => {
       await activatePreset(page, 'fresh-league')
 
       // Start at dashboard

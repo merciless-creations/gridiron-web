@@ -45,6 +45,7 @@ preStart().then(() => {
     'fresh-league': {
       'getCurrentUser': { scenario: 'defaultScenario' },
       'getMyTeams': { scenario: 'defaultScenario' },
+      'listTeams': { scenario: 'fourTeams' },
       'getLeagueTeamAssignments': { scenario: 'allAiControlled' },
     },
 
@@ -52,6 +53,7 @@ preStart().then(() => {
     'many-pending': {
       'getCurrentUser': { scenario: 'defaultScenario' },
       'getMyTeams': { scenario: 'defaultScenario' },
+      'listTeams': { scenario: 'fourTeams' },
       'getLeagueTeamAssignments': { scenario: 'manyPending' },
     },
 
@@ -59,6 +61,7 @@ preStart().then(() => {
     'all-active': {
       'getCurrentUser': { scenario: 'defaultScenario' },
       'getMyTeams': { scenario: 'defaultScenario' },
+      'listTeams': { scenario: 'fourTeams' },
       'getLeagueTeamAssignments': { scenario: 'allActive' },
     },
 
@@ -74,6 +77,7 @@ preStart().then(() => {
     'error-mode': {
       'getMyTeams': { scope: 'error' },
       'listLeagues': { scope: 'error' },
+      'listTeams': { scope: 'error' },
       'getLeagueTeamAssignments': { scope: 'error' },
       'assignGm': { scope: 'error' },
     },
