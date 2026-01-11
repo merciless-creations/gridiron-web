@@ -217,7 +217,7 @@ describe('TeamColorSchemeEditor', () => {
         expect(mockSetTeamColorScheme).toHaveBeenCalledWith(1, {
           primary: '#FF0000',
           secondary: '#0000FF',
-          accent: '#00d4aa', // Default accent is primary color
+          // accent is undefined unless explicitly set by user
         });
       });
 

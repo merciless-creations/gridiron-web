@@ -36,8 +36,8 @@ describe('TeamManagePage', () => {
         expect(screen.getByText(/Team Management/i)).toBeInTheDocument();
       });
 
-      expect(screen.getByText(/Atlanta/i)).toBeInTheDocument();
-      expect(screen.getByText(/Falcons/i)).toBeInTheDocument();
+      // The full team name appears in the header
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/Atlanta.*Falcons/);
     });
 
     it('displays team record', async () => {
