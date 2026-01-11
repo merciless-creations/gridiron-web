@@ -67,10 +67,10 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
 
       await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible()
 
-      // Should show empty state for teams
+      // Should show empty state for teams with info about commissioner invites
       await expect(page.getByText('No Teams Assigned')).toBeVisible()
-      await expect(page.getByText("You haven't been assigned to manage any teams yet")).toBeVisible()
-      await expect(page.getByRole('link', { name: 'Browse Leagues' })).toBeVisible()
+      await expect(page.getByText(/when a commissioner invites you/i)).toBeVisible()
+      await expect(page.getByRole('link', { name: 'Create Your Own League' })).toBeVisible()
     })
 
     test('displays empty state when user has no leagues', async ({ page }) => {
