@@ -7,30 +7,34 @@ interface WelcomeModalProps {
 
 export function WelcomeModal({ teamName, onConfirm, onCancel, isLoading }: WelcomeModalProps) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50"
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
+    >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="welcome-modal-title"
-        className="bg-gridiron-dark rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
+        className="rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl border border-gridiron-border-subtle"
+        style={{ backgroundColor: '#1e1e2a' }}
       >
         <div className="text-center">
           <span className="text-4xl mb-4 block">🏈</span>
           <h2
             id="welcome-modal-title"
-            className="text-2xl font-bold text-gridiron-light mb-2"
+            className="text-2xl font-bold text-gridiron-text-primary mb-2"
           >
             Welcome to the {teamName}!
           </h2>
         </div>
 
-        <p className="text-gridiron-gray text-center mb-6">
+        <p className="text-gridiron-text-secondary text-center mb-6">
           You're now the GM.
         </p>
 
-        <div className="text-gridiron-light mb-6">
+        <div className="text-gridiron-text-primary mb-6">
           <p className="mb-2">As GM, you can:</p>
-          <ul className="list-disc list-inside space-y-1 text-gridiron-gray">
+          <ul className="list-disc list-inside space-y-1 text-gridiron-text-secondary">
             <li>Manage your roster</li>
             <li>Set your depth chart</li>
             <li>Make trades and signings</li>

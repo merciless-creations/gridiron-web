@@ -137,19 +137,34 @@ describe('WelcomeModal', () => {
   })
 
   describe('Styling', () => {
-    it('renders modal overlay', () => {
+    it('renders modal with full-screen fixed overlay', () => {
       const { container } = render(<WelcomeModal {...defaultProps} />)
 
       const overlay = container.querySelector('.fixed.inset-0')
       expect(overlay).toBeInTheDocument()
-      expect(overlay).toHaveClass('bg-black/50')
+      expect(overlay).toHaveClass('z-50')
     })
 
     it('renders modal content with correct styling', () => {
       render(<WelcomeModal {...defaultProps} />)
 
       const dialog = screen.getByRole('dialog')
-      expect(dialog).toHaveClass('bg-gridiron-dark', 'rounded-lg', 'p-6')
+      expect(dialog).toHaveClass('rounded-lg', 'p-6')
+    })
+
+    it('has opaque backdrop to hide underlying content', () => {
+      const { container } = render(<WelcomeModal {...defaultProps} />)
+
+      const overlay = container.querySelector('.fixed.inset-0')
+      expect(overlay).toHaveStyle({ backgroundColor: 'rgba(0, 0, 0, 0.8)' })
+    })
+
+    it('has solid opaque background on modal dialog', () => {
+      render(<WelcomeModal {...defaultProps} />)
+
+      const dialog = screen.getByRole('dialog')
+      // #1e1e2a is the gridiron-bg-card color
+      expect(dialog).toHaveStyle({ backgroundColor: 'rgb(30, 30, 42)' })
     })
   })
 })
