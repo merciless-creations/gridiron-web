@@ -73,6 +73,40 @@ preStart().then(() => {
       'getLeagueTeamAssignments': { scenario: 'defaultScenario' },
     },
 
+    // ==========================================
+    // Dashboard User State Presets
+    // ==========================================
+
+    // User (not commissioner) with first team assigned (new, hasn't taken control)
+    'user-first-team': {
+      'getMyTeams': { scenario: 'oneTeamNew' },
+      'listLeagues': { scenario: 'empty' },
+    },
+
+    // User (not commissioner) with multiple teams, one new
+    'user-multiple-teams-one-new': {
+      'getMyTeams': { scenario: 'multipleTeamsOneNew' },
+      'listLeagues': { scenario: 'empty' },
+    },
+
+    // Commissioner of 1 league, no teams as GM
+    'commissioner-no-teams': {
+      'getMyTeams': { scenario: 'empty' },
+      'listLeagues': { scenario: 'defaultScenario' },
+    },
+
+    // Commissioner of 1 league, first team assigned (new)
+    'commissioner-first-team': {
+      'getMyTeams': { scenario: 'oneTeamNew' },
+      'listLeagues': { scenario: 'defaultScenario' },
+    },
+
+    // Commissioner of 1 league, multiple teams, one new
+    'commissioner-multiple-teams-one-new': {
+      'getMyTeams': { scenario: 'multipleTeamsOneNew' },
+      'listLeagues': { scenario: 'defaultScenario' },
+    },
+
     // Error testing: API errors
     'error-mode': {
       'getMyTeams': { scope: 'error' },

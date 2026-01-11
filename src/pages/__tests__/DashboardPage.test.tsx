@@ -403,11 +403,12 @@ describe('DashboardPage', () => {
       await waitFor(() => {
         expect(screen.getByText('No Teams Assigned')).toBeInTheDocument()
         expect(screen.getByText(/haven't been assigned to manage any teams/i)).toBeInTheDocument()
+        expect(screen.getByText(/when a commissioner invites you/i)).toBeInTheDocument()
       })
 
-      // Check for CTA link
-      const ctaLink = screen.getByRole('link', { name: /browse leagues/i })
-      expect(ctaLink).toHaveAttribute('href', '/leagues')
+      // Check for CTA link to create league
+      const ctaLink = screen.getByRole('link', { name: /create your own league/i })
+      expect(ctaLink).toHaveAttribute('href', '/leagues/create')
     })
 
     it('does not show Create League button when leagues list is empty', async () => {

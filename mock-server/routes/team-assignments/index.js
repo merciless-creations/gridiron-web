@@ -96,6 +96,46 @@ const pendingUserTeams = [
   },
 ];
 
+// User with one new team (first team assigned, hasn't taken control)
+const oneTeamNew = [
+  {
+    teamId: 1,
+    teamName: 'Eagles',
+    leagueId: 1,
+    leagueName: 'Test League',
+    hasViewed: false,
+    controlState: 'Pending',
+  },
+];
+
+// User with multiple teams, one is new
+const multipleTeamsOneNew = [
+  {
+    teamId: 1,
+    teamName: 'Eagles',
+    leagueId: 1,
+    leagueName: 'Test League',
+    hasViewed: true,
+    controlState: 'HumanControlled',
+  },
+  {
+    teamId: 2,
+    teamName: 'Cowboys',
+    leagueId: 1,
+    leagueName: 'Test League',
+    hasViewed: true,
+    controlState: 'HumanControlled',
+  },
+  {
+    teamId: 3,
+    teamName: 'Giants',
+    leagueId: 2,
+    leagueName: 'Another League',
+    hasViewed: false,
+    controlState: 'Pending',
+  },
+];
+
 const getMyTeams = {
   name: 'getMyTeams',
   mockRoute: '/api/users/me/teams',
@@ -112,6 +152,12 @@ const getMyTeams = {
       },
       empty: function () {
         return JSON.stringify([]);
+      },
+      oneTeamNew: function () {
+        return JSON.stringify(oneTeamNew);
+      },
+      multipleTeamsOneNew: function () {
+        return JSON.stringify(multipleTeamsOneNew);
       },
     },
   ],
