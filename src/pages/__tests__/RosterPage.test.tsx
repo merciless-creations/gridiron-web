@@ -1,14 +1,11 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { renderWithProviders } from '../../test/test-utils';
 import { RosterPage } from '../RosterPage';
 import { Route, Routes } from 'react-router-dom';
 
 const MOCK_SERVER_URL = 'http://localhost:3002';
-
-// Track fetch calls for API call counting tests
-let fetchSpy: ReturnType<typeof vi.spyOn> | null = null;
 
 const setScenario = async (name: string, scope: string) => {
   await fetch(`${MOCK_SERVER_URL}/_scenario`, {

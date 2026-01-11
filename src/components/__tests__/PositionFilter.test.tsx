@@ -153,7 +153,7 @@ describe('PositionFilter', () => {
 
   it('shows checkmark for selected positions', () => {
     const onChange = vi.fn();
-    const { container } = render(
+    render(
       <PositionFilter
         availablePositions={offensePositions}
         selectedPositions={[Position.QB]}

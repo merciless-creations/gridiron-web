@@ -6,9 +6,8 @@ import {
   Loading,
   GridColumnCustomizer,
   ColumnFilterPopover,
-  type NumericFilterValue,
-  passesFilter,
 } from '../components';
+import { passesFilter, type NumericFilterValue } from '../utils/numericFilter';
 import { usePreferences } from '../contexts';
 import type { GridKey } from '../contexts/preferences/types';
 import {

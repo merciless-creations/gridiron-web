@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Position, PositionLabels, PlayerStatus, PlayerStatusLabels } from '../types/enums';
-import type { NumericFilterValue } from './NumericFilter';
-import { parseFilterExpression, formatFilterExpression } from './NumericFilter';
+import type { NumericFilterValue } from '../utils/numericFilter';
+import { parseFilterExpression, formatFilterExpression } from '../utils/numericFilter';
 
 interface ColumnFilterPopoverProps {
   /** Column key for identification */
@@ -58,9 +58,11 @@ export function ColumnFilterPopover({
     ? positionFilter.length > 0
     : statusFilter.length > 0;
 
-  // Sync input value when filter prop changes externally
+  // Sync input value when filter prop changes externally (e.g., clear all filters button)
+  // This is a valid use case for setting state in an effect - syncing state from props
   useEffect(() => {
     if (type === 'numeric') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInputValue(formatFilterExpression(numericFilter ?? null));
     }
   }, [numericFilter, type]);

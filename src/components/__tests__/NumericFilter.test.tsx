@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { NumericFilter, parseFilterExpression, formatFilterExpression, passesFilter } from '../NumericFilter';
-import type { NumericFilterValue } from '../NumericFilter';
+import { NumericFilter } from '../NumericFilter';
+import { parseFilterExpression, formatFilterExpression, passesFilter } from '../../utils/numericFilter';
+import type { NumericFilterValue } from '../../utils/numericFilter';
 
 describe('NumericFilter', () => {
   beforeEach(() => {

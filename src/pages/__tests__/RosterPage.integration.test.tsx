@@ -238,8 +238,7 @@ describe('RosterPage Integration Tests', () => {
       const ageFilterButton = screen.getByTestId('column-filter-age');
       await user.click(ageFilterButton);
 
-      // Just press enter with empty input
-      const filterInput = screen.getByTestId('column-filter-input-age');
+      // Just press enter with empty input (input should be focused after popover opens)
       await user.keyboard('{Enter}');
 
       // Should still show all players
@@ -426,7 +425,6 @@ describe('RosterPage Integration Tests', () => {
     });
 
     it('shows "All" when no specific positions selected', async () => {
-      const user = userEvent.setup();
       renderRosterPage('1');
       await waitForPlayersToLoad();
 
