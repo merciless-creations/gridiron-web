@@ -575,17 +575,17 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
       await expect(page).toHaveURL('/leagues/create')
     })
 
-    test('empty state "Browse Leagues" navigates to leagues page', async ({ page }) => {
+    test('empty state "Create Your Own League" navigates to league creation', async ({ page }) => {
       await activatePreset(page, 'new-user')
       await page.goto('/dashboard')
 
       await expect(page.getByText('No Teams Assigned')).toBeVisible()
 
-      // Click browse leagues link
-      await page.getByRole('link', { name: 'Browse Leagues' }).click()
+      // Click create league link in the teams empty state
+      await page.getByRole('link', { name: 'Create Your Own League' }).click()
 
-      // Should navigate to leagues page
-      await expect(page).toHaveURL('/leagues')
+      // Should navigate to league creation page
+      await expect(page).toHaveURL('/leagues/create')
     })
 
     // Note: Landing page doesn't have a Dashboard link - users access dashboard after login
