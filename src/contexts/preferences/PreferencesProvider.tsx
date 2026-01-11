@@ -9,7 +9,7 @@ import {
   DEFAULT_PREFERENCES,
 } from '../../types/Preferences';
 import { PreferencesContext } from './PreferencesContext';
-import type { PreferencesContextValue } from './types';
+import type { PreferencesContextValue, GridKey } from './types';
 
 interface PreferencesProviderProps {
   children: ReactNode;
@@ -106,7 +106,7 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
 
   // Set grid preferences
   const setGridPreferences = useCallback(async (
-    gridKey: 'roster' | 'depthChart' | 'standings',
+    gridKey: GridKey,
     prefs: Partial<GridPreferences>
   ) => {
     await updatePreferences({

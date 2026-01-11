@@ -143,7 +143,7 @@ describe('RosterPage', () => {
       // Should show sort indicator (the actual sorting is handled in component)
       // This test verifies the click handler works
       await waitFor(() => {
-        expect(nameHeader.textContent).toContain('^');
+        expect(nameHeader.textContent).toContain('↑');
       });
     });
   });

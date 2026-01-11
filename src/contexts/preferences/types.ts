@@ -18,13 +18,23 @@ export interface PreferencesState {
   resolvedTheme: 'light' | 'dark';
 }
 
+/** All grid keys that can be customized */
+export type GridKey =
+  | 'roster'
+  | 'rosterAll'
+  | 'rosterOffense'
+  | 'rosterDefense'
+  | 'rosterSpecialTeams'
+  | 'depthChart'
+  | 'standings';
+
 export interface PreferencesActions {
   /** Update the entire preferences object */
   updatePreferences: (prefs: Partial<UserPreferences>) => Promise<void>;
   /** Set the theme preference */
   setTheme: (theme: ThemePreference) => Promise<void>;
   /** Update grid preferences for a specific grid */
-  setGridPreferences: (gridKey: 'roster' | 'depthChart' | 'standings', prefs: Partial<GridPreferences>) => Promise<void>;
+  setGridPreferences: (gridKey: GridKey, prefs: Partial<GridPreferences>) => Promise<void>;
   /** Set a team color scheme */
   setTeamColorScheme: (teamId: number, colors: TeamColorScheme) => Promise<void>;
   /** Remove a team color scheme */

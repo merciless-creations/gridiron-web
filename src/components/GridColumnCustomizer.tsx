@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { usePreferences } from '../contexts';
+import type { GridKey } from '../contexts/preferences/types';
 
 interface ColumnDefinition {
   key: string;
@@ -9,7 +10,7 @@ interface ColumnDefinition {
 
 interface GridColumnCustomizerProps {
   /** Which grid these settings apply to */
-  gridKey: 'roster' | 'depthChart' | 'standings';
+  gridKey: GridKey;
   /** Available column definitions */
   columns: ColumnDefinition[];
   /** Callback when columns change (for immediate UI updates) */
