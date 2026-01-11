@@ -265,7 +265,7 @@ export const LeagueDetailPage = () => {
                           {division.teams.map(team => (
                             <Link
                               key={team.id}
-                              to={`/teams/${team.id}`}
+                              to={`/teams/${team.id}/manage`}
                               className="block p-3 bg-gridiron-bg-card border border-gridiron-border-subtle rounded hover:border-gridiron-accent transition-all"
                               data-testid={`team-${team.id}`}
                             >

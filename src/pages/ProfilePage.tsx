@@ -208,7 +208,7 @@ export const ProfilePage = () => {
             {teams.map(team => (
               <Link
                 key={team.teamId}
-                to={`/teams/${team.teamId}`}
+                to={`/teams/${team.teamId}/manage`}
                 className="block card hover:border-gridiron-win transition-all cursor-pointer"
               >
                 <div className="flex items-center justify-between">

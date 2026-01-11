@@ -49,6 +49,15 @@ const mockUser = seedData.user || {
       teamName: null,
       assignedAt: '2024-01-15T10:00:00Z',
     },
+    {
+      id: 2,
+      leagueId: 1,
+      leagueName: 'Test League',
+      role: 'GeneralManager',
+      teamId: 1,
+      teamName: 'Falcons',
+      assignedAt: '2024-01-15T10:00:00Z',
+    },
   ],
 };
 
