@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { usePreferences } from '../contexts';
+import { useTeamColors } from '../hooks';
 import type { TeamColorScheme } from '../types/Preferences';
 
 interface TeamColorSchemeEditorProps {
@@ -130,6 +131,7 @@ export function TeamColorSchemeEditor({
   className = '',
 }: TeamColorSchemeEditorProps) {
   const { getTeamColorScheme, setTeamColorScheme, removeTeamColorScheme, isSaving } = usePreferences();
+  const { applyColors, storeRollbackPoint, revertColors, clearRollbackPoint } = useTeamColors();
 
   // Get current colors (user-set or defaults)
   const currentColors = getTeamColorScheme(teamId) ?? defaultColors;
@@ -138,27 +140,51 @@ export function TeamColorSchemeEditor({
   const [isEditing, setIsEditing] = useState(false);
   const [editColors, setEditColors] = useState<TeamColorScheme>(currentColors);
 
+  // Apply colors to CSS variables when currentColors changes from API
+  // Only apply when not editing (editing state manages its own CSS updates)
+  useEffect(() => {
+    if (!isEditing) {
+      applyColors(currentColors);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentColors]); // Intentionally omit isEditing - we only want to react to API changes
+
+  // Update a single color and apply live to site
+  const updateColor = useCallback((key: keyof TeamColorScheme, value: string) => {
+    const newColors = { ...editColors, [key]: value };
+    setEditColors(newColors);
+    applyColors(newColors);
+  }, [editColors, applyColors]);
+
   const handleStartEdit = useCallback(() => {
+    storeRollbackPoint(); // Store current site colors before editing
     setEditColors(currentColors);
     setIsEditing(true);
-  }, [currentColors]);
+  }, [currentColors, storeRollbackPoint]);
 
   const handleCancel = useCallback(() => {
+    revertColors(); // Revert site to colors before editing
     setEditColors(currentColors);
     setIsEditing(false);
-  }, [currentColors]);
+  }, [currentColors, revertColors]);
 
   const handleSave = useCallback(async () => {
+    clearRollbackPoint(); // Colors already applied, clear rollback
     await setTeamColorScheme(teamId, editColors);
+    // Re-apply the colors we just saved to ensure they stay applied
+    // (the cache will update with API response, and useEffect will sync)
+    applyColors(editColors);
     onSave?.(editColors);
     setIsEditing(false);
-  }, [teamId, editColors, setTeamColorScheme, onSave]);
+  }, [teamId, editColors, setTeamColorScheme, onSave, clearRollbackPoint, applyColors]);
 
   const handleReset = useCallback(async () => {
     await removeTeamColorScheme(teamId);
+    applyColors(defaultColors); // Apply default colors to site
     setEditColors(defaultColors);
+    clearRollbackPoint();
     setIsEditing(false);
-  }, [teamId, defaultColors, removeTeamColorScheme]);
+  }, [teamId, defaultColors, removeTeamColorScheme, applyColors, clearRollbackPoint]);
 
   return (
     <div className={`card ${className}`} data-testid="team-color-editor">
@@ -186,19 +212,19 @@ export function TeamColorSchemeEditor({
           <ColorInput
             label="Primary"
             value={editColors.primary}
-            onChange={(primary) => setEditColors(prev => ({ ...prev, primary }))}
+            onChange={(value) => updateColor('primary', value)}
             testId="primary-color"
           />
           <ColorInput
             label="Secondary"
             value={editColors.secondary}
-            onChange={(secondary) => setEditColors(prev => ({ ...prev, secondary }))}
+            onChange={(value) => updateColor('secondary', value)}
             testId="secondary-color"
           />
           <ColorInput
             label="Accent"
             value={editColors.accent ?? editColors.primary}
-            onChange={(accent) => setEditColors(prev => ({ ...prev, accent }))}
+            onChange={(value) => updateColor('accent', value)}
             testId="accent-color"
           />
 

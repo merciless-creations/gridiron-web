@@ -1,9 +1,12 @@
+import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTeam } from '../api/teams';
 import { useDepthChart } from '../api/depthChart';
 import { Loading } from '../components/Loading';
 import { Position, PositionLabels } from '../types/enums';
 import type { Player } from '../types/Player';
+import { usePreferences } from '../contexts';
+import { useTeamColors } from '../hooks';
 
 interface PositionGroupProps {
   title: string;
@@ -99,10 +102,10 @@ const PositionSlot = ({
 }) => {
   return (
     <div className="bg-gridiron-bg-card rounded-lg border border-gridiron-border-subtle overflow-hidden">
-      <div className="px-4 py-3 bg-gridiron-bg-tertiary border-b border-gridiron-border-subtle">
-        <h4 className="font-semibold text-gridiron-text-primary">
+      <div className="px-4 py-3 bg-team-primary/10 border-b border-team-primary/30">
+        <h4 className="font-semibold text-team-primary">
           {PositionLabels[position]}
-          <span className="ml-2 text-sm font-normal text-gridiron-text-secondary">
+          <span className="ml-2 text-sm font-normal text-team-secondary">
             ({players.length})
           </span>
         </h4>
@@ -128,14 +131,9 @@ const PositionSlot = ({
 
 const PositionGroup = ({ title, positions, depthChart, isOwner }: PositionGroupProps) => {
   return (
-    <div className="card" data-testid={`position-group-${title.toLowerCase().replace(/\s+/g, '-')}`}>
-      <h3 className="text-xl font-bold text-gridiron-text-primary mb-4 flex items-center gap-2">
-        <span className={`
-          w-2 h-6 rounded
-          ${title === 'Offense' ? 'bg-gridiron-accent' : ''}
-          ${title === 'Defense' ? 'bg-red-500' : ''}
-          ${title === 'Special Teams' ? 'bg-yellow-500' : ''}
-        `} />
+    <div className="card border-l-4 border-team-primary" data-testid={`position-group-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+      <h3 className="text-xl font-bold text-team-secondary mb-4 flex items-center gap-2">
+        <span className="w-2 h-6 rounded bg-team-accent" />
         {title}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -158,6 +156,14 @@ export const DepthChartPage = () => {
 
   const { data: team, isLoading: teamLoading, error: teamError } = useTeam(teamIdNum);
   const { data: depthChartData, isLoading: depthChartLoading, error: depthChartError } = useDepthChart(teamIdNum);
+  const { getTeamColorScheme } = usePreferences();
+  const { applyColors, DEFAULT_COLORS } = useTeamColors();
+
+  // Apply team colors when page loads
+  useEffect(() => {
+    const savedColors = getTeamColorScheme(teamIdNum);
+    applyColors(savedColors ?? DEFAULT_COLORS);
+  }, [teamIdNum, getTeamColorScheme, applyColors, DEFAULT_COLORS]);
 
   // For now, assume the viewer is the owner (this would come from auth context in real app)
   const isOwner = true;
@@ -235,14 +241,14 @@ export const DepthChartPage = () => {
         <div>
           <Link
             to={`/teams/${teamId}/manage`}
-            className="text-gridiron-accent hover:underline text-sm mb-2 inline-block"
+            className="text-team-primary hover:underline text-sm mb-2 inline-block"
           >
             &larr; Back to Team Management
           </Link>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-3xl font-bold text-team-primary">
             {team.city} {team.name}
           </h1>
-          <p className="text-gray-400">Depth Chart</p>
+          <p className="text-team-secondary">Depth Chart</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -260,7 +266,7 @@ export const DepthChartPage = () => {
       </div>
 
       {/* Legend */}
-      <div className="card">
+      <div className="card border-l-4 border-team-primary">
         <div className="flex flex-wrap items-center gap-6 text-sm">
           <span className="text-gridiron-text-secondary">Rating:</span>
           <div className="flex items-center gap-2">

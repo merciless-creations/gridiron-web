@@ -107,7 +107,7 @@ describe('RosterPage', () => {
 
       // The offense button should be highlighted (has different styling)
       const offenseButton = screen.getByTestId('roster-tab-offense');
-      expect(offenseButton).toHaveClass('bg-emerald-600');
+      expect(offenseButton).toHaveClass('bg-team-primary');
     });
 
     it('filters players by search query', async () => {

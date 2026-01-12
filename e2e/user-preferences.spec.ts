@@ -298,7 +298,7 @@ test.describe('User Preferences', () => {
 
       // All tab should be selected (has active styling)
       const allTab = page.getByTestId('roster-tab-all');
-      await expect(allTab).toHaveClass(/bg-emerald-600/);
+      await expect(allTab).toHaveClass(/bg-team-primary/);
     });
 
     test('can switch between roster tabs', async ({ page }) => {
@@ -314,7 +314,7 @@ test.describe('User Preferences', () => {
 
       // Offense tab should be selected
       const offenseTab = page.getByTestId('roster-tab-offense');
-      await expect(offenseTab).toHaveClass(/bg-emerald-600/);
+      await expect(offenseTab).toHaveClass(/bg-team-primary/);
 
       // Click Defense tab
       await page.getByTestId('roster-tab-defense').click();
