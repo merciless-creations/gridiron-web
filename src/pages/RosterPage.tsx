@@ -94,6 +94,7 @@ const FILTERABLE_STATUSES: PlayerStatus[] = [PlayerStatus.Injured];
 const BASE_COLUMNS = [
   { key: 'number', label: '#', defaultVisible: true },
   { key: 'name', label: 'Name', defaultVisible: true },
+  { key: 'nameShort', label: 'Name Short', defaultVisible: false },
   { key: 'position', label: 'Pos', defaultVisible: true },
   { key: 'status', label: 'Status', defaultVisible: true },
   { key: 'overall', label: 'OVR', defaultVisible: true },
@@ -124,6 +125,7 @@ function getColumnsForGrid(gridType: RosterGridType) {
 const SORTABLE_COLUMNS: Record<string, SortField | null> = {
   number: 'number',
   name: 'name',
+  nameShort: 'name', // Sort by name field
   position: 'position',
   status: null,
   overall: 'overall',
@@ -141,6 +143,7 @@ const SORTABLE_COLUMNS: Record<string, SortField | null> = {
 const COLUMN_HEADER_CONFIG: Record<string, { label: string; className: string }> = {
   number: { label: '#', className: 'px-4 py-3' },
   name: { label: 'Name', className: 'px-4 py-3' },
+  nameShort: { label: 'Name', className: 'px-4 py-3' },
   position: { label: 'Pos', className: 'px-4 py-3' },
   status: { label: 'Status', className: 'px-4 py-3 text-center' },
   overall: { label: 'OVR', className: 'px-4 py-3 text-center' },
@@ -681,6 +684,14 @@ function PlayerRow({ player, visibleColumns }: PlayerRowProps) {
           <td key={columnKey} className="px-4 py-3" data-testid={`cell-${columnKey}`}>
             <span className="text-gridiron-text-primary font-medium">
               {player.firstName} {player.lastName}
+            </span>
+          </td>
+        );
+      case 'nameShort':
+        return (
+          <td key={columnKey} className="px-4 py-3" data-testid={`cell-${columnKey}`}>
+            <span className="text-gridiron-text-primary font-medium">
+              {player.firstName.charAt(0)}. {player.lastName}
             </span>
           </td>
         );
