@@ -68,6 +68,92 @@ test.describe('User Preferences', () => {
     });
   });
 
+  test.describe('Theme Switching', () => {
+    test('can click dark theme button and theme changes', async ({ page }) => {
+      // Start with light theme
+      await setMockScenario('getPreferences', 'lightThemeScenario');
+      // Server will return dark theme after save
+      await setMockScenario('updatePreferences', 'darkThemeScenario');
+
+      await page.goto('/profile');
+      await page.waitForLoadState('networkidle');
+
+      // Verify we start with light theme
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+
+      // Set up scenario for refetch after mutation
+      await setMockScenario('getPreferences', 'darkThemeScenario');
+
+      // Click the dark theme button
+      const darkButton = page.getByTestId('theme-option-dark');
+      await expect(darkButton).toBeVisible();
+      await expect(darkButton).toBeEnabled();
+      await darkButton.click();
+
+      // Verify dark theme is now applied
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+      await expect(darkButton).toHaveAttribute('aria-checked', 'true');
+    });
+
+    test('can click light theme button and theme changes', async ({ page }) => {
+      // Start with dark theme
+      await setMockScenario('getPreferences', 'darkThemeScenario');
+      // Server will return light theme after save
+      await setMockScenario('updatePreferences', 'lightThemeScenario');
+
+      await page.goto('/profile');
+      await page.waitForLoadState('networkidle');
+
+      // Verify we start with dark theme
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+      // Set up scenario for refetch after mutation
+      await setMockScenario('getPreferences', 'lightThemeScenario');
+
+      // Click the light theme button
+      const lightButton = page.getByTestId('theme-option-light');
+      await expect(lightButton).toBeVisible();
+      await expect(lightButton).toBeEnabled();
+      await lightButton.click();
+
+      // Verify light theme is now applied
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+      await expect(lightButton).toHaveAttribute('aria-checked', 'true');
+    });
+
+    test('can click system theme button', async ({ page }) => {
+      // Start with dark theme
+      await setMockScenario('getPreferences', 'darkThemeScenario');
+      // Server will return system theme after save
+      await setMockScenario('updatePreferences', 'systemThemeScenario');
+
+      await page.goto('/profile');
+      await page.waitForLoadState('networkidle');
+
+      // Set up scenario for refetch after mutation
+      await setMockScenario('getPreferences', 'systemThemeScenario');
+
+      // Click the system theme button
+      const systemButton = page.getByTestId('theme-option-system');
+      await expect(systemButton).toBeVisible();
+      await expect(systemButton).toBeEnabled();
+      await systemButton.click();
+
+      // Verify system button is now selected
+      await expect(systemButton).toHaveAttribute('aria-checked', 'true');
+    });
+
+    test('theme button is not disabled initially', async ({ page }) => {
+      await page.goto('/profile');
+      await page.waitForLoadState('networkidle');
+
+      // All theme buttons should be enabled (not disabled)
+      await expect(page.getByTestId('theme-option-light')).toBeEnabled();
+      await expect(page.getByTestId('theme-option-dark')).toBeEnabled();
+      await expect(page.getByTestId('theme-option-system')).toBeEnabled();
+    });
+  });
+
   test.describe('Grid Column Customization', () => {
     test('shows column customizer on roster page', async ({ page }) => {
       // Navigate to a team roster page
