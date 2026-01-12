@@ -707,8 +707,10 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       // Position column width should not have changed significantly
       const posWidthAfter = await page.getByTestId('column-header-position').boundingBox();
 
-      // With table-fixed layout, other columns may shift but their explicit widths stay
+      // With table-fixed layout and explicit widths, other columns should stay the same
       expect(posWidthAfter).not.toBeNull();
+      expect(posWidthBefore).not.toBeNull();
+      expect(Math.abs(posWidthAfter!.width - posWidthBefore!.width)).toBeLessThan(5);
     });
 
     test('rapid successive resizes work correctly', async ({ page }) => {

@@ -278,8 +278,11 @@ export const RosterPage = () => {
     });
   }, [columnFilters, positionFilter, statusFilter, gridKey, setGridPreferences]);
 
-  // Get column widths from preferences
-  const savedColumnWidths = gridPrefs?.columnWidths ?? {};
+  // Get column widths from preferences (memoized to prevent dependency issues)
+  const savedColumnWidths = useMemo(
+    () => gridPrefs?.columnWidths ?? {},
+    [gridPrefs?.columnWidths]
+  );
 
   // Ref to the table for measuring column widths
   const tableRef = useRef<HTMLTableElement>(null);
