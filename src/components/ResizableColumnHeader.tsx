@@ -33,6 +33,18 @@ export function ResizableColumnHeader({
   const startXRef = useRef(0);
   const startWidthRef = useRef(0);
 
+  // Double-click to collapse to minimum width
+  const handleDoubleClick = useCallback((e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (headerRef.current) {
+      headerRef.current.style.width = `${minWidth}px`;
+      headerRef.current.style.minWidth = `${minWidth}px`;
+    }
+    onWidthChange(columnKey, minWidth);
+  }, [columnKey, minWidth, onWidthChange]);
+
   const handleMouseDown = useCallback((e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -91,6 +103,7 @@ export function ResizableColumnHeader({
           ${isResizing ? 'bg-gridiron-accent' : 'bg-transparent group-hover:bg-gridiron-border-emphasis'}
         `}
         onMouseDown={handleMouseDown}
+        onDoubleClick={handleDoubleClick}
         data-testid={testId ? `${testId}-resize-handle` : undefined}
         role="separator"
         aria-orientation="vertical"

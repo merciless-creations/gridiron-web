@@ -358,6 +358,92 @@ describe('ResizableColumnHeader', () => {
     });
   });
 
+  describe('Double-Click to Minimize', () => {
+    it('collapses column to minimum width on double-click', () => {
+      const onWidthChange = vi.fn();
+      render(
+        <table>
+          <thead>
+            <tr>
+              <ResizableColumnHeader
+                {...defaultProps}
+                onWidthChange={onWidthChange}
+                width={200}
+                data-testid="test-header"
+              >
+                Test Header
+              </ResizableColumnHeader>
+            </tr>
+          </thead>
+        </table>
+      );
+
+      const handle = screen.getByTestId('test-header-resize-handle');
+
+      fireEvent.doubleClick(handle);
+
+      // Should collapse to default minWidth of 50
+      expect(onWidthChange).toHaveBeenCalledWith('testColumn', 50);
+    });
+
+    it('collapses to custom minWidth on double-click', () => {
+      const onWidthChange = vi.fn();
+      render(
+        <table>
+          <thead>
+            <tr>
+              <ResizableColumnHeader
+                {...defaultProps}
+                onWidthChange={onWidthChange}
+                width={200}
+                minWidth={80}
+                data-testid="test-header"
+              >
+                Test Header
+              </ResizableColumnHeader>
+            </tr>
+          </thead>
+        </table>
+      );
+
+      const handle = screen.getByTestId('test-header-resize-handle');
+
+      fireEvent.doubleClick(handle);
+
+      // Should collapse to custom minWidth of 80
+      expect(onWidthChange).toHaveBeenCalledWith('testColumn', 80);
+    });
+
+    it('updates header style immediately on double-click', () => {
+      const onWidthChange = vi.fn();
+      render(
+        <table>
+          <thead>
+            <tr>
+              <ResizableColumnHeader
+                {...defaultProps}
+                onWidthChange={onWidthChange}
+                width={200}
+                data-testid="test-header"
+              >
+                Test Header
+              </ResizableColumnHeader>
+            </tr>
+          </thead>
+        </table>
+      );
+
+      const handle = screen.getByTestId('test-header-resize-handle');
+      const header = screen.getByTestId('test-header');
+
+      fireEvent.doubleClick(handle);
+
+      // Header style should be updated to minWidth
+      expect(header.style.width).toBe('50px');
+      expect(header.style.minWidth).toBe('50px');
+    });
+  });
+
   describe('Resize Handle Styling', () => {
     it('has hover styling classes', () => {
       render(

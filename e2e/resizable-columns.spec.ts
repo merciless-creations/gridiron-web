@@ -198,6 +198,54 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       await page.mouse.up();
     });
 
+    test('double-click collapses column to minimum width', async ({ page }) => {
+      await page.goto('/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      const header = page.getByTestId('column-header-name');
+      const resizeHandle = page.getByTestId('column-header-name-resize-handle');
+
+      // Get initial width
+      const initialBox = await header.boundingBox();
+      expect(initialBox).not.toBeNull();
+
+      // Double-click the resize handle
+      await resizeHandle.dblclick();
+
+      // Wait for update
+      await page.waitForTimeout(100);
+
+      // Get new width
+      const newBox = await header.boundingBox();
+      expect(newBox).not.toBeNull();
+
+      // Width should be at minimum (50px)
+      expect(newBox!.width).toBeLessThanOrEqual(55); // Allow small tolerance
+    });
+
+    test('double-click minimum width persists after reload', async ({ page }) => {
+      await page.goto('/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      const resizeHandle = page.getByTestId('column-header-name-resize-handle');
+
+      // Double-click to collapse
+      await resizeHandle.dblclick();
+
+      // Wait for preference to save
+      await page.waitForTimeout(500);
+
+      // Reload
+      await page.reload();
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Width should still be at minimum
+      const header = page.getByTestId('column-header-name');
+      const box = await header.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.width).toBeLessThanOrEqual(55);
+    });
+
     test('cursor and selection restored after resize ends', async ({ page }) => {
       await page.goto('/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
