@@ -22,9 +22,11 @@ describe('Navigation', () => {
     expect(simulateLinks.length).toBeGreaterThan(0)
   })
 
-  it('renders the login button when not authenticated', () => {
+  it('renders the logout button and username when authenticated', () => {
+    // MockAuthProvider always returns authenticated state
     render(<Navigation />)
-    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument()
+    expect(screen.getByText('Test User')).toBeInTheDocument()
   })
 
   it('has correct href attributes', () => {

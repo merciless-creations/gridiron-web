@@ -1,6 +1,4 @@
-import { InteractionType } from '@azure/msal-browser';
-import { MsalAuthenticationTemplate } from '@azure/msal-react';
-import { loginRequest } from '../config/authConfig';
+import { useAuth } from '../hooks/useAuth';
 import { Loading } from './Loading';
 
 interface ProtectedRouteProps {
@@ -8,26 +6,21 @@ interface ProtectedRouteProps {
 }
 
 /**
- * ProtectedRoute component that ensures user is authenticated
- * Uses MSAL's built-in authentication template to handle login flow
- * Authentication is bypassed when using mock API server
+ * ProtectedRoute component that ensures user is authenticated.
+ * Uses the auth context which is provided by either MsalAuthProvider or MockAuthProvider.
  */
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  // Skip authentication when using mock API server
-  // This flag should ONLY be set in test/dev environments, never in production
-  const isMockAuth = import.meta.env.VITE_MOCK_AUTH === 'true';
+  const { isAuthenticated, isLoading, login } = useAuth();
 
-  if (isMockAuth) {
-    return <>{children}</>;
+  if (isLoading) {
+    return <Loading />;
   }
 
-  return (
-    <MsalAuthenticationTemplate
-      interactionType={InteractionType.Redirect}
-      authenticationRequest={loginRequest}
-      loadingComponent={Loading}
-    >
-      {children}
-    </MsalAuthenticationTemplate>
-  );
+  if (!isAuthenticated) {
+    // Trigger login redirect
+    login();
+    return <Loading />;
+  }
+
+  return <>{children}</>;
 };

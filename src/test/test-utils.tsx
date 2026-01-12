@@ -2,6 +2,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { render, type RenderOptions } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
+import { MockAuthProvider } from '../auth'
 import { ActiveContextProvider } from '../contexts/ActiveContextProvider'
 import { PreferencesProvider } from '../contexts/preferences'
 
@@ -29,13 +30,15 @@ const AllTheProviders = ({ children, initialEntries = ['/'] }: WrapperProps) => 
 
   return (
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={initialEntries}>
-        <ActiveContextProvider>
-          <PreferencesProvider>
-            {children}
-          </PreferencesProvider>
-        </ActiveContextProvider>
-      </MemoryRouter>
+      <MockAuthProvider>
+        <MemoryRouter initialEntries={initialEntries}>
+          <ActiveContextProvider>
+            <PreferencesProvider>
+              {children}
+            </PreferencesProvider>
+          </ActiveContextProvider>
+        </MemoryRouter>
+      </MockAuthProvider>
     </QueryClientProvider>
   )
 }
