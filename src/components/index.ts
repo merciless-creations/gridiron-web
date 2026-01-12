@@ -17,3 +17,4 @@ export * from './TeamColorSchemeEditor';
 export * from './NumericFilter';
 export * from './PositionFilter';
 export * from './ColumnFilterPopover';
+export * from './ResizableColumnHeader';

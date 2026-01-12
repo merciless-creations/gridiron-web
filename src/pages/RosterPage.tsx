@@ -6,6 +6,7 @@ import {
   Loading,
   GridColumnCustomizer,
   ColumnFilterPopover,
+  ResizableColumnHeader,
 } from '../components';
 import { passesFilter, type NumericFilterValue } from '../utils/numericFilter';
 import { usePreferences } from '../contexts';
@@ -272,6 +273,19 @@ export const RosterPage = () => {
       numericFilters: cleanFilters,
     });
   }, [columnFilters, positionFilter, statusFilter, gridKey, setGridPreferences]);
+
+  // Get column widths from preferences
+  const columnWidths = gridPrefs?.columnWidths ?? {};
+
+  // Handle column width change
+  const handleColumnWidthChange = useCallback((columnKey: string, width: number) => {
+    setGridPreferences(gridKey, {
+      columnWidths: {
+        ...columnWidths,
+        [columnKey]: width,
+      },
+    });
+  }, [gridKey, columnWidths, setGridPreferences]);
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
@@ -550,7 +564,7 @@ export const RosterPage = () => {
       {/* Roster Table */}
       <div className="card overflow-hidden border-l-4 border-team-primary">
         <div className="overflow-x-auto">
-          <table className="w-full" data-testid="roster-table">
+          <table className="w-full table-fixed" data-testid="roster-table">
             <thead>
               <tr className="text-left text-xs text-gridiron-text-secondary uppercase tracking-wider border-b border-gridiron-border-subtle">
                 {visibleColumns.map((columnKey) => {
@@ -567,12 +581,15 @@ export const RosterPage = () => {
                   if (!config) return null;
 
                   return (
-                    <th
+                    <ResizableColumnHeader
                       key={columnKey}
-                      className={`${config.className}`}
+                      columnKey={columnKey}
+                      width={columnWidths[columnKey]}
+                      className={config.className}
+                      onWidthChange={handleColumnWidthChange}
                       data-testid={`column-header-${columnKey}`}
                     >
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 pr-2">
                         <span
                           className={sortableField ? 'cursor-pointer hover:text-gridiron-text-primary' : ''}
                           onClick={sortableField ? () => handleSort(sortableField) : undefined}
@@ -595,7 +612,7 @@ export const RosterPage = () => {
                           />
                         )}
                       </div>
-                    </th>
+                    </ResizableColumnHeader>
                   );
                 })}
               </tr>
