@@ -616,7 +616,7 @@ export const RosterPage = () => {
       {/* Roster Table */}
       <div className="card overflow-hidden border-l-4 border-team-primary">
         <div className="overflow-x-auto">
-          <table ref={tableRef} className={widthsInitialized ? 'w-max' : 'w-full'} data-testid="roster-table">
+          <table ref={tableRef} className={widthsInitialized ? 'w-max table-fixed' : 'w-full'} data-testid="roster-table">
             <thead>
               <tr className="text-left text-xs text-gridiron-text-secondary uppercase tracking-wider border-b border-gridiron-border-subtle">
                 {visibleColumns.map((columnKey) => {
@@ -642,9 +642,9 @@ export const RosterPage = () => {
                       onWidthChange={handleColumnWidthChange}
                       data-testid={`column-header-${columnKey}`}
                     >
-                      <div className="flex items-center gap-1 pr-2">
+                      <div className="flex items-center gap-1 pr-2 min-w-0">
                         <span
-                          className={sortableField ? 'cursor-pointer hover:text-gridiron-text-primary' : ''}
+                          className={`truncate min-w-0 ${sortableField ? 'cursor-pointer hover:text-gridiron-text-primary' : ''}`}
                           onClick={sortableField ? () => handleSort(sortableField) : undefined}
                         >
                           {config.label}{sortableField ? getSortIndicator(sortableField) : ''}

@@ -44,6 +44,7 @@ export function ResizableColumnHeader({
     if (headerRef.current) {
       headerRef.current.style.width = `${minWidth}px`;
       headerRef.current.style.minWidth = `${minWidth}px`;
+      headerRef.current.style.maxWidth = `${minWidth}px`;
     }
     onWidthChange(columnKey, minWidth);
   }, [columnKey, minWidth, onWidthChange]);
@@ -69,6 +70,7 @@ export function ResizableColumnHeader({
       if (headerRef.current) {
         headerRef.current.style.width = `${newWidth}px`;
         headerRef.current.style.minWidth = `${newWidth}px`;
+        headerRef.current.style.maxWidth = `${newWidth}px`;
       }
     };
 
@@ -91,16 +93,22 @@ export function ResizableColumnHeader({
     document.body.style.userSelect = 'none';
   }, [columnKey, minWidth, onResizeStart, onWidthChange]);
 
-  const style = width ? { width: `${width}px`, minWidth: `${width}px` } : undefined;
+  const style = width ? {
+    width: `${width}px`,
+    minWidth: `${width}px`,
+    maxWidth: `${width}px`,
+  } : undefined;
 
   return (
     <th
       ref={headerRef}
-      className={`${className} relative group`}
+      className={`${className} relative group overflow-hidden`}
       style={style}
       data-testid={testId}
     >
-      {children}
+      <div className="overflow-hidden whitespace-nowrap min-w-0">
+        {children}
+      </div>
       {/* Resize Handle */}
       <div
         className={`

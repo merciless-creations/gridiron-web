@@ -64,14 +64,14 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       }
     });
 
-    test('table allows horizontal scrolling for column widths', async ({ page }) => {
+    test('table starts at full width before customization', async ({ page }) => {
       await page.goto('/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const table = page.getByTestId('roster-table');
 
-      // Table should have min-w-full class to fill container but allow growth
-      await expect(table).toHaveClass(/min-w-full/);
+      // Table should start at full width (w-full) before any column customization
+      await expect(table).toHaveClass(/w-full/);
     });
   });
 
