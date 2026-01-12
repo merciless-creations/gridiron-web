@@ -154,8 +154,8 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       const finalBox = await header.boundingBox();
       expect(finalBox).not.toBeNull();
 
-      // Width should not go below minimum (50px default)
-      expect(finalBox!.width).toBeGreaterThanOrEqual(50);
+      // Width should not go below minimum (36px default)
+      expect(finalBox!.width).toBeGreaterThanOrEqual(36);
     });
 
     test('resize handle shows visual feedback during drag', async ({ page }) => {
@@ -219,8 +219,8 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       const newBox = await header.boundingBox();
       expect(newBox).not.toBeNull();
 
-      // Width should be at minimum (50px)
-      expect(newBox!.width).toBeLessThanOrEqual(55); // Allow small tolerance
+      // Width should be at minimum (36px)
+      expect(newBox!.width).toBeLessThanOrEqual(42); // Allow small tolerance
     });
 
     test('double-click minimum width persists after reload', async ({ page }) => {
@@ -243,7 +243,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       const header = page.getByTestId('column-header-name');
       const box = await header.boundingBox();
       expect(box).not.toBeNull();
-      expect(box!.width).toBeLessThanOrEqual(55);
+      expect(box!.width).toBeLessThanOrEqual(42);
     });
 
     test('cursor and selection restored after resize ends', async ({ page }) => {
@@ -733,7 +733,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       // Should not have crashed, column should have a valid width
       const finalBox = await page.getByTestId('column-header-name').boundingBox();
       expect(finalBox).not.toBeNull();
-      expect(finalBox!.width).toBeGreaterThan(50);
+      expect(finalBox!.width).toBeGreaterThan(36);
     });
 
     test('hiding all columns except one still works', async ({ page }) => {

@@ -24,6 +24,7 @@ import {
   type Skill,
   type RosterGridType,
   SKILL_LABELS,
+  SKILL_ABBREV,
   ALL_SKILLS,
   ROSTER_GRID_POSITIONS,
   getGridSkills,
@@ -153,10 +154,10 @@ const COLUMN_HEADER_CONFIG: Record<string, { label: string; className: string }>
   salary: { label: 'Salary', className: 'px-4 py-3 text-right' },
   contract: { label: 'Contract', className: 'px-4 py-3 text-center' },
   health: { label: 'Health', className: 'px-4 py-3 text-center' },
-  // Skill columns
+  // Skill columns (use 3-letter abbreviations)
   ...Object.fromEntries(ALL_SKILLS.map(skill => [
     skill,
-    { label: SKILL_LABELS[skill], className: 'px-4 py-3 text-center' }
+    { label: SKILL_ABBREV[skill], className: 'px-2 py-3 text-center' }
   ])),
 };
 

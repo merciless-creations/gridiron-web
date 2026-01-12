@@ -17,7 +17,7 @@ interface ResizableColumnHeaderProps {
   'data-testid'?: string;
 }
 
-const DEFAULT_MIN_WIDTH = 50;
+const DEFAULT_MIN_WIDTH = 36;
 
 export function ResizableColumnHeader({
   columnKey,

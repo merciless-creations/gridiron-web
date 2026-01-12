@@ -185,6 +185,23 @@ export const SKILL_LABELS: Record<Skill, string> = {
 };
 
 /**
+ * 3-letter abbreviations for skills (used in grid headers)
+ */
+export const SKILL_ABBREV: Record<Skill, string> = {
+  speed: 'SPD',
+  strength: 'STR',
+  agility: 'AGI',
+  awareness: 'AWR',
+  passing: 'PAS',
+  catching: 'CAT',
+  rushing: 'RSH',
+  blocking: 'BLK',
+  tackling: 'TKL',
+  coverage: 'COV',
+  kicking: 'KCK',
+};
+
+/**
  * Roster grid types
  */
 export type RosterGridType = 'all' | 'offense' | 'defense' | 'specialTeams';

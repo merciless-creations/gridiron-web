@@ -186,12 +186,12 @@ describe('ResizableColumnHeader', () => {
       fireEvent.mouseDown(handle, { clientX: 100 });
 
       // Move mouse
-      fireEvent.mouseMove(document, { clientX: 150 });
+      fireEvent.mouseMove(document, { clientX: 136 });
 
       // End resize
-      fireEvent.mouseUp(document, { clientX: 150 });
+      fireEvent.mouseUp(document, { clientX: 136 });
 
-      expect(onWidthChange).toHaveBeenCalledWith('testColumn', 150);
+      expect(onWidthChange).toHaveBeenCalledWith('testColumn', 136);
     });
 
     it('respects minWidth during resize', () => {
@@ -232,7 +232,7 @@ describe('ResizableColumnHeader', () => {
       expect(onWidthChange).toHaveBeenCalledWith('testColumn', 80);
     });
 
-    it('uses default minWidth of 50px', () => {
+    it('uses default minWidth of 36px', () => {
       const onWidthChange = vi.fn();
       render(
         <table>
@@ -265,8 +265,8 @@ describe('ResizableColumnHeader', () => {
       // End resize
       fireEvent.mouseUp(document, { clientX: 10 });
 
-      // Should be clamped to default minWidth of 50
-      expect(onWidthChange).toHaveBeenCalledWith('testColumn', 50);
+      // Should be clamped to default minWidth of 36
+      expect(onWidthChange).toHaveBeenCalledWith('testColumn', 36);
     });
 
     it('sets cursor to col-resize during drag', () => {
@@ -315,7 +315,7 @@ describe('ResizableColumnHeader', () => {
       Object.defineProperty(header, 'offsetWidth', { value: 100, configurable: true });
 
       fireEvent.mouseDown(handle, { clientX: 100 });
-      fireEvent.mouseUp(document, { clientX: 150 });
+      fireEvent.mouseUp(document, { clientX: 136 });
 
       expect(document.body.style.cursor).toBe('');
       expect(document.body.style.userSelect).toBe('');
@@ -382,8 +382,8 @@ describe('ResizableColumnHeader', () => {
 
       fireEvent.doubleClick(handle);
 
-      // Should collapse to default minWidth of 50
-      expect(onWidthChange).toHaveBeenCalledWith('testColumn', 50);
+      // Should collapse to default minWidth of 36
+      expect(onWidthChange).toHaveBeenCalledWith('testColumn', 36);
     });
 
     it('collapses to custom minWidth on double-click', () => {
@@ -439,8 +439,8 @@ describe('ResizableColumnHeader', () => {
       fireEvent.doubleClick(handle);
 
       // Header style should be updated to minWidth
-      expect(header.style.width).toBe('50px');
-      expect(header.style.minWidth).toBe('50px');
+      expect(header.style.width).toBe('36px');
+      expect(header.style.minWidth).toBe('36px');
     });
   });
 
@@ -536,15 +536,15 @@ describe('ResizableColumnHeader', () => {
 
       // First resize
       fireEvent.mouseDown(handle, { clientX: 100 });
-      fireEvent.mouseUp(document, { clientX: 150 });
+      fireEvent.mouseUp(document, { clientX: 136 });
 
-      expect(onWidthChange).toHaveBeenCalledWith('testColumn', 150);
+      expect(onWidthChange).toHaveBeenCalledWith('testColumn', 136);
 
       // Update mock width for second resize
-      Object.defineProperty(header, 'offsetWidth', { value: 150, configurable: true });
+      Object.defineProperty(header, 'offsetWidth', { value: 136, configurable: true });
 
       // Second resize
-      fireEvent.mouseDown(handle, { clientX: 150 });
+      fireEvent.mouseDown(handle, { clientX: 136 });
       fireEvent.mouseUp(document, { clientX: 200 });
 
       expect(onWidthChange).toHaveBeenCalledWith('testColumn', 200);
