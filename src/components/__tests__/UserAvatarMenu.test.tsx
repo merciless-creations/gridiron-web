@@ -132,6 +132,30 @@ describe('UserAvatarMenu', () => {
       const dropdown = screen.getByTestId('user-avatar-menu-dropdown')
       expect(dropdown).toHaveAttribute('role', 'menu')
     })
+
+    it('renders theme switcher in dropdown', async () => {
+      const user = userEvent.setup()
+      render(<UserAvatarMenu />)
+
+      await user.click(screen.getByTestId('user-avatar-menu-trigger'))
+
+      // Theme label should be visible
+      expect(screen.getByText('Theme')).toBeInTheDocument()
+      // Theme switcher should be present
+      expect(screen.getByTestId('theme-switcher')).toBeInTheDocument()
+    })
+
+    it('renders all theme options in dropdown', async () => {
+      const user = userEvent.setup()
+      render(<UserAvatarMenu />)
+
+      await user.click(screen.getByTestId('user-avatar-menu-trigger'))
+
+      // All three theme options should be available
+      expect(screen.getByTestId('theme-option-light')).toBeInTheDocument()
+      expect(screen.getByTestId('theme-option-dark')).toBeInTheDocument()
+      expect(screen.getByTestId('theme-option-system')).toBeInTheDocument()
+    })
   })
 
   describe('Actions', () => {

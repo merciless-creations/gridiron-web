@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { ContextSwitcher } from './ContextSwitcher';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 interface UserAvatarMenuProps {
   className?: string;
@@ -148,6 +149,12 @@ export const UserAvatarMenu = ({ className = '' }: UserAvatarMenuProps) => {
             </svg>
             Profile
           </Link>
+
+          {/* Theme Switcher */}
+          <div className="px-4 py-2 flex items-center justify-between" role="menuitem">
+            <span className="text-sm text-gridiron-text-secondary">Theme</span>
+            <ThemeSwitcher variant="buttons" className="scale-90" data-testid="avatar-menu-theme-switcher" />
+          </div>
 
           {/* Divider */}
           <div className="border-t border-gridiron-border-subtle" />

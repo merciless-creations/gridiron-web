@@ -223,6 +223,62 @@ test.describe('User Avatar Menu', () => {
     });
   });
 
+  test.describe('Theme Switcher', () => {
+    test.beforeEach(async ({ request }) => {
+      await request.post(`${MOCK_SERVER}/_preset`, {
+        data: { name: 'default' }
+      });
+    });
+
+    test('theme switcher is visible in dropdown', async ({ page }) => {
+      await page.goto('/dashboard');
+
+      await page.getByTestId('user-avatar-menu-trigger').click();
+
+      // Theme label and switcher should be visible
+      await expect(page.getByText('Theme')).toBeVisible();
+      await expect(page.getByTestId('theme-switcher')).toBeVisible();
+    });
+
+    test('all theme options are available', async ({ page }) => {
+      await page.goto('/dashboard');
+
+      await page.getByTestId('user-avatar-menu-trigger').click();
+
+      // All three theme options should be present
+      await expect(page.getByTestId('theme-option-light')).toBeVisible();
+      await expect(page.getByTestId('theme-option-dark')).toBeVisible();
+      await expect(page.getByTestId('theme-option-system')).toBeVisible();
+    });
+
+    test('can switch to dark theme from dropdown', async ({ page }) => {
+      await page.goto('/dashboard');
+
+      await page.getByTestId('user-avatar-menu-trigger').click();
+
+      // Click dark theme option
+      await page.getByTestId('theme-option-dark').click();
+
+      // Wait a moment for the theme to apply
+      await page.waitForTimeout(100);
+
+      // Dropdown should stay open after clicking theme (it's a toggle, not navigation)
+      await expect(page.getByTestId('user-avatar-menu-dropdown')).toBeVisible();
+    });
+
+    test('can switch to light theme from dropdown', async ({ page }) => {
+      await page.goto('/dashboard');
+
+      await page.getByTestId('user-avatar-menu-trigger').click();
+
+      // Click light theme option
+      await page.getByTestId('theme-option-light').click();
+
+      // Dropdown should stay open
+      await expect(page.getByTestId('user-avatar-menu-dropdown')).toBeVisible();
+    });
+  });
+
   test.describe('Logout Flow', () => {
     test.beforeEach(async ({ request }) => {
       await request.post(`${MOCK_SERVER}/_preset`, {
