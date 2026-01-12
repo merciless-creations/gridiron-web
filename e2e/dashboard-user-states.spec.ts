@@ -87,14 +87,15 @@ test.describe('Dashboard User States', () => {
     test('shows team with New badge', async ({ page }) => {
       await page.goto('/dashboard');
 
-      // Should see the team name
-      await expect(page.getByText('Eagles')).toBeVisible();
+      // Should see the team name in main content (not nav context switcher)
+      const main = page.getByRole('main');
+      await expect(main.getByText('Eagles')).toBeVisible();
 
       // Should see "New" badge
-      await expect(page.getByText('New')).toBeVisible();
+      await expect(main.getByText('New')).toBeVisible();
 
       // Should see league name in parentheses
-      await expect(page.getByText('(Test League)')).toBeVisible();
+      await expect(main.getByText('(Test League)')).toBeVisible();
     });
 
     test('shows Pending control state indicator', async ({ page }) => {
@@ -107,11 +108,12 @@ test.describe('Dashboard User States', () => {
     test('clicking team shows welcome modal', async ({ page }) => {
       await page.goto('/dashboard');
 
-      // Wait for team to be visible
-      await expect(page.getByText('Eagles')).toBeVisible();
+      // Wait for team to be visible in main content
+      const main = page.getByRole('main');
+      await expect(main.getByText('Eagles')).toBeVisible();
 
       // Click on the team name to trigger the modal (for unviewed teams)
-      await page.getByText('Eagles').click();
+      await main.getByText('Eagles').click();
 
       // Should see welcome modal
       await expect(page.getByRole('dialog')).toBeVisible();
@@ -136,10 +138,11 @@ test.describe('Dashboard User States', () => {
     test('shows all teams', async ({ page }) => {
       await page.goto('/dashboard');
 
-      // Should see all team names
-      await expect(page.getByText('Eagles')).toBeVisible();
-      await expect(page.getByText('Cowboys')).toBeVisible();
-      await expect(page.getByText('Giants')).toBeVisible();
+      // Should see all team names in main content
+      const main = page.getByRole('main');
+      await expect(main.getByText('Eagles')).toBeVisible();
+      await expect(main.getByText('Cowboys')).toBeVisible();
+      await expect(main.getByText('Giants')).toBeVisible();
     });
 
     test('shows New badge only on the new team', async ({ page }) => {
@@ -165,8 +168,8 @@ test.describe('Dashboard User States', () => {
     test('clicking new team shows welcome modal', async ({ page }) => {
       await page.goto('/dashboard');
 
-      // Click on the new team (Giants)
-      await page.getByText('Giants').click();
+      // Click on the new team (Giants) in main content
+      await page.getByRole('main').getByText('Giants').click();
 
       // Should see welcome modal
       await expect(page.getByText(/welcome/i)).toBeVisible();
@@ -175,11 +178,12 @@ test.describe('Dashboard User States', () => {
     test('clicking viewed team navigates directly to team manage page', async ({ page }) => {
       await page.goto('/dashboard');
 
-      // Wait for teams to load
-      await expect(page.getByText('Eagles')).toBeVisible();
+      // Wait for teams to load in main content
+      const main = page.getByRole('main');
+      await expect(main.getByText('Eagles')).toBeVisible();
 
       // Click on a viewed team (Eagles) - clicking the team name navigates directly
-      await page.getByText('Eagles').click();
+      await main.getByText('Eagles').click();
 
       // Should navigate to team manage page (no modal)
       await expect(page).toHaveURL(/\/teams\/1\/manage/);
@@ -239,11 +243,10 @@ test.describe('Dashboard User States', () => {
     test('shows both league and team', async ({ page }) => {
       await page.goto('/dashboard');
 
-      // Should see league
-      await expect(page.getByText('Test League').first()).toBeVisible();
-
-      // Should see team
-      await expect(page.getByText('Eagles')).toBeVisible();
+      // Should see league and team in main content
+      const main = page.getByRole('main');
+      await expect(main.getByText('Test League').first()).toBeVisible();
+      await expect(main.getByText('Eagles')).toBeVisible();
     });
 
     test('team has New badge', async ({ page }) => {
@@ -256,8 +259,9 @@ test.describe('Dashboard User States', () => {
     test('clicking team shows welcome modal', async ({ page }) => {
       await page.goto('/dashboard');
 
-      // Click on team
-      await page.getByText('Eagles').click();
+      // Click on team in main content
+      const main = page.getByRole('main');
+      await main.getByText('Eagles').click();
 
       // Should see welcome modal
       await expect(page.getByText(/welcome/i)).toBeVisible();
@@ -274,13 +278,12 @@ test.describe('Dashboard User States', () => {
     test('shows league and all teams', async ({ page }) => {
       await page.goto('/dashboard');
 
-      // Should see league
-      await expect(page.getByText('Test League').first()).toBeVisible();
-
-      // Should see all teams
-      await expect(page.getByText('Eagles')).toBeVisible();
-      await expect(page.getByText('Cowboys')).toBeVisible();
-      await expect(page.getByText('Giants')).toBeVisible();
+      // Should see league and all teams in main content
+      const main = page.getByRole('main');
+      await expect(main.getByText('Test League').first()).toBeVisible();
+      await expect(main.getByText('Eagles')).toBeVisible();
+      await expect(main.getByText('Cowboys')).toBeVisible();
+      await expect(main.getByText('Giants')).toBeVisible();
     });
 
     test('only new team has New badge', async ({ page }) => {
@@ -304,8 +307,8 @@ test.describe('Dashboard User States', () => {
     test('welcome modal flow works for new team then navigates', async ({ page }) => {
       await page.goto('/dashboard');
 
-      // Click new team
-      await page.getByText('Giants').click();
+      // Click new team in main content
+      await page.getByRole('main').getByText('Giants').click();
 
       // See welcome modal
       await expect(page.getByText(/welcome/i)).toBeVisible();

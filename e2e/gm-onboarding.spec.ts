@@ -42,8 +42,9 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
 
       // Should show teams with different control states
       // The default preset has: Eagles (viewed), Falcons (not viewed)
-      await expect(page.getByText('Eagles')).toBeVisible()
-      await expect(page.getByText('Falcons')).toBeVisible()
+      const main = page.getByRole('main')
+      await expect(main.getByText('Eagles')).toBeVisible()
+      await expect(main.getByText('Falcons')).toBeVisible()
 
       // Teams section should show league names
       await expect(page.getByText('(Test League)')).toBeVisible()
@@ -92,8 +93,9 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
 
       await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible()
 
-      // Wait for teams to load
-      await expect(page.getByText('Falcons')).toBeVisible()
+      // Wait for teams to load in main content
+      const main = page.getByRole('main')
+      await expect(main.getByText('Falcons')).toBeVisible()
 
       // Find and click on the team that hasn't been viewed (Falcons)
       // The team row with cursor-pointer class is clickable
@@ -186,8 +188,9 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
 
       await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible()
 
-      // Should show the pending team
-      await expect(page.getByText('Giants')).toBeVisible()
+      // Should show the pending team in main content
+      const main = page.getByRole('main')
+      await expect(main.getByText('Giants')).toBeVisible()
 
       // Should show Pending indicator
       await expect(page.locator('[aria-label="Pending"]')).toBeVisible()
@@ -199,8 +202,9 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
 
       await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible()
 
-      // Wait for teams to load
-      await expect(page.getByText('Giants')).toBeVisible()
+      // Wait for teams to load in main content
+      const main = page.getByRole('main')
+      await expect(main.getByText('Giants')).toBeVisible()
 
       // Click on the pending team (Giants - hasViewed: false)
       const giantsRow = page.locator('div.cursor-pointer').filter({ hasText: 'Giants' })
@@ -717,8 +721,9 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
       await page.goto('/dashboard')
       await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible()
 
-      // Should see their pending team
-      await expect(page.getByText('Giants')).toBeVisible()
+      // Should see their pending team in main content
+      const main = page.getByRole('main')
+      await expect(main.getByText('Giants')).toBeVisible()
       await expect(page.locator('[aria-label="Pending"]')).toBeVisible()
 
       // Click on the team to see welcome modal
@@ -770,7 +775,7 @@ test.describe('Epic #49: GM Invitation & Onboarding', () => {
 
       // Dashboard should load successfully
       await expect(page.getByRole('heading', { name: 'Teams You Manage' })).toBeVisible({ timeout: 10000 })
-      await expect(page.getByText('Eagles')).toBeVisible()
+      await expect(page.getByRole('main').getByText('Eagles')).toBeVisible()
     })
   })
 })
