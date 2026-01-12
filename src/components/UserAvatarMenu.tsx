@@ -124,7 +124,7 @@ export const UserAvatarMenu = ({ className = '' }: UserAvatarMenuProps) => {
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className="absolute top-full right-0 mt-1 w-72 sm:w-80 max-h-[calc(100vh-5rem)] overflow-auto bg-gridiron-bg-card border border-gridiron-border-subtle rounded shadow-lg z-50"
+          className="absolute top-full right-0 mt-1 w-80 max-h-[calc(100vh-5rem)] overflow-y-auto overflow-x-hidden bg-gridiron-bg-card border border-gridiron-border-subtle rounded shadow-lg z-50"
           role="menu"
           data-testid="user-avatar-menu-dropdown"
         >
