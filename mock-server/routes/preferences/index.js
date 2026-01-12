@@ -104,6 +104,7 @@ const getPreferences = {
 };
 
 // Update user preferences - returns canned response (no state)
+// For manual dev testing, use 'echoScenario' to return what was sent
 const updatePreferences = {
   name: 'updatePreferences',
   mockRoute: '/api/users/me/preferences',
@@ -118,6 +119,10 @@ const updatePreferences = {
       withRedTeamColors: () => JSON.stringify(CANNED_RESPONSES.withRedTeamColors),
       withBlueTeamColors: () => JSON.stringify(CANNED_RESPONSES.withBlueTeamColors),
       fullPreferencesScenario: () => JSON.stringify(CANNED_RESPONSES.fullPreferences),
+      // Theme scenarios
+      lightThemeScenario: () => JSON.stringify(CANNED_RESPONSES.lightTheme),
+      darkThemeScenario: () => JSON.stringify(CANNED_RESPONSES.darkTheme),
+      systemThemeScenario: () => JSON.stringify(CANNED_RESPONSES.systemTheme),
     },
     {
       // Error scenarios

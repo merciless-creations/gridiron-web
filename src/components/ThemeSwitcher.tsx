@@ -69,6 +69,7 @@ export function ThemeSwitcher({ variant = 'buttons', className = '' }: ThemeSwit
   if (variant === 'compact') {
     return (
       <button
+        type="button"
         onClick={() => {
           // Cycle through themes: light -> dark -> system -> light
           const nextTheme: ThemePreference =
@@ -115,6 +116,7 @@ export function ThemeSwitcher({ variant = 'buttons', className = '' }: ThemeSwit
     >
       {themeOptions.map((option) => (
         <button
+          type="button"
           key={option.value}
           onClick={() => setTheme(option.value)}
           disabled={isSaving}
