@@ -14,40 +14,40 @@ export function LandingPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gridiron-bg-primary">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gridiron-accent"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gridiron-bg-primary via-gridiron-bg-secondary to-gridiron-bg-primary">
       <div className="container mx-auto px-4 py-16">
         <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-            Goal To Go <span className="text-green-500">Football</span>
+          <h1 className="text-5xl md:text-7xl font-bold text-gridiron-text-primary mb-6">
+            Goal To Go <span className="text-gridiron-accent">Football</span>
           </h1>
-          
-          <p className="text-xl md:text-2xl text-gray-300 mb-8">
+
+          <p className="text-xl md:text-2xl text-gridiron-text-secondary mb-8">
             Build your dynasty. Manage your roster. Dominate the league.
           </p>
-          
-          <p className="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">
-            The ultimate online football franchise simulation. Draft players, manage contracts, 
+
+          <p className="text-lg text-gridiron-text-muted mb-12 max-w-2xl mx-auto">
+            The ultimate online football franchise simulation. Draft players, manage contracts,
             make trades, and compete against friends in a realistic NFL-style experience.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => login()}
-              className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+              className="px-8 py-4 bg-gridiron-accent hover:bg-emerald-400 text-gridiron-bg-primary text-lg font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
             >
               Get Started
             </button>
-            
+
             <button
               onClick={() => login()}
-              className="px-8 py-4 bg-transparent border-2 border-gray-500 hover:border-green-500 text-white text-lg font-semibold rounded-lg transition-colors duration-200"
+              className="px-8 py-4 bg-transparent border-2 border-gridiron-border-emphasis hover:border-gridiron-accent text-gridiron-text-primary text-lg font-semibold rounded-lg transition-colors duration-200"
             >
               Sign In
             </button>
@@ -75,9 +75,9 @@ export function LandingPage() {
 
 function FeatureCard({ title, description }: { title: string; description: string }) {
   return (
-    <div className="bg-gray-800 bg-opacity-50 rounded-xl p-6 border border-gray-700">
-      <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
-      <p className="text-gray-400">{description}</p>
+    <div className="bg-gridiron-bg-card bg-opacity-50 rounded-xl p-6 border border-gridiron-border-subtle">
+      <h3 className="text-xl font-semibold text-gridiron-text-primary mb-2">{title}</h3>
+      <p className="text-gridiron-text-secondary">{description}</p>
     </div>
   );
 }
