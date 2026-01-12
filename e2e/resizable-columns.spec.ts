@@ -64,14 +64,14 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       }
     });
 
-    test('table uses fixed layout for precise column widths', async ({ page }) => {
+    test('table allows horizontal scrolling for column widths', async ({ page }) => {
       await page.goto('/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const table = page.getByTestId('roster-table');
 
-      // Table should have table-fixed class for proper column width behavior
-      await expect(table).toHaveClass(/table-fixed/);
+      // Table should have min-w-full class to fill container but allow growth
+      await expect(table).toHaveClass(/min-w-full/);
     });
   });
 
