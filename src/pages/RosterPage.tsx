@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { usePlayers } from '../api/players';
 import { useTeam } from '../api/teams';
@@ -279,17 +279,65 @@ export const RosterPage = () => {
   }, [columnFilters, positionFilter, statusFilter, gridKey, setGridPreferences]);
 
   // Get column widths from preferences
-  const columnWidths = gridPrefs?.columnWidths ?? {};
+  const savedColumnWidths = gridPrefs?.columnWidths ?? {};
+
+  // Ref to the table for measuring column widths
+  const tableRef = useRef<HTMLTableElement>(null);
+
+  // Track measured widths (captured on first resize interaction)
+  const [measuredWidths, setMeasuredWidths] = useState<Record<string, number>>({});
+
+  // Track if widths have been initialized (either from prefs or measured)
+  const [widthsInitialized, setWidthsInitialized] = useState(
+    () => Object.keys(savedColumnWidths).length > 0
+  );
+
+  // Measure all column widths from the table
+  const measureAllColumnWidths = useCallback(() => {
+    if (!tableRef.current) return null;
+
+    const headerCells = tableRef.current.querySelectorAll('th[data-testid^="column-header-"]');
+    if (headerCells.length === 0) return null;
+
+    const widths: Record<string, number> = {};
+    headerCells.forEach((cell) => {
+      const testId = cell.getAttribute('data-testid');
+      if (testId) {
+        const columnKey = testId.replace('column-header-', '');
+        widths[columnKey] = (cell as HTMLElement).offsetWidth;
+      }
+    });
+
+    return widths;
+  }, []);
+
+  // Combine saved widths with measured widths (saved takes precedence)
+  const columnWidths = useMemo(() => ({
+    ...measuredWidths,
+    ...savedColumnWidths,
+  }), [measuredWidths, savedColumnWidths]);
+
+  // Called at the START of any resize - measure and lock all columns
+  const handleResizeStart = useCallback(() => {
+    if (widthsInitialized) return;
+
+    const measured = measureAllColumnWidths();
+    if (measured) {
+      setMeasuredWidths(measured);
+      setWidthsInitialized(true);
+    }
+  }, [widthsInitialized, measureAllColumnWidths]);
 
   // Handle column width change
   const handleColumnWidthChange = useCallback((columnKey: string, width: number) => {
     setGridPreferences(gridKey, {
       columnWidths: {
-        ...columnWidths,
+        ...measuredWidths,
+        ...savedColumnWidths,
         [columnKey]: width,
       },
     });
-  }, [gridKey, columnWidths, setGridPreferences]);
+  }, [gridKey, measuredWidths, savedColumnWidths, setGridPreferences]);
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
@@ -568,7 +616,7 @@ export const RosterPage = () => {
       {/* Roster Table */}
       <div className="card overflow-hidden border-l-4 border-team-primary">
         <div className="overflow-x-auto">
-          <table className="min-w-full" data-testid="roster-table">
+          <table ref={tableRef} className={widthsInitialized ? 'w-max' : 'w-full'} data-testid="roster-table">
             <thead>
               <tr className="text-left text-xs text-gridiron-text-secondary uppercase tracking-wider border-b border-gridiron-border-subtle">
                 {visibleColumns.map((columnKey) => {
@@ -590,6 +638,7 @@ export const RosterPage = () => {
                       columnKey={columnKey}
                       width={columnWidths[columnKey]}
                       className={config.className}
+                      onResizeStart={handleResizeStart}
                       onWidthChange={handleColumnWidthChange}
                       data-testid={`column-header-${columnKey}`}
                     >

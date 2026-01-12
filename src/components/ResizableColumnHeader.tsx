@@ -11,6 +11,8 @@ interface ResizableColumnHeaderProps {
   children: ReactNode;
   /** Base className for the th element */
   className?: string;
+  /** Callback when resize starts (before any movement) */
+  onResizeStart?: () => void;
   /** Callback when width changes */
   onWidthChange: (columnKey: string, width: number) => void;
   /** Test ID for the header */
@@ -25,6 +27,7 @@ export function ResizableColumnHeader({
   minWidth = DEFAULT_MIN_WIDTH,
   children,
   className = '',
+  onResizeStart,
   onWidthChange,
   'data-testid': testId,
 }: ResizableColumnHeaderProps) {
@@ -50,6 +53,9 @@ export function ResizableColumnHeader({
     e.stopPropagation();
 
     if (!headerRef.current) return;
+
+    // Notify parent before any resize happens
+    onResizeStart?.();
 
     setIsResizing(true);
     startXRef.current = e.clientX;
@@ -83,7 +89,7 @@ export function ResizableColumnHeader({
     document.addEventListener('mouseup', handleMouseUp);
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
-  }, [columnKey, minWidth, onWidthChange]);
+  }, [columnKey, minWidth, onResizeStart, onWidthChange]);
 
   const style = width ? { width: `${width}px`, minWidth: `${width}px` } : undefined;
 
