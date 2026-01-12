@@ -28,7 +28,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
 
   test.describe('Column Resize Handles', () => {
     test('column headers have visible resize handles', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Check that name column has a resize handle
@@ -41,7 +41,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('resize handle has col-resize cursor', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const nameResizeHandle = page.getByTestId('column-header-name-resize-handle');
@@ -49,7 +49,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('all visible columns have resize handles', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Get all column header resize handles
@@ -65,7 +65,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('table starts at full width before customization', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const table = page.getByTestId('roster-table');
@@ -77,7 +77,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
 
   test.describe('Column Resizing Behavior', () => {
     test('can resize column by dragging right to increase width', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const header = page.getByTestId('column-header-name');
@@ -106,7 +106,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('can resize column by dragging left to decrease width', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const header = page.getByTestId('column-header-name');
@@ -135,7 +135,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('column respects minimum width when shrinking', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const header = page.getByTestId('column-header-name');
@@ -159,7 +159,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('resize handle shows visual feedback during drag', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const resizeHandle = page.getByTestId('column-header-name-resize-handle');
@@ -179,7 +179,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('text selection is disabled during resize', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const resizeHandle = page.getByTestId('column-header-name-resize-handle');
@@ -199,7 +199,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('double-click collapses column to minimum width', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const header = page.getByTestId('column-header-name');
@@ -224,7 +224,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('double-click minimum width persists after reload', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const resizeHandle = page.getByTestId('column-header-name-resize-handle');
@@ -247,7 +247,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('cursor and selection restored after resize ends', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const resizeHandle = page.getByTestId('column-header-name-resize-handle');
@@ -270,7 +270,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
 
   test.describe('Column Width Persistence', () => {
     test('column width persists after page reload', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const header = page.getByTestId('column-header-name');
@@ -305,7 +305,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('multiple column widths persist independently', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Resize name column
@@ -349,7 +349,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('column widths persist across navigation', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Resize a column
@@ -371,7 +371,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       await page.waitForLoadState('networkidle');
 
       // Navigate back
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Width should persist
@@ -382,7 +382,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
 
   test.describe('Column Visibility - Adding/Removing Columns', () => {
     test('column customizer toggle is visible', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const customizer = page.getByTestId('column-customizer-toggle');
@@ -390,7 +390,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('can open column customizer panel', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       await page.getByTestId('column-customizer-toggle').click();
@@ -400,7 +400,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('can hide a column using customizer', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Verify position column is visible initially
@@ -424,7 +424,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('hidden column persists after reload', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Verify position column is visible initially
@@ -447,7 +447,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('can show a hidden column using customizer', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // First hide position column
@@ -470,7 +470,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('can reset columns to defaults', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Hide some columns first
@@ -491,7 +491,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('column visibility change shows in table immediately', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Count initial columns
@@ -512,7 +512,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
 
   test.describe('Column Ordering', () => {
     test('can reorder columns using customizer', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Get initial column order
@@ -537,7 +537,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('column order persists after reload', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Open customizer and reorder
@@ -565,7 +565,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
 
   test.describe('Per-Tab Preferences Independence', () => {
     test('each roster tab has independent column preferences', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Check if tabs exist
@@ -614,7 +614,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('hidden columns in one tab do not affect other tabs', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const offenseTab = page.getByRole('tab', { name: /offense/i });
@@ -646,7 +646,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
 
   test.describe('Accessibility', () => {
     test('resize handles have appropriate aria labels', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const nameResizeHandle = page.getByTestId('column-header-name-resize-handle');
@@ -656,7 +656,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('resize handles have separator role', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const resizeHandles = await page.locator('[data-testid$="-resize-handle"]').all();
@@ -668,7 +668,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('column customizer has proper aria attributes', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const toggle = page.getByTestId('column-customizer-toggle');
@@ -686,7 +686,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
 
   test.describe('Edge Cases', () => {
     test('resizing one column does not affect others', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Get initial width of position column
@@ -714,7 +714,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('rapid successive resizes work correctly', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const resizeHandle = page.getByTestId('column-header-name-resize-handle');
@@ -739,7 +739,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
 
     test('hiding all columns except one still works', async ({ page }) => {
-      await page.goto('/roster');
+      await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       // Open customizer
