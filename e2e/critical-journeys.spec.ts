@@ -17,18 +17,18 @@ test.describe('Critical User Journeys', () => {
     await page.goto('/')
     await expect(page.getByRole('heading', { name: 'Goal to Go Football' })).toBeVisible()
 
-    // Can navigate to Teams (which loads from API)
-    await page.click('text=Teams')
+    // Can navigate to Teams (which loads from API) - use nav link specifically
+    await page.getByRole('link', { name: 'Teams', exact: true }).first().click()
     await expect(page).toHaveURL('/teams')
     await expect(page.getByRole('heading', { name: 'Teams' })).toBeVisible()
 
-    // Can navigate to Leagues
-    await page.click('text=Leagues')
+    // Can navigate to Leagues - use nav link specifically
+    await page.getByRole('link', { name: 'Leagues', exact: true }).first().click()
     await expect(page).toHaveURL('/leagues')
     await expect(page.getByRole('heading', { name: 'My Leagues' })).toBeVisible()
 
-    // Can navigate to Profile
-    await page.click('text=Profile')
+    // Can navigate to Profile - use nav link specifically
+    await page.getByRole('link', { name: 'Profile', exact: true }).first().click()
     await expect(page).toHaveURL('/profile')
     await expect(page.getByRole('heading', { name: 'User Profile' })).toBeVisible()
   })

@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { ContextSwitcher } from './ContextSwitcher';
+import { UserAvatarMenu } from './UserAvatarMenu';
 
 export const Navigation = () => {
-  const { isAuthenticated, user, login, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -15,11 +13,6 @@ export const Navigation = () => {
             <Link to="/" className="flex items-center flex-shrink-0">
               <h1 className="text-xl sm:text-2xl font-display font-bold text-gridiron-accent">Goal to Go</h1>
             </Link>
-
-            {/* Context Switcher - visible when authenticated */}
-            {isAuthenticated && (
-              <ContextSwitcher className="hidden sm:block" />
-            )}
 
             <div className="hidden lg:flex space-x-1">
               <Link
@@ -73,39 +66,13 @@ export const Navigation = () => {
               </svg>
             </button>
 
-            {isAuthenticated ? (
-              <>
-                <span className="hidden sm:block text-sm text-gridiron-text-secondary">
-                  {user?.name || user?.username || 'User'}
-                </span>
-                <button
-                  onClick={logout}
-                  className="btn-secondary text-sm"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={login}
-                className="btn-primary text-sm"
-              >
-                Login
-              </button>
-            )}
+            <UserAvatarMenu />
           </div>
         </div>
 
         {/* Mobile menu */}
         {isMobileMenuOpen && (
           <div className="lg:hidden pb-4 space-y-2" data-testid="mobile-menu">
-            {/* Context Switcher for mobile */}
-            {isAuthenticated && (
-              <div className="sm:hidden py-2">
-                <ContextSwitcher />
-              </div>
-            )}
-
             <Link
               to="/"
               onClick={() => setIsMobileMenuOpen(false)}

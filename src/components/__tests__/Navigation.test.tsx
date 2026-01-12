@@ -22,11 +22,14 @@ describe('Navigation', () => {
     expect(simulateLinks.length).toBeGreaterThan(0)
   })
 
-  it('renders the logout button and username when authenticated', () => {
+  it('renders the user avatar menu when authenticated', () => {
     // MockAuthProvider always returns authenticated state
     render(<Navigation />)
-    expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument()
-    expect(screen.getByText('Test User')).toBeInTheDocument()
+    // Avatar menu trigger should be visible
+    expect(screen.getByTestId('user-avatar-menu-trigger')).toBeInTheDocument()
+    // User initials should be visible in avatar
+    expect(screen.getByTestId('user-avatar-initials')).toBeInTheDocument()
+    expect(screen.getByTestId('user-avatar-initials')).toHaveTextContent('TU')
   })
 
   it('has correct href attributes', () => {
@@ -83,18 +86,35 @@ describe('Navigation', () => {
     })
   })
 
-  describe('Context Switcher Integration', () => {
-    it('shows context switcher after data loads when authenticated', async () => {
+  describe('User Avatar Menu Integration', () => {
+    it('shows avatar menu with user info when authenticated', async () => {
       // The test utils render with mock auth which simulates authenticated state
       render(<Navigation />)
 
-      // Wait for context data to load
+      // Avatar menu trigger should be present
+      const avatarTrigger = screen.getByTestId('user-avatar-menu-trigger')
+      expect(avatarTrigger).toBeInTheDocument()
+
+      // Should have correct aria attributes
+      expect(avatarTrigger).toHaveAttribute('aria-haspopup', 'menu')
+      expect(avatarTrigger).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('opens avatar menu dropdown on click', async () => {
+      const user = userEvent.setup()
+      render(<Navigation />)
+
+      // Click avatar trigger
+      await user.click(screen.getByTestId('user-avatar-menu-trigger'))
+
+      // Dropdown should appear
       await waitFor(() => {
-        // Context switcher should be visible (either in header or mobile menu)
-        const contextSwitchers = screen.queryAllByTestId('context-switcher-trigger')
-        // May or may not show depending on auth state in test
-        expect(contextSwitchers.length).toBeGreaterThanOrEqual(0)
-      }, { timeout: 3000 })
+        expect(screen.getByTestId('user-avatar-menu-dropdown')).toBeInTheDocument()
+      })
+
+      // Should contain profile link and logout
+      expect(screen.getByTestId('avatar-menu-profile-link')).toBeInTheDocument()
+      expect(screen.getByTestId('avatar-menu-logout')).toBeInTheDocument()
     })
   })
 })
