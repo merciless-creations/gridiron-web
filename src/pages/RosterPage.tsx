@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { usePlayers } from '../api/players';
 import { useTeam } from '../api/teams';
@@ -9,6 +9,7 @@ import {
 } from '../components';
 import { passesFilter, type NumericFilterValue } from '../utils/numericFilter';
 import { usePreferences } from '../contexts';
+import { useTeamColors } from '../hooks';
 import type { GridKey } from '../contexts/preferences/types';
 import {
   Position,
@@ -172,9 +173,16 @@ export const RosterPage = () => {
   const activeTab = (searchParams.get('tab') as RosterGridType) || 'all';
   const gridKey = GRID_TYPE_TO_KEY[activeTab];
 
-  // Get preferences
-  const { preferences, setGridPreferences } = usePreferences();
+  // Get preferences and team colors
+  const { preferences, setGridPreferences, getTeamColorScheme } = usePreferences();
   const gridPrefs = preferences.grids?.[gridKey];
+  const { applyColors, DEFAULT_COLORS } = useTeamColors();
+
+  // Apply team colors when page loads
+  useEffect(() => {
+    const savedColors = getTeamColorScheme(teamIdNum);
+    applyColors(savedColors ?? DEFAULT_COLORS);
+  }, [teamIdNum, getTeamColorScheme, applyColors, DEFAULT_COLORS]);
 
   // Get available columns for this grid type
   const availableColumns = useMemo(() => getColumnsForGrid(activeTab), [activeTab]);
@@ -474,19 +482,19 @@ export const RosterPage = () => {
         <div>
           <Link
             to={`/teams/${teamId}/manage`}
-            className="text-gridiron-accent hover:underline text-sm mb-2 inline-block"
+            className="text-team-primary hover:underline text-sm mb-2 inline-block"
           >
             &larr; Back to Team Management
           </Link>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-3xl font-bold text-team-primary">
             {team.city} {team.name} Roster
           </h1>
-          <p className="text-gray-400">{filteredPlayers.length} Players</p>
+          <p className="text-team-secondary">{filteredPlayers.length} Players</p>
         </div>
       </div>
 
       {/* Filters and Tabs */}
-      <div className="card">
+      <div className="card border-l-4 border-team-primary">
         <div className="flex flex-col gap-4">
           {/* Tabs */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -497,8 +505,8 @@ export const RosterPage = () => {
                   onClick={() => handleTabChange(tab.key)}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     activeTab === tab.key
-                      ? 'bg-emerald-600 text-white'
-                      : 'text-gray-400 hover:text-white'
+                      ? 'bg-team-primary text-team-secondary'
+                      : 'text-gray-400 hover:text-team-primary'
                   }`}
                   data-testid={`roster-tab-${tab.key}`}
                 >
@@ -540,7 +548,7 @@ export const RosterPage = () => {
       </div>
 
       {/* Roster Table */}
-      <div className="card overflow-hidden">
+      <div className="card overflow-hidden border-l-4 border-team-primary">
         <div className="overflow-x-auto">
           <table className="w-full" data-testid="roster-table">
             <thead>

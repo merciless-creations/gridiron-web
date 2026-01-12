@@ -1,17 +1,75 @@
 /**
- * User Preferences routes (stateful for E2E testing)
+ * User Preferences routes
  *
  * - GET /api/users/me/preferences - Get current user's preferences
  * - PUT /api/users/me/preferences - Update current user's preferences
  *
- * This mock server maintains state within a session for E2E testing.
- * State is reset when the server restarts or when /_reset is called.
+ * Each scenario returns a canned response. Tests should set the appropriate
+ * scenario before making requests to get the expected responses.
  */
 
 const mocks = [];
 
-// In-memory store for preferences (stateful)
-let storedPreferences = {};
+// Canned preference responses for different scenarios
+const CANNED_RESPONSES = {
+  empty: {
+    preferences: {},
+  },
+  withRedTeamColors: {
+    preferences: {
+      ui: {
+        theme: 'system',
+        teamColorSchemes: {
+          1: { primary: '#ff0000', secondary: '#1a1a24' },
+        },
+      },
+    },
+  },
+  withBlueTeamColors: {
+    preferences: {
+      ui: {
+        theme: 'system',
+        teamColorSchemes: {
+          1: { primary: '#0000ff', secondary: '#1a1a24' },
+        },
+      },
+    },
+  },
+  fullPreferences: {
+    preferences: {
+      ui: {
+        theme: 'dark',
+        teamColorSchemes: {
+          1: { primary: '#C8102E', secondary: '#FFB612', accent: '#FFFFFF' },
+          2: { primary: '#004C54', secondary: '#A5ACAF' },
+        },
+      },
+      grids: {
+        roster: {
+          columns: ['number', 'name', 'position', 'overall', 'age', 'salary'],
+          columnWidths: { name: 200, salary: 100 },
+          sortColumn: 'overall',
+          sortDirection: 'desc',
+        },
+      },
+    },
+  },
+  lightTheme: {
+    preferences: {
+      ui: { theme: 'light' },
+    },
+  },
+  darkTheme: {
+    preferences: {
+      ui: { theme: 'dark' },
+    },
+  },
+  systemTheme: {
+    preferences: {
+      ui: { theme: 'system' },
+    },
+  },
+};
 
 // Get user preferences
 const getPreferences = {
@@ -22,100 +80,30 @@ const getPreferences = {
   testScenario: 'defaultScenario',
   jsonTemplate: [
     {
-      defaultScenario: function () {
-        // Return stored preferences (stateful)
-        return JSON.stringify({ preferences: storedPreferences });
-      },
-      emptyScenario: function () {
-        return JSON.stringify({ preferences: {} });
-      },
-      fullPreferencesScenario: function () {
-        return JSON.stringify({
-          preferences: {
-            ui: {
-              theme: 'dark',
-              teamColorSchemes: {
-                1: { primary: '#C8102E', secondary: '#FFB612', accent: '#FFFFFF' },
-                2: { primary: '#004C54', secondary: '#A5ACAF' },
-              },
-            },
-            grids: {
-              roster: {
-                columns: ['number', 'name', 'position', 'overall', 'age', 'salary'],
-                columnWidths: { name: 200, salary: 100 },
-                sortColumn: 'overall',
-                sortDirection: 'desc',
-              },
-              depthChart: {
-                columns: ['name', 'position', 'rating'],
-                sortColumn: 'position',
-                sortDirection: 'asc',
-              },
-            },
-          },
-        });
-      },
-      lightThemeScenario: function () {
-        return JSON.stringify({
-          preferences: {
-            ui: {
-              theme: 'light',
-            },
-          },
-        });
-      },
-      darkThemeScenario: function () {
-        return JSON.stringify({
-          preferences: {
-            ui: {
-              theme: 'dark',
-            },
-          },
-        });
-      },
-      systemThemeScenario: function () {
-        return JSON.stringify({
-          preferences: {
-            ui: {
-              theme: 'system',
-            },
-          },
-        });
-      },
-      customColumnsScenario: function () {
-        return JSON.stringify({
-          preferences: {
-            grids: {
-              rosterAll: {
-                columns: ['name', 'position', 'overall', 'speed', 'strength'],
-              },
-              rosterOffense: {
-                columns: ['name', 'position', 'passing', 'rushing', 'catching'],
-              },
-            },
-          },
-        });
-      },
+      defaultScenario: () => JSON.stringify(CANNED_RESPONSES.empty),
+      emptyScenario: () => JSON.stringify(CANNED_RESPONSES.empty),
+      withRedTeamColors: () => JSON.stringify(CANNED_RESPONSES.withRedTeamColors),
+      withBlueTeamColors: () => JSON.stringify(CANNED_RESPONSES.withBlueTeamColors),
+      fullPreferencesScenario: () => JSON.stringify(CANNED_RESPONSES.fullPreferences),
+      lightThemeScenario: () => JSON.stringify(CANNED_RESPONSES.lightTheme),
+      darkThemeScenario: () => JSON.stringify(CANNED_RESPONSES.darkTheme),
+      systemThemeScenario: () => JSON.stringify(CANNED_RESPONSES.systemTheme),
     },
     {
       // Error scenarios
-      error: function () {
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ error: 'Internal server error' }),
-        };
-      },
-      unauthorized: function () {
-        return {
-          statusCode: 401,
-          body: JSON.stringify({ error: 'Unauthorized' }),
-        };
-      },
+      error: () => ({
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Internal server error' }),
+      }),
+      unauthorized: () => ({
+        statusCode: 401,
+        body: JSON.stringify({ error: 'Unauthorized' }),
+      }),
     },
   ],
 };
 
-// Update user preferences - stores and returns the preferences (stateful)
+// Update user preferences - returns canned response (no state)
 const updatePreferences = {
   name: 'updatePreferences',
   mockRoute: '/api/users/me/preferences',
@@ -124,47 +112,32 @@ const updatePreferences = {
   testScenario: 'defaultScenario',
   jsonTemplate: [
     {
-      defaultScenario: function (req) {
-        // Store the preferences (stateful mock)
-        const body = req.body;
-        if (body && body.preferences) {
-          storedPreferences = body.preferences;
-          return JSON.stringify({ preferences: storedPreferences });
-        }
-        return JSON.stringify({ preferences: storedPreferences });
-      },
+      // Default: return empty preferences (simulates successful save)
+      defaultScenario: () => JSON.stringify(CANNED_RESPONSES.empty),
+      // Return specific saved colors (tests should set this scenario before saving)
+      withRedTeamColors: () => JSON.stringify(CANNED_RESPONSES.withRedTeamColors),
+      withBlueTeamColors: () => JSON.stringify(CANNED_RESPONSES.withBlueTeamColors),
+      fullPreferencesScenario: () => JSON.stringify(CANNED_RESPONSES.fullPreferences),
     },
     {
       // Error scenarios
-      error: function () {
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ error: 'Failed to save preferences' }),
-        };
-      },
-      validationError: function () {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({ error: 'Invalid preferences format' }),
-        };
-      },
-      unauthorized: function () {
-        return {
-          statusCode: 401,
-          body: JSON.stringify({ error: 'Unauthorized' }),
-        };
-      },
+      error: () => ({
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Failed to save preferences' }),
+      }),
+      validationError: () => ({
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Invalid preferences format' }),
+      }),
+      unauthorized: () => ({
+        statusCode: 401,
+        body: JSON.stringify({ error: 'Unauthorized' }),
+      }),
     },
   ],
-};
-
-// Export a reset function that can be called to clear stored preferences
-const resetPreferences = () => {
-  storedPreferences = {};
 };
 
 mocks.push(getPreferences);
 mocks.push(updatePreferences);
 
 exports.mocks = mocks;
-exports.resetPreferences = resetPreferences;

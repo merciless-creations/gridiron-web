@@ -14,6 +14,11 @@
     --gridiron-text-primary: #ffffff;
     --gridiron-text-secondary: #a0a0b0;
     --gridiron-text-muted: #606070;
+
+    /* Team colors - customizable per team context */
+    --team-color-primary: #00d4aa;
+    --team-color-secondary: #1a1a24;
+    --team-color-accent: #00d4aa;
   }
 
   /* Dark theme (explicit) */

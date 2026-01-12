@@ -1,8 +1,9 @@
 import { useParams, Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useTeam } from '../api/teams';
 import { Loading, ReadOnlyBanner, TeamColorSchemeEditor } from '../components';
-import { usePermissions } from '../hooks/usePermissions';
-import { useActiveContext } from '../contexts';
+import { usePermissions, useTeamColors } from '../hooks';
+import { useActiveContext, usePreferences } from '../contexts';
 
 export const TeamManagePage = () => {
   const { teamId } = useParams<{ teamId: string }>();
@@ -11,6 +12,14 @@ export const TeamManagePage = () => {
 
   const { data: team, isLoading, error } = useTeam(teamIdNum);
   const permissions = usePermissions(teamIdNum);
+  const { getTeamColorScheme } = usePreferences();
+  const { applyColors, DEFAULT_COLORS } = useTeamColors();
+
+  // Apply team colors when page loads
+  useEffect(() => {
+    const savedColors = getTeamColorScheme(teamIdNum);
+    applyColors(savedColors ?? DEFAULT_COLORS);
+  }, [teamIdNum, getTeamColorScheme, applyColors, DEFAULT_COLORS]);
 
   if (isLoading || permissions.isLoading) {
     return <Loading />;
@@ -83,10 +92,10 @@ export const TeamManagePage = () => {
 
       <div className="flex items-center justify-between">
         <div>
-          <Link to="/dashboard" className="text-gridiron-accent hover:underline text-sm mb-2 inline-block">
+          <Link to="/dashboard" className="text-team-primary hover:underline text-sm mb-2 inline-block">
             &larr; Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-3xl font-bold text-team-primary">
             {fullTeamName}
           </h1>
           <p className="text-gray-400">
@@ -94,37 +103,37 @@ export const TeamManagePage = () => {
           </p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold">{record}</div>
+          <div className="text-2xl font-bold text-team-primary">{record}</div>
           <div className="text-gray-400 text-sm">
             {team.championships > 0 && `${team.championships} Championship${team.championships > 1 ? 's' : ''}`}
           </div>
         </div>
       </div>
 
-      <div className="card">
-        <h2 className="text-xl font-semibold mb-4">Team Overview</h2>
+      <div className="card border-l-4 border-team-primary">
+        <h2 className="text-xl font-semibold mb-4 text-team-secondary">Team Overview</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <div className="text-gray-400 text-sm">Budget</div>
-            <div className="text-lg font-semibold">${(team.budget / 1000000).toFixed(1)}M</div>
+            <div className="text-lg font-semibold text-team-accent">${(team.budget / 1000000).toFixed(1)}M</div>
           </div>
           <div>
             <div className="text-gray-400 text-sm">Fan Support</div>
-            <div className="text-lg font-semibold">{team.fanSupport}%</div>
+            <div className="text-lg font-semibold text-team-accent">{team.fanSupport}%</div>
           </div>
           <div>
             <div className="text-gray-400 text-sm">Chemistry</div>
-            <div className="text-lg font-semibold">{team.chemistry}%</div>
+            <div className="text-lg font-semibold text-team-accent">{team.chemistry}%</div>
           </div>
           <div>
             <div className="text-gray-400 text-sm">Roster Size</div>
-            <div className="text-lg font-semibold">{team.players?.length ?? '--'}</div>
+            <div className="text-lg font-semibold text-team-accent">{team.players?.length ?? '--'}</div>
           </div>
         </div>
       </div>
 
-      <div className="card">
-        <h2 className="text-xl font-semibold mb-4">
+      <div className="card border-l-4 border-team-primary">
+        <h2 className="text-xl font-semibold mb-4 text-team-secondary">
           {permissions.isReadOnly ? 'View Options' : 'Quick Actions'}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -133,14 +142,14 @@ export const TeamManagePage = () => {
             <>
               <Link
                 to={`/teams/${teamId}/depth-chart`}
-                className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+                className="block p-4 bg-gridiron-light rounded-lg hover:bg-team-primary/20 transition-colors"
               >
                 <div className="font-semibold mb-1">Depth Chart</div>
                 <div className="text-gray-400 text-sm">Set your starting lineup and backups</div>
               </Link>
               <Link
                 to={`/teams/${teamId}/roster`}
-                className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+                className="block p-4 bg-gridiron-light rounded-lg hover:bg-team-primary/20 transition-colors"
               >
                 <div className="font-semibold mb-1">Full Roster</div>
                 <div className="text-gray-400 text-sm">View and manage your players</div>
@@ -148,7 +157,7 @@ export const TeamManagePage = () => {
               {leagueId && (
                 <Link
                   to={`/leagues/${leagueId}/standings`}
-                  className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+                  className="block p-4 bg-gridiron-light rounded-lg hover:bg-team-primary/20 transition-colors"
                 >
                   <div className="font-semibold mb-1">League Standings</div>
                   <div className="text-gray-400 text-sm">View league rankings and leaders</div>
@@ -164,14 +173,14 @@ export const TeamManagePage = () => {
             <>
               <Link
                 to={`/teams/${teamId}/depth-chart`}
-                className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+                className="block p-4 bg-gridiron-light rounded-lg hover:bg-team-primary/20 transition-colors"
               >
                 <div className="font-semibold mb-1">View Depth Chart</div>
                 <div className="text-gray-400 text-sm">See their starting lineup and backups</div>
               </Link>
               <Link
                 to={`/teams/${teamId}/roster`}
-                className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+                className="block p-4 bg-gridiron-light rounded-lg hover:bg-team-primary/20 transition-colors"
               >
                 <div className="font-semibold mb-1">View Roster</div>
                 <div className="text-gray-400 text-sm">Scout their players</div>
@@ -179,7 +188,7 @@ export const TeamManagePage = () => {
               {leagueId && (
                 <Link
                   to={`/leagues/${leagueId}/standings`}
-                  className="block p-4 bg-gridiron-light rounded-lg hover:bg-gridiron-accent/20 transition-colors"
+                  className="block p-4 bg-gridiron-light rounded-lg hover:bg-team-primary/20 transition-colors"
                 >
                   <div className="font-semibold mb-1">League Standings</div>
                   <div className="text-gray-400 text-sm">View league rankings and leaders</div>
@@ -194,8 +203,8 @@ export const TeamManagePage = () => {
         </div>
       </div>
 
-      <div className="card">
-        <h2 className="text-xl font-semibold mb-4">Season Stats</h2>
+      <div className="card border-l-4 border-team-primary">
+        <h2 className="text-xl font-semibold mb-4 text-team-secondary">Season Stats</h2>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <div className="text-3xl font-bold text-gridiron-win">{team.wins}</div>

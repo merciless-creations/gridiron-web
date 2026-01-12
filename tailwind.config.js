@@ -24,6 +24,12 @@ export default {
           'loss': '#ef4444',
           'warning': '#f59e0b',
           'live': '#ef4444',
+        },
+        'team': {
+          // Dynamic team colors (set via CSS custom properties)
+          'primary': 'var(--team-color-primary)',
+          'secondary': 'var(--team-color-secondary)',
+          'accent': 'var(--team-color-accent)',
         }
       },
       fontFamily: {
