@@ -1,8 +1,14 @@
 import '@testing-library/jest-dom'
 import { cleanup } from '@testing-library/react'
-import { afterEach, beforeEach } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
 
 const MOCK_SERVER_URL = 'http://localhost:3002'
+
+// Mock requestAnimationFrame to execute callbacks immediately in tests
+vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+  callback(0)
+  return 0
+})
 
 // Reset mock server state before each test to ensure clean state
 beforeEach(async () => {
