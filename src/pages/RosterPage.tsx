@@ -290,17 +290,14 @@ export const RosterPage = () => {
   // Track measured widths (captured on first resize interaction)
   const [measuredWidths, setMeasuredWidths] = useState<Record<string, number>>({});
 
-  // Track if widths have been initialized (either from prefs or measured)
-  const [widthsInitialized, setWidthsInitialized] = useState(
-    () => Object.keys(savedColumnWidths).length > 0
-  );
+  // Track if user has manually triggered resize (to know when to set measured widths)
+  const [hasUserResized, setHasUserResized] = useState(false);
 
-  // Update widthsInitialized when savedColumnWidths loads from preferences
-  useEffect(() => {
-    if (!widthsInitialized && Object.keys(savedColumnWidths).length > 0) {
-      setWidthsInitialized(true);
-    }
-  }, [widthsInitialized, savedColumnWidths]);
+  // Widths are initialized when we have either saved widths from preferences or measured widths from user interaction
+  const widthsInitialized = useMemo(
+    () => Object.keys(savedColumnWidths).length > 0 || Object.keys(measuredWidths).length > 0,
+    [savedColumnWidths, measuredWidths]
+  );
 
   // Measure all column widths from the table
   const measureAllColumnWidths = useCallback(() => {
@@ -335,14 +332,15 @@ export const RosterPage = () => {
 
   // Called at the START of any resize - measure and lock all columns
   const handleResizeStart = useCallback(() => {
-    if (widthsInitialized) return;
+    // If user has already resized or we have saved widths, don't re-measure
+    if (hasUserResized || Object.keys(savedColumnWidths).length > 0) return;
 
     const measured = measureAllColumnWidths();
     if (measured) {
       setMeasuredWidths(measured);
-      setWidthsInitialized(true);
+      setHasUserResized(true);
     }
-  }, [widthsInitialized, measureAllColumnWidths]);
+  }, [hasUserResized, savedColumnWidths, measureAllColumnWidths]);
 
   // Handle column width change
   const handleColumnWidthChange = useCallback((columnKey: string, width: number) => {
