@@ -8,6 +8,8 @@ import type {
   GenerateScheduleRequest,
   GenerateScheduleResponse,
   ProcessYearEndResponse,
+  AdvanceDaysRequest,
+  AdvanceDaysResponse,
 } from '../types/Season';
 
 export const seasonApi = {
@@ -36,6 +38,14 @@ export const seasonApi = {
 
   advanceWeek: async (leagueId: number): Promise<AdvanceWeekResponse> => {
     const response = await apiClient.post<AdvanceWeekResponse>(`/leagues-management/${leagueId}/advance-week`);
+    return response.data;
+  },
+
+  advanceByDays: async (request: AdvanceDaysRequest): Promise<AdvanceDaysResponse> => {
+    const response = await apiClient.post<AdvanceDaysResponse>(
+      `/leagues-management/${request.leagueId}/advance-days`,
+      { days: request.days }
+    );
     return response.data;
   },
 
@@ -104,6 +114,20 @@ export const useProcessYearEnd = () => {
       queryClient.invalidateQueries({ queryKey: ['standings', leagueId] });
       queryClient.invalidateQueries({ queryKey: ['leagues', leagueId] });
       queryClient.invalidateQueries({ queryKey: ['teams'] });
+    },
+  });
+};
+
+export const useAdvanceByDays = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: seasonApi.advanceByDays,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['season', variables.leagueId] });
+      queryClient.invalidateQueries({ queryKey: ['schedule', variables.leagueId] });
+      queryClient.invalidateQueries({ queryKey: ['standings', variables.leagueId] });
+      queryClient.invalidateQueries({ queryKey: ['leagues', variables.leagueId] });
+      queryClient.invalidateQueries({ queryKey: ['injuries'] });
     },
   });
 };

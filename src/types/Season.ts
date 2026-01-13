@@ -107,3 +107,32 @@ export interface ProcessYearEndResponse {
   playersProgressed: number;
   playersRetired: number;
 }
+
+export interface AdvanceDaysRequest {
+  leagueId: number;
+  days: number;
+}
+
+export interface AdvanceDaysGameResult {
+  gameId: number;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  gameDay: number;
+  weekNumber: number;
+}
+
+export interface AdvanceDaysResponse {
+  success: boolean;
+  error?: string;
+  daysAdvanced: number;
+  gamesSimulated: number;
+  injuriesHealed: number;
+  playersProgressed: number;
+  currentWeek: number;
+  currentDay: number;
+  phase: string;
+  gameResults: AdvanceDaysGameResult[];
+  warnings: string[];
+}

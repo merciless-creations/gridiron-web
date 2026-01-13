@@ -5,6 +5,7 @@
  * - GET /api/leagues-management/:leagueId/schedule - Get schedule
  * - POST /api/leagues-management/:leagueId/generate-schedule - Generate schedule
  * - POST /api/leagues-management/:leagueId/advance-week - Advance week
+ * - POST /api/leagues-management/:leagueId/advance-days - Advance by X days
  * - POST /api/leagues-management/:leagueId/process-year-end - Process year end
  */
 const state = require('../../state');
@@ -215,6 +216,44 @@ const advanceWeek = {
   ],
 };
 
+// Advance by days
+const advanceDays = {
+  name: 'advanceDays',
+  mockRoute: new RegExp(`^/api/leagues-management/([0-9]+)/advance-days$`).source,
+  method: 'POST',
+  testScope: 'success',
+  testScenario: 'defaultScenario',
+  jsonTemplate: [
+    {
+      defaultScenario: function (req) {
+        const body = req.body || {};
+        const days = body.days || 7;
+
+        // Calculate games based on days
+        const gamesPerDay = { 0: 14, 1: 1, 4: 1, 6: 2 }; // Sun=14, Mon=1, Thu=1, Sat=2
+        let gamesSimulated = 0;
+        for (let d = 0; d < days; d++) {
+          const dayOfWeek = d % 7;
+          gamesSimulated += gamesPerDay[dayOfWeek] || 0;
+        }
+
+        return JSON.stringify({
+          success: true,
+          daysAdvanced: days,
+          gamesSimulated: gamesSimulated,
+          injuriesHealed: Math.floor(days * 0.5),
+          playersProgressed: Math.floor(days * 2),
+          currentWeek: 10 + Math.floor(days / 7),
+          currentDay: days % 7,
+          phase: 'regular',
+          gameResults: [],
+          warnings: [],
+        });
+      },
+    },
+  ],
+};
+
 // Process year end
 const processYearEnd = {
   name: 'processYearEnd',
@@ -244,6 +283,7 @@ mocks.push(getStandings);
 mocks.push(getSchedule);
 mocks.push(generateSchedule);
 mocks.push(advanceWeek);
+mocks.push(advanceDays);
 mocks.push(processYearEnd);
 
 exports.mocks = mocks;

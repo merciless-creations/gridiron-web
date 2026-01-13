@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useSeason, useSeasonStandings, useGenerateSchedule, useAdvanceWeek, useProcessYearEnd } from '../api/season';
+import { useSeason, useSeasonStandings, useGenerateSchedule, useAdvanceWeek, useAdvanceByDays, useProcessYearEnd } from '../api/season';
 import { CommissionerControls } from '../components/CommissionerControls';
 
 export default function SeasonDashboardPage() {
@@ -11,6 +11,7 @@ export default function SeasonDashboardPage() {
 
   const generateSchedule = useGenerateSchedule();
   const advanceWeek = useAdvanceWeek();
+  const advanceByDays = useAdvanceByDays();
   const processYearEnd = useProcessYearEnd();
 
   const handleGenerateSchedule = () => {
@@ -19,6 +20,10 @@ export default function SeasonDashboardPage() {
 
   const handleAdvanceWeek = () => {
     advanceWeek.mutate(leagueId);
+  };
+
+  const handleAdvanceByDays = (days: number) => {
+    advanceByDays.mutate({ leagueId, days });
   };
 
   const handleProcessYearEnd = () => {
@@ -194,9 +199,11 @@ export default function SeasonDashboardPage() {
               season={season ?? null}
               onGenerateSchedule={handleGenerateSchedule}
               onAdvanceWeek={handleAdvanceWeek}
+              onAdvanceByDays={handleAdvanceByDays}
               onProcessYearEnd={handleProcessYearEnd}
               isGenerating={generateSchedule.isPending}
               isAdvancing={advanceWeek.isPending}
+              isAdvancingByDays={advanceByDays.isPending}
               isProcessingYearEnd={processYearEnd.isPending}
             />
           </div>
