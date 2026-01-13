@@ -10,6 +10,7 @@ const { mockNavigate, mockState } = vi.hoisted(() => ({
     useSeasonStandings: vi.fn(),
     useGenerateSchedule: vi.fn(),
     useAdvanceWeek: vi.fn(),
+    useAdvanceByDays: vi.fn(),
     useProcessYearEnd: vi.fn(),
   },
 }));
@@ -28,6 +29,7 @@ vi.mock('../../api/season', () => ({
   useSeasonStandings: () => mockState.useSeasonStandings(),
   useGenerateSchedule: () => mockState.useGenerateSchedule(),
   useAdvanceWeek: () => mockState.useAdvanceWeek(),
+  useAdvanceByDays: () => mockState.useAdvanceByDays(),
   useProcessYearEnd: () => mockState.useProcessYearEnd(),
 }));
 
@@ -104,6 +106,10 @@ describe('SeasonDashboardPage', () => {
       isPending: false,
     });
     mockState.useAdvanceWeek = vi.fn().mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    });
+    mockState.useAdvanceByDays = vi.fn().mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
     });
@@ -199,9 +205,9 @@ describe('SeasonDashboardPage', () => {
     expect(screen.getByText('Commissioner Controls')).toBeInTheDocument();
   });
 
-  it('should show Advance Week button when in progress', async () => {
+  it('should show Advance Full Week button when in progress', async () => {
     renderPage();
-    expect(screen.getByRole('button', { name: /Advance Week/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Advance Full Week/i })).toBeInTheDocument();
   });
 
   it('should show back to league link', async () => {
@@ -257,8 +263,8 @@ describe('SeasonDashboardPage', () => {
 
     renderPage();
 
-    await user.click(screen.getByRole('button', { name: /Advance Week/i }));
-    await user.click(screen.getByRole('button', { name: /Confirm Advance/i }));
+    await user.click(screen.getByRole('button', { name: /Advance Full Week/i }));
+    await user.click(screen.getByRole('button', { name: /Confirm Advance Week/i }));
 
     expect(mutateFn).toHaveBeenCalledWith(1);
   });
