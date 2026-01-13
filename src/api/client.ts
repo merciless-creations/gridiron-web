@@ -147,6 +147,28 @@ export const setupAuthInterceptor = (instance: PublicClientApplication) => {
         return Promise.reject(error);
       }
 
+      // Handle 423 Locked (simulation in progress)
+      if (error.response?.status === 423) {
+        // Extract league ID from the error response or URL
+        const responseData = error.response.data as { leagueId?: number } | undefined;
+        let leagueId = responseData?.leagueId;
+
+        if (!leagueId && originalRequest?.url) {
+          // Try to extract from URL pattern: /leagues-management/{id}/...
+          const match = originalRequest.url.match(/\/leagues-management\/(\d+)/);
+          if (match) {
+            leagueId = Number(match[1]);
+          }
+        }
+
+        if (leagueId) {
+          console.log(`League ${leagueId} is simulating, redirecting to simulating page`);
+          // Use window.location for redirect to avoid React Router issues
+          window.location.href = `/leagues/${leagueId}/simulating`;
+          return new Promise(() => {}); // Never resolves - page is navigating away
+        }
+      }
+
       // Log other errors
       if (error.response) {
         // Server responded with error status

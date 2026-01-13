@@ -121,6 +121,22 @@ preStart().then(() => {
     'slow-network': {
       '*': { latency: 2000 },
     },
+
+    // ==========================================
+    // Simulation Lock Presets (GM experience testing)
+    // ==========================================
+
+    // League has active simulation - GM sees banner, roster actions blocked
+    'simulation-locked': {
+      'getLeague': { scenario: 'simulationLocked' },
+      'getMyTeams': { scenario: 'defaultScenario' },
+    },
+
+    // League has no active simulation - GM can make roster changes
+    'simulation-unlocked': {
+      'getLeague': { scenario: 'simulationUnlocked' },
+      'getMyTeams': { scenario: 'defaultScenario' },
+    },
   };
 
   // Create mock API with json store for caching and presets

@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Layout, ProtectedRoute, AuthErrorBoundary } from './components';
-import { ActiveContextProvider, PreferencesProvider } from './contexts';
-import { TeamsPage, GameSimulationPage, ProfilePage, LeaguesPage, LeagueDetailPage, CreateLeaguePage, LeagueStructurePage, SeasonDashboardPage, SchedulePage, StandingsPage, LoginCallbackPage, LandingPage, LeagueManagePage, TeamManagePage, RosterPage, DepthChartPage, DashboardPage } from './pages';
+import { ActiveContextProvider, PreferencesProvider, ToastProvider } from './contexts';
+import { TeamsPage, GameSimulationPage, ProfilePage, LeaguesPage, LeagueDetailPage, CreateLeaguePage, LeagueStructurePage, SeasonDashboardPage, SchedulePage, StandingsPage, LoginCallbackPage, LandingPage, LeagueManagePage, TeamManagePage, RosterPage, DepthChartPage, DashboardPage, LeagueSimulatingPage } from './pages';
 
 // Create a QueryClient instance for React Query
 const queryClient = new QueryClient({
@@ -20,6 +20,7 @@ function App() {
       <AuthErrorBoundary>
         <ActiveContextProvider>
           <PreferencesProvider>
+            <ToastProvider>
             <BrowserRouter>
               <Layout>
               <Routes>
@@ -145,9 +146,18 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/leagues/:id/simulating"
+                  element={
+                    <ProtectedRoute>
+                      <LeagueSimulatingPage />
+                    </ProtectedRoute>
+                  }
+                />
                 </Routes>
               </Layout>
             </BrowserRouter>
+            </ToastProvider>
           </PreferencesProvider>
         </ActiveContextProvider>
       </AuthErrorBoundary>

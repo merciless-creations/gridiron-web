@@ -217,6 +217,78 @@ const emptyLeagueData = {
   conferences: [],
 };
 
+/**
+ * League with simulation in progress
+ * Tests that UI shows lock banner and disables roster controls
+ */
+const simulationLockedLeagueData = {
+  id: 1,
+  name: 'Test League',
+  season: 2024,
+  totalTeams: 4,
+  totalConferences: 1,
+  isActive: true,
+  simulationInProgress: true,
+  simulationStartedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 mins ago
+  simulationStartedByUserName: 'Commissioner Bob',
+  conferences: [
+    {
+      id: 100,
+      name: 'Test Conference',
+      leagueId: 1,
+      divisions: [
+        {
+          id: 200,
+          name: 'Test Division',
+          conferenceId: 100,
+          teams: [
+            { id: 1, name: 'Eagles', divisionId: 200 },
+            { id: 2, name: 'Bears', divisionId: 200 },
+            { id: 3, name: 'Lions', divisionId: 200 },
+            { id: 4, name: 'Vikings', divisionId: 200 },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+/**
+ * League with no simulation (unlocked)
+ * Tests that UI allows roster changes when not locked
+ */
+const simulationUnlockedLeagueData = {
+  id: 1,
+  name: 'Test League',
+  season: 2024,
+  totalTeams: 4,
+  totalConferences: 1,
+  isActive: true,
+  simulationInProgress: false,
+  simulationStartedAt: null,
+  simulationStartedByUserName: null,
+  conferences: [
+    {
+      id: 100,
+      name: 'Test Conference',
+      leagueId: 1,
+      divisions: [
+        {
+          id: 200,
+          name: 'Test Division',
+          conferenceId: 100,
+          teams: [
+            { id: 1, name: 'Eagles', divisionId: 200 },
+            { id: 2, name: 'Bears', divisionId: 200 },
+            { id: 3, name: 'Lions', divisionId: 200 },
+            { id: 4, name: 'Vikings', divisionId: 200 },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
 // ============================================================================
 
 // List all leagues
@@ -302,6 +374,16 @@ const getLeague = {
     {
       emptyLeague: function () {
         return JSON.stringify(emptyLeagueData);
+      },
+    },
+    {
+      simulationLocked: function () {
+        return JSON.stringify(simulationLockedLeagueData);
+      },
+    },
+    {
+      simulationUnlocked: function () {
+        return JSON.stringify(simulationUnlockedLeagueData);
       },
     },
   ],

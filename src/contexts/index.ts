@@ -4,3 +4,6 @@ export type { ActiveContext, ActiveRole, ActiveContextState } from './types';
 
 export { PreferencesProvider, usePreferences } from './preferences';
 export type { PreferencesContextValue, PreferencesState, PreferencesActions, GridKey } from './preferences';
+
+export { ToastProvider, useToast } from './toast';
+export type { Toast, ToastType } from './toast';
