@@ -52,6 +52,7 @@ export interface UserPreferences {
 
 export interface PreferencesResponse {
   preferences: UserPreferences;
+  lastUpdated?: string;
 }
 
 /**
