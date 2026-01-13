@@ -12,7 +12,7 @@ interface PlayByPlayViewerProps {
  * Converts field position (0-100) to readable yard line
  * 0 = own goal line, 50 = midfield, 100 = opponent's goal line
  */
-function formatFieldPosition(position: number, possession: string): string {
+function formatFieldPosition(position: number): string {
   if (position === 50) return 'MIDFIELD';
   if (position < 50) {
     return `OWN ${position}`;
@@ -64,7 +64,7 @@ export const PlayByPlayViewer = ({
     let currentQuarter = 1;
     let currentPlays: Play[] = [];
 
-    plays.forEach((play, index) => {
+    plays.forEach((play) => {
       // Calculate quarter based on game time (4 quarters * 15 minutes = 3600 seconds)
       // startTime counts down from 3600
       const quarterNumber = Math.min(4, Math.floor((3600 - play.startTime) / 900) + 1);
@@ -170,7 +170,7 @@ export const PlayByPlayViewer = ({
                             {formatDownAndDistance(play.down, play.yardsToGo)}
                           </span>
                           <span className="text-xs text-gridiron-text-muted">
-                            {formatFieldPosition(play.startFieldPosition, play.possession)}
+                            {formatFieldPosition(play.startFieldPosition)}
                           </span>
                           <span className="text-xs px-1.5 py-0.5 rounded bg-gridiron-bg-secondary text-gridiron-text-secondary">
                             {teamName}
