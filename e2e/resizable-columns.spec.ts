@@ -725,4 +725,262 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       expect(visibleHeaders).toBeGreaterThan(0);
     });
   });
+
+  test.describe('Preferences Loading - Column Widths', () => {
+    test('loads saved column widths from preferences on page load', async ({ page, request }) => {
+      // Script the mock to return saved column widths
+      await request.post(`${MOCK_SERVER_URL}/_scenario`, {
+        data: {
+          route: 'getPreferences',
+          scenario: 'savedColumnWidths'
+        }
+      });
+
+      // Set up promise to wait for preferences API request
+      const preferencesPromise = page.waitForResponse(
+        response => response.url().includes('/api/users/me/preferences') && response.request().method() === 'GET'
+      );
+
+      await page.goto('/teams/1/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Wait for preferences request to complete
+      const preferencesResponse = await preferencesPromise;
+      const preferencesData = await preferencesResponse.json();
+
+      // Verify the correct preferences were loaded
+      expect(preferencesData.preferences?.grids?.rosterAll?.columnWidths?.name).toBe(250);
+
+      // Wait for preferences to load and widths to be applied
+      const table = page.getByTestId('roster-table');
+      await expect(table).toHaveClass(/table-fixed/, { timeout: 5000 });
+
+      // Verify name column has saved width (250px)
+      const nameHeader = page.getByTestId('column-header-name');
+      const nameBox = await nameHeader.boundingBox();
+      expect(nameBox).not.toBeNull();
+      expect(nameBox!.width).toBeGreaterThan(240);
+      expect(nameBox!.width).toBeLessThan(260);
+
+      // Verify position column has saved width (120px)
+      const posHeader = page.getByTestId('column-header-position');
+      const posBox = await posHeader.boundingBox();
+      expect(posBox).not.toBeNull();
+      expect(posBox!.width).toBeGreaterThan(110);
+      expect(posBox!.width).toBeLessThan(130);
+    });
+
+    test('loads collapsed column width from preferences', async ({ page, request }) => {
+      // Script the mock to return collapsed name column
+      await request.post(`${MOCK_SERVER_URL}/_scenario`, {
+        data: {
+          route: 'getPreferences',
+          scenario: 'collapsedNameColumn'
+        }
+      });
+
+      await page.goto('/teams/1/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Wait for preferences to load
+      const table = page.getByTestId('roster-table');
+      await expect(table).toHaveClass(/table-fixed/, { timeout: 5000 });
+
+      // Verify name column is at minimum width (36px)
+      const nameHeader = page.getByTestId('column-header-name');
+      const nameBox = await nameHeader.boundingBox();
+      expect(nameBox).not.toBeNull();
+      expect(nameBox!.width).toBeLessThanOrEqual(42); // Allow small tolerance
+    });
+
+    test('default widths used when no saved preferences', async ({ page, request }) => {
+      // Ensure default scenario returns empty preferences
+      await request.post(`${MOCK_SERVER_URL}/_scenario`, {
+        data: {
+          route: 'getPreferences',
+          scenario: 'defaultScenario'
+        }
+      });
+
+      await page.goto('/teams/1/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Table should NOT have table-fixed class initially (no saved widths)
+      const table = page.getByTestId('roster-table');
+      await expect(table).toHaveClass(/w-full/);
+    });
+  });
+
+  test.describe('Preferences Loading - Column Visibility', () => {
+    test('hidden columns from preferences are not displayed', async ({ page, request }) => {
+      // Script the mock to return hidden position column
+      await request.post(`${MOCK_SERVER_URL}/_scenario`, {
+        data: {
+          route: 'getPreferences',
+          scenario: 'hiddenPositionColumn'
+        }
+      });
+
+      await page.goto('/teams/1/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Position column should not be visible
+      await expect(page.getByTestId('column-header-position')).not.toBeVisible();
+
+      // Other columns should still be visible
+      await expect(page.getByTestId('column-header-name')).toBeVisible();
+      await expect(page.getByTestId('column-header-overall')).toBeVisible();
+    });
+
+    test('all default columns shown when no visibility preferences', async ({ page, request }) => {
+      // Ensure default scenario returns empty preferences
+      await request.post(`${MOCK_SERVER_URL}/_scenario`, {
+        data: {
+          route: 'getPreferences',
+          scenario: 'defaultScenario'
+        }
+      });
+
+      await page.goto('/teams/1/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Default columns should all be visible
+      await expect(page.getByTestId('column-header-name')).toBeVisible();
+      await expect(page.getByTestId('column-header-position')).toBeVisible();
+      await expect(page.getByTestId('column-header-overall')).toBeVisible();
+    });
+  });
+
+  test.describe('Preferences Loading - Column Order', () => {
+    test('columns are displayed in saved order from preferences', async ({ page, request }) => {
+      // Script the mock to return reordered columns
+      await request.post(`${MOCK_SERVER_URL}/_scenario`, {
+        data: {
+          route: 'getPreferences',
+          scenario: 'reorderedColumns'
+        }
+      });
+
+      await page.goto('/teams/1/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Get all column headers in order
+      const headers = await page.locator('th[data-testid^="column-header-"]').allTextContents();
+
+      // First column should be Position (reordered from default)
+      // The scenario sets: ['position', 'name', 'number', 'status', 'overall', 'age']
+      expect(headers[0].toLowerCase()).toContain('pos');
+    });
+
+    test('default column order used when no order preferences', async ({ page, request }) => {
+      // Ensure default scenario returns empty preferences
+      await request.post(`${MOCK_SERVER_URL}/_scenario`, {
+        data: {
+          route: 'getPreferences',
+          scenario: 'defaultScenario'
+        }
+      });
+
+      await page.goto('/teams/1/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Get all column headers in order
+      const headers = await page.locator('th[data-testid^="column-header-"]').allTextContents();
+
+      // Default order starts with # (number)
+      expect(headers[0]).toBe('#');
+    });
+  });
+
+  test.describe('Preferences Loading - Combined Customizations', () => {
+    test('loads multiple customizations together', async ({ page, request }) => {
+      // Script the mock to return multiple customizations
+      await request.post(`${MOCK_SERVER_URL}/_scenario`, {
+        data: {
+          route: 'getPreferences',
+          scenario: 'multipleCustomizations'
+        }
+      });
+
+      await page.goto('/teams/1/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Wait for preferences to load
+      const table = page.getByTestId('roster-table');
+      await expect(table).toHaveClass(/table-fixed/, { timeout: 5000 });
+
+      // Verify column visibility - some columns should be hidden
+      // The scenario sets columns: ['name', 'position', 'overall', 'age']
+      // So 'number' and 'status' should be hidden
+      await expect(page.getByTestId('column-header-name')).toBeVisible();
+      await expect(page.getByTestId('column-header-position')).toBeVisible();
+
+      // Verify column widths are applied
+      const nameHeader = page.getByTestId('column-header-name');
+      const nameBox = await nameHeader.boundingBox();
+      expect(nameBox).not.toBeNull();
+      expect(nameBox!.width).toBeGreaterThan(170);
+      expect(nameBox!.width).toBeLessThan(190);
+    });
+
+    test('customizations persist through SPA navigation', async ({ page, request }) => {
+      // Script the mock to return saved column widths
+      await request.post(`${MOCK_SERVER_URL}/_scenario`, {
+        data: {
+          route: 'getPreferences',
+          scenario: 'savedColumnWidths'
+        }
+      });
+
+      await page.goto('/teams/1/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Wait for preferences to load
+      const table = page.getByTestId('roster-table');
+      await expect(table).toHaveClass(/table-fixed/, { timeout: 5000 });
+
+      // Get initial name column width
+      const nameHeader = page.getByTestId('column-header-name');
+      const initialBox = await nameHeader.boundingBox();
+      expect(initialBox).not.toBeNull();
+
+      // Navigate away (SPA navigation)
+      await page.goto('/dashboard');
+      await page.waitForLoadState('networkidle');
+
+      // Navigate back
+      await page.goto('/teams/1/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Wait for table-fixed class again
+      await expect(table).toHaveClass(/table-fixed/, { timeout: 5000 });
+
+      // Width should still be applied (from React Query cache or re-fetched)
+      const afterNavBox = await nameHeader.boundingBox();
+      expect(afterNavBox).not.toBeNull();
+      expect(Math.abs(afterNavBox!.width - initialBox!.width)).toBeLessThan(10);
+    });
+  });
+
+  test.describe('Preferences Loading - Error Handling', () => {
+    test('gracefully handles preferences loading error', async ({ page, request }) => {
+      // Script the mock to return an error
+      await request.post(`${MOCK_SERVER_URL}/_scenario`, {
+        data: {
+          route: 'getPreferences',
+          scope: 'error'
+        }
+      });
+
+      await page.goto('/teams/1/roster');
+      await page.waitForSelector('[data-testid="roster-table"]');
+
+      // Table should still render with default settings
+      await expect(page.getByTestId('roster-table')).toBeVisible();
+
+      // Default columns should be visible
+      await expect(page.getByTestId('column-header-name')).toBeVisible();
+      await expect(page.getByTestId('column-header-position')).toBeVisible();
+    });
+  });
 });

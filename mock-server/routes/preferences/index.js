@@ -45,7 +45,7 @@ const CANNED_RESPONSES = {
         },
       },
       grids: {
-        roster: {
+        rosterAll: {
           columns: ['number', 'name', 'position', 'overall', 'age', 'salary'],
           columnWidths: { name: 200, salary: 100 },
           sortColumn: 'overall',
@@ -67,6 +67,58 @@ const CANNED_RESPONSES = {
   systemTheme: {
     preferences: {
       ui: { theme: 'system' },
+    },
+  },
+  // Grid-specific scenarios for E2E testing
+  // Note: The grid key is 'rosterAll' for the default tab (not 'roster')
+  savedColumnWidths: {
+    preferences: {
+      grids: {
+        rosterAll: {
+          columns: ['number', 'name', 'position', 'status', 'overall', 'age'],
+          columnWidths: { name: 250, position: 120, overall: 80 },
+        },
+      },
+    },
+  },
+  collapsedNameColumn: {
+    preferences: {
+      grids: {
+        rosterAll: {
+          columns: ['number', 'name', 'position', 'status', 'overall', 'age'],
+          columnWidths: { name: 36 },
+        },
+      },
+    },
+  },
+  hiddenPositionColumn: {
+    preferences: {
+      grids: {
+        rosterAll: {
+          columns: ['number', 'name', 'status', 'overall', 'age'],  // position removed
+          columnWidths: {},
+        },
+      },
+    },
+  },
+  reorderedColumns: {
+    preferences: {
+      grids: {
+        rosterAll: {
+          columns: ['position', 'name', 'number', 'status', 'overall', 'age'],  // reordered
+          columnWidths: {},
+        },
+      },
+    },
+  },
+  multipleCustomizations: {
+    preferences: {
+      grids: {
+        rosterAll: {
+          columns: ['name', 'position', 'overall', 'age'],  // some hidden, reordered
+          columnWidths: { name: 180, position: 100, overall: 70 },
+        },
+      },
     },
   },
 };
@@ -92,6 +144,27 @@ const getPreferences = {
       lightThemeScenario: () => JSON.stringify(CANNED_RESPONSES.lightTheme),
       darkThemeScenario: () => JSON.stringify(CANNED_RESPONSES.darkTheme),
       systemThemeScenario: () => JSON.stringify(CANNED_RESPONSES.systemTheme),
+      // Grid-specific scenarios for E2E testing
+      savedColumnWidths: () => JSON.stringify({
+        ...CANNED_RESPONSES.savedColumnWidths,
+        lastUpdated: new Date().toISOString(),
+      }),
+      collapsedNameColumn: () => JSON.stringify({
+        ...CANNED_RESPONSES.collapsedNameColumn,
+        lastUpdated: new Date().toISOString(),
+      }),
+      hiddenPositionColumn: () => JSON.stringify({
+        ...CANNED_RESPONSES.hiddenPositionColumn,
+        lastUpdated: new Date().toISOString(),
+      }),
+      reorderedColumns: () => JSON.stringify({
+        ...CANNED_RESPONSES.reorderedColumns,
+        lastUpdated: new Date().toISOString(),
+      }),
+      multipleCustomizations: () => JSON.stringify({
+        ...CANNED_RESPONSES.multipleCustomizations,
+        lastUpdated: new Date().toISOString(),
+      }),
     },
     {
       // Error scenarios

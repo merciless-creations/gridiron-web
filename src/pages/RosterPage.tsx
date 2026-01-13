@@ -295,6 +295,13 @@ export const RosterPage = () => {
     () => Object.keys(savedColumnWidths).length > 0
   );
 
+  // Update widthsInitialized when savedColumnWidths loads from preferences
+  useEffect(() => {
+    if (!widthsInitialized && Object.keys(savedColumnWidths).length > 0) {
+      setWidthsInitialized(true);
+    }
+  }, [widthsInitialized, savedColumnWidths]);
+
   // Measure all column widths from the table
   const measureAllColumnWidths = useCallback(() => {
     if (!tableRef.current) return null;
