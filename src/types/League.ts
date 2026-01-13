@@ -11,6 +11,12 @@ export interface League {
   isActive: boolean;
   totalTeams: number;
   totalConferences: number;
+  /** Whether a simulation is currently in progress for this league */
+  simulationInProgress: boolean;
+  /** When the current simulation started (ISO string) */
+  simulationStartedAt: string | null;
+  /** Display name of who started the simulation */
+  simulationStartedByUserName: string | null;
 }
 
 export interface LeagueDetail extends League {

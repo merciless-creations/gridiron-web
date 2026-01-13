@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
 import type { Season } from '../types/Season';
 
 interface CommissionerControlsProps {
@@ -7,10 +8,18 @@ interface CommissionerControlsProps {
   onAdvanceWeek: () => void;
   onAdvanceByDays: (days: number) => void;
   onProcessYearEnd: () => void;
+  onUnlockSimulation: () => void;
   isGenerating: boolean;
   isAdvancing: boolean;
   isAdvancingByDays: boolean;
   isProcessingYearEnd: boolean;
+  isUnlocking: boolean;
+  /** Whether a simulation is currently in progress for this league */
+  simulationInProgress: boolean;
+  /** When the current simulation started (ISO string) */
+  simulationStartedAt: string | null;
+  /** Display name of who started the simulation */
+  simulationStartedByUserName: string | null;
 }
 
 const QUICK_DAYS = [
@@ -27,10 +36,15 @@ export function CommissionerControls({
   onAdvanceWeek,
   onAdvanceByDays,
   onProcessYearEnd,
+  onUnlockSimulation,
   isGenerating,
   isAdvancing,
   isAdvancingByDays,
   isProcessingYearEnd,
+  isUnlocking,
+  simulationInProgress,
+  simulationStartedAt,
+  simulationStartedByUserName,
 }: CommissionerControlsProps) {
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const [daysToAdvance, setDaysToAdvance] = useState(7);
@@ -41,6 +55,7 @@ export function CommissionerControls({
       if (action === 'advance') onAdvanceWeek();
       if (action === 'advanceDays') onAdvanceByDays(daysToAdvance);
       if (action === 'yearEnd') onProcessYearEnd();
+      if (action === 'unlock') onUnlockSimulation();
       setConfirmAction(null);
     } else {
       setConfirmAction(action);
@@ -58,7 +73,7 @@ export function CommissionerControls({
     }
   };
 
-  const isAnyLoading = isGenerating || isAdvancing || isAdvancingByDays || isProcessingYearEnd;
+  const isAnyLoading = isGenerating || isAdvancing || isAdvancingByDays || isProcessingYearEnd || isUnlocking;
   const hasSchedule = season && season.totalWeeks > 0;
   const isSeasonComplete = season?.isComplete;
   const canAdvance = hasSchedule && !isSeasonComplete && season.currentWeek <= season.totalWeeks;
@@ -68,9 +83,77 @@ export function CommissionerControls({
   const currentDayOfWeek = (season as Season & { currentDayOfWeek?: number })?.currentDayOfWeek ?? 0;
   const currentDayName = DAY_NAMES[currentDayOfWeek];
 
+  // Calculate simulation duration for display
+  const simulationDuration = simulationStartedAt
+    ? formatDistanceToNow(new Date(simulationStartedAt), { addSuffix: false })
+    : null;
+
   return (
     <div className="bg-zinc-800 rounded-lg p-6">
       <h2 className="text-xl font-semibold text-white mb-4">Commissioner Controls</h2>
+
+      {/* Simulation Lock Warning and Unlock Button */}
+      {simulationInProgress && (
+        <div className="mb-4 p-4 bg-red-900/20 rounded-lg border border-red-500/30">
+          <div className="flex items-start gap-3">
+            <svg
+              className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-red-400">
+                Simulation in progress
+                {simulationStartedByUserName && ` (started by ${simulationStartedByUserName})`}
+              </p>
+              {simulationDuration && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Running for {simulationDuration}
+                </p>
+              )}
+              <p className="text-xs text-gray-400 mt-2">
+                If the simulation has crashed or stalled, you can force unlock to allow roster changes again.
+              </p>
+              <div className="mt-3">
+                {confirmAction === 'unlock' ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleConfirm('unlock')}
+                      disabled={isAnyLoading}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-zinc-700 disabled:text-gray-500 text-white text-sm rounded font-medium transition-colors"
+                    >
+                      {isUnlocking ? 'Unlocking...' : 'Confirm Force Unlock'}
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      disabled={isAnyLoading}
+                      className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-sm rounded transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleConfirm('unlock')}
+                    disabled={isAnyLoading}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-zinc-700 disabled:text-gray-500 text-white text-sm rounded font-medium transition-colors"
+                  >
+                    Force Unlock
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         {!hasSchedule && (
