@@ -1,5 +1,5 @@
 import type { Team } from './Team';
-import { Possession, PlayType, Downs } from './enums';
+import { Downs } from './enums';
 
 export interface Game {
   id: number;
@@ -16,12 +16,14 @@ export interface Game {
   plays?: Play[];
 }
 
+/**
+ * Play-by-play data matching backend PlayDto
+ */
 export interface Play {
-  id?: number;
-  gameId?: number;
-  playType: PlayType;
-  possession: Possession;
-  down: Downs;
+  playType: string;
+  possession: string;
+  down: number;
+  yardsToGo: number;
   startFieldPosition: number;
   endFieldPosition: number;
   yardsGained: number;
@@ -29,13 +31,13 @@ export interface Play {
   stopTime: number;
   elapsedTime: number;
   isTouchdown: boolean;
-  isFirstDown: boolean;
   isSafety: boolean;
-  possessionChange: boolean;
   interception: boolean;
-  quarterExpired: boolean;
-  halfExpired: boolean;
-  gameExpired: boolean;
+  possessionChange: boolean;
+  penalties: string[];
+  fumbles: string[];
+  injuries: string[];
+  description: string;
 }
 
 export interface SimulateGameRequest {

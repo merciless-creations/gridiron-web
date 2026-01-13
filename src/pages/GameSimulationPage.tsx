@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useTeams, useSimulateGame } from '../api';
-import { Loading, ErrorMessage } from '../components';
+import { useTeams, useSimulateGame, useGamePlays } from '../api';
+import { Loading, ErrorMessage, PlayByPlayViewer } from '../components';
 
 export const GameSimulationPage = () => {
   const { data: teams, isLoading: teamsLoading, error: teamsError } = useTeams();
@@ -8,6 +8,10 @@ export const GameSimulationPage = () => {
 
   const [homeTeamId, setHomeTeamId] = useState<number | null>(null);
   const [awayTeamId, setAwayTeamId] = useState<number | null>(null);
+
+  // Fetch play-by-play data when we have a completed game
+  const gameId = simulateGame.data?.id ?? 0;
+  const { data: plays, isLoading: playsLoading } = useGamePlays(gameId);
 
   const handleSimulate = async () => {
     if (!homeTeamId || !awayTeamId) {
@@ -161,6 +165,16 @@ export const GameSimulationPage = () => {
             </p>
           </div>
         </div>
+      )}
+
+      {/* Play-by-Play Display */}
+      {simulateGame.isSuccess && simulateGame.data && (
+        <PlayByPlayViewer
+          plays={plays ?? []}
+          homeTeamName={`${homeTeam?.city ?? ''} ${homeTeam?.name ?? ''}`}
+          awayTeamName={`${awayTeam?.city ?? ''} ${awayTeam?.name ?? ''}`}
+          isLoading={playsLoading}
+        />
       )}
 
       {/* Error Display */}
