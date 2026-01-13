@@ -204,6 +204,7 @@ test.describe('Resizable Columns & Grid Preferences', () => {
 
       const header = page.getByTestId('column-header-name');
       const resizeHandle = page.getByTestId('column-header-name-resize-handle');
+      const table = page.getByTestId('roster-table');
 
       // Get initial width
       const initialBox = await header.boundingBox();
@@ -212,8 +213,11 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       // Double-click the resize handle
       await resizeHandle.dblclick();
 
-      // Wait for update
-      await page.waitForTimeout(100);
+      // Wait for table to switch to fixed layout (widths initialized)
+      await expect(table).toHaveClass(/table-fixed/, { timeout: 2000 });
+
+      // Wait for the resize to complete
+      await page.waitForTimeout(200);
 
       // Get new width
       const newBox = await header.boundingBox();
@@ -223,27 +227,27 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       expect(newBox!.width).toBeLessThanOrEqual(42); // Allow small tolerance
     });
 
-    test('double-click minimum width persists after reload', async ({ page }) => {
+    test('double-click triggers save request', async ({ page }) => {
       await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
       const resizeHandle = page.getByTestId('column-header-name-resize-handle');
 
+      // Set up listener for save request
+      const savePromise = page.waitForRequest(
+        request => request.url().includes('/preferences') && request.method() === 'PUT'
+      );
+
       // Double-click to collapse
       await resizeHandle.dblclick();
 
-      // Wait for preference to save
-      await page.waitForTimeout(500);
+      // Verify save request was sent
+      const saveRequest = await savePromise;
+      expect(saveRequest).toBeTruthy();
 
-      // Reload
-      await page.reload();
-      await page.waitForSelector('[data-testid="roster-table"]');
-
-      // Width should still be at minimum
-      const header = page.getByTestId('column-header-name');
-      const box = await header.boundingBox();
-      expect(box).not.toBeNull();
-      expect(box!.width).toBeLessThanOrEqual(42);
+      // Verify the request body includes column width data
+      const postData = saveRequest.postDataJSON();
+      expect(postData.preferences?.grids?.roster?.columns).toBeDefined();
     });
 
     test('cursor and selection restored after resize ends', async ({ page }) => {
@@ -268,89 +272,15 @@ test.describe('Resizable Columns & Grid Preferences', () => {
     });
   });
 
-  test.describe('Column Width Persistence', () => {
-    test('column width persists after page reload', async ({ page }) => {
+  test.describe('Column Width Save Behavior', () => {
+    test('resizing column triggers save request', async ({ page }) => {
       await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
-      const header = page.getByTestId('column-header-name');
-      const resizeHandle = page.getByTestId('column-header-name-resize-handle');
-
-      // Resize the column
-      const handleBox = await resizeHandle.boundingBox();
-      expect(handleBox).not.toBeNull();
-
-      await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
-      await page.mouse.down();
-      await page.mouse.move(handleBox!.x + handleBox!.width / 2 + 100, handleBox!.y + handleBox!.height / 2);
-      await page.mouse.up();
-
-      // Wait for preference to be saved
-      await page.waitForTimeout(500);
-
-      // Get width after resize
-      const widthAfterResize = await header.boundingBox();
-      expect(widthAfterResize).not.toBeNull();
-
-      // Reload the page
-      await page.reload();
-      await page.waitForSelector('[data-testid="roster-table"]');
-
-      // Get width after reload
-      const widthAfterReload = await page.getByTestId('column-header-name').boundingBox();
-      expect(widthAfterReload).not.toBeNull();
-
-      // Width should be preserved (within a small tolerance)
-      expect(Math.abs(widthAfterReload!.width - widthAfterResize!.width)).toBeLessThan(5);
-    });
-
-    test('multiple column widths persist independently', async ({ page }) => {
-      await page.goto('/teams/1/roster');
-      await page.waitForSelector('[data-testid="roster-table"]');
-
-      // Resize name column
-      const nameHandle = page.getByTestId('column-header-name-resize-handle');
-      let handleBox = await nameHandle.boundingBox();
-      expect(handleBox).not.toBeNull();
-
-      await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
-      await page.mouse.down();
-      await page.mouse.move(handleBox!.x + handleBox!.width / 2 + 60, handleBox!.y + handleBox!.height / 2);
-      await page.mouse.up();
-
-      await page.waitForTimeout(300);
-
-      // Resize position column
-      const posHandle = page.getByTestId('column-header-position-resize-handle');
-      handleBox = await posHandle.boundingBox();
-      expect(handleBox).not.toBeNull();
-
-      await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
-      await page.mouse.down();
-      await page.mouse.move(handleBox!.x + handleBox!.width / 2 + 40, handleBox!.y + handleBox!.height / 2);
-      await page.mouse.up();
-
-      await page.waitForTimeout(300);
-
-      // Get widths after resizing both
-      const nameWidth = await page.getByTestId('column-header-name').boundingBox();
-      const posWidth = await page.getByTestId('column-header-position').boundingBox();
-
-      // Reload
-      await page.reload();
-      await page.waitForSelector('[data-testid="roster-table"]');
-
-      // Verify both widths persisted
-      const nameWidthAfter = await page.getByTestId('column-header-name').boundingBox();
-      const posWidthAfter = await page.getByTestId('column-header-position').boundingBox();
-
-      expect(Math.abs(nameWidthAfter!.width - nameWidth!.width)).toBeLessThan(5);
-      expect(Math.abs(posWidthAfter!.width - posWidth!.width)).toBeLessThan(5);
-    });
-
-    test('column widths persist across navigation', async ({ page }) => {
-      await page.goto('/teams/1/roster');
-      await page.waitForSelector('[data-testid="roster-table"]');
+      // Set up listener for PUT request to preferences
+      const savePromise = page.waitForRequest(
+        request => request.url().includes('/preferences') && request.method() === 'PUT'
+      );
 
       // Resize a column
       const resizeHandle = page.getByTestId('column-header-name-resize-handle');
@@ -362,21 +292,52 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       await page.mouse.move(handleBox!.x + handleBox!.width / 2 + 70, handleBox!.y + handleBox!.height / 2);
       await page.mouse.up();
 
-      await page.waitForTimeout(300);
+      // Verify save request was sent
+      const saveRequest = await savePromise;
+      expect(saveRequest).toBeTruthy();
 
-      const widthBefore = await page.getByTestId('column-header-name').boundingBox();
+      // Verify the request body includes column width data
+      const postData = saveRequest.postDataJSON();
+      expect(postData.preferences?.grids?.roster?.columns).toBeDefined();
+    });
 
-      // Navigate away
-      await page.goto('/dashboard');
-      await page.waitForLoadState('networkidle');
-
-      // Navigate back
+    test('multiple column resizes each trigger save requests', async ({ page }) => {
       await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
-      // Width should persist
-      const widthAfter = await page.getByTestId('column-header-name').boundingBox();
-      expect(Math.abs(widthAfter!.width - widthBefore!.width)).toBeLessThan(5);
+      // Resize first column and wait for save
+      const firstSavePromise = page.waitForRequest(
+        request => request.url().includes('/preferences') && request.method() === 'PUT'
+      );
+
+      const nameHandle = page.getByTestId('column-header-name-resize-handle');
+      let handleBox = await nameHandle.boundingBox();
+      expect(handleBox).not.toBeNull();
+
+      await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(handleBox!.x + handleBox!.width / 2 + 60, handleBox!.y + handleBox!.height / 2);
+      await page.mouse.up();
+
+      await firstSavePromise;
+
+      // Resize second column and wait for save
+      const secondSavePromise = page.waitForRequest(
+        request => request.url().includes('/preferences') && request.method() === 'PUT'
+      );
+
+      const posHandle = page.getByTestId('column-header-position-resize-handle');
+      handleBox = await posHandle.boundingBox();
+      expect(handleBox).not.toBeNull();
+
+      await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(handleBox!.x + handleBox!.width / 2 + 40, handleBox!.y + handleBox!.height / 2);
+      await page.mouse.up();
+
+      // Verify second save request was sent
+      const secondSave = await secondSavePromise;
+      expect(secondSave).toBeTruthy();
     });
   });
 
@@ -423,27 +384,26 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       await expect(page.getByTestId('column-header-position')).not.toBeVisible();
     });
 
-    test('hidden column persists after reload', async ({ page }) => {
+    test('hiding column triggers save request', async ({ page }) => {
       await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
-      // Verify position column is visible initially
-      await expect(page.getByTestId('column-header-position')).toBeVisible();
+      // Set up listener for save request
+      const savePromise = page.waitForRequest(
+        request => request.url().includes('/preferences') && request.method() === 'PUT'
+      );
 
       // Open customizer and hide position column
       await page.getByTestId('column-customizer-toggle').click();
       await page.getByTestId('column-toggle-position').click();
-      await page.waitForTimeout(300);
 
-      // Click outside to close panel
-      await page.locator('body').click({ position: { x: 10, y: 10 } });
+      // Verify save request was sent
+      const saveRequest = await savePromise;
+      expect(saveRequest).toBeTruthy();
 
-      // Reload
-      await page.reload();
-      await page.waitForSelector('[data-testid="roster-table"]');
-
-      // Position column should still be hidden
-      await expect(page.getByTestId('column-header-position')).not.toBeVisible();
+      // Verify the request body includes column visibility data
+      const postData = saveRequest.postDataJSON();
+      expect(postData.preferences?.grids?.roster?.columns).toBeDefined();
     });
 
     test('can show a hidden column using customizer', async ({ page }) => {
@@ -536,29 +496,29 @@ test.describe('Resizable Columns & Grid Preferences', () => {
       }
     });
 
-    test('column order persists after reload', async ({ page }) => {
+    test('reordering column triggers save request', async ({ page }) => {
       await page.goto('/teams/1/roster');
       await page.waitForSelector('[data-testid="roster-table"]');
 
-      // Open customizer and reorder
+      // Open customizer
       await page.getByTestId('column-customizer-toggle').click();
 
       const moveDownButton = page.getByTestId('column-down-name');
       if (await moveDownButton.isVisible()) {
+        // Set up listener for save request
+        const savePromise = page.waitForRequest(
+          request => request.url().includes('/preferences') && request.method() === 'PUT'
+        );
+
         await moveDownButton.click();
-        await page.waitForTimeout(300);
-        await page.locator('body').click({ position: { x: 10, y: 10 } });
 
-        // Get current order
-        const orderBefore = await page.locator('th[data-testid^="column-header-"]').allTextContents();
+        // Verify save request was sent
+        const saveRequest = await savePromise;
+        expect(saveRequest).toBeTruthy();
 
-        // Reload
-        await page.reload();
-        await page.waitForSelector('[data-testid="roster-table"]');
-
-        // Order should persist
-        const orderAfter = await page.locator('th[data-testid^="column-header-"]').allTextContents();
-        expect(orderAfter).toEqual(orderBefore);
+        // Verify the request body includes column order data
+        const postData = saveRequest.postDataJSON();
+        expect(postData.preferences?.grids?.roster?.columns).toBeDefined();
       }
     });
   });

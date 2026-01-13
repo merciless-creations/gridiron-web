@@ -41,13 +41,20 @@ export function ResizableColumnHeader({
     e.preventDefault();
     e.stopPropagation();
 
+    // Set inline style immediately for visual feedback
     if (headerRef.current) {
       headerRef.current.style.width = `${minWidth}px`;
       headerRef.current.style.minWidth = `${minWidth}px`;
       headerRef.current.style.maxWidth = `${minWidth}px`;
     }
-    onWidthChange(columnKey, minWidth);
-  }, [columnKey, minWidth, onWidthChange]);
+
+    // Notify parent to initialize all column widths (measures AFTER style is set)
+    // Use requestAnimationFrame to ensure the style has been applied before measuring
+    requestAnimationFrame(() => {
+      onResizeStart?.();
+      onWidthChange(columnKey, minWidth);
+    });
+  }, [columnKey, minWidth, onResizeStart, onWidthChange]);
 
   const handleMouseDown = useCallback((e: MouseEvent) => {
     e.preventDefault();

@@ -37,11 +37,45 @@ export const useUpdatePreferences = () => {
 
   return useMutation({
     mutationFn: preferencesApi.updatePreferences,
-    onSuccess: (data) => {
-      // Update the cache with the new preferences
-      queryClient.setQueryData(PREFERENCES_QUERY_KEY, data);
+    // Optimistic update for immediate UI feedback
+    onMutate: async (newPreferences) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: PREFERENCES_QUERY_KEY });
+
+      // Snapshot previous value
+      const previousPreferences = queryClient.getQueryData(PREFERENCES_QUERY_KEY);
+
+      // Optimistically update the cache
+      queryClient.setQueryData(PREFERENCES_QUERY_KEY, (old: PreferencesResponse | undefined) => ({
+        preferences: newPreferences,
+        lastUpdated: old?.lastUpdated ?? new Date().toISOString(),
+      }));
+
+      return { previousPreferences };
     },
-    onError: (error) => {
+    onSuccess: (data, variables) => {
+      // Merge server response with what we sent (in case server returns partial/empty)
+      // This preserves the optimistic update if the server doesn't echo back the full preferences
+      queryClient.setQueryData(PREFERENCES_QUERY_KEY, (old: PreferencesResponse | undefined) => {
+        const serverPrefs = data?.preferences || {};
+        const sentPrefs = variables;
+        // Merge: sent preferences override server response (preserves optimistic update)
+        return {
+          preferences: {
+            ...serverPrefs,
+            ...sentPrefs,
+            ui: { ...serverPrefs.ui, ...sentPrefs.ui },
+            grids: { ...serverPrefs.grids, ...sentPrefs.grids },
+          },
+          lastUpdated: data?.lastUpdated || old?.lastUpdated || new Date().toISOString(),
+        };
+      });
+    },
+    onError: (error, _newPreferences, context) => {
+      // Roll back to previous value on error
+      if (context?.previousPreferences) {
+        queryClient.setQueryData(PREFERENCES_QUERY_KEY, context.previousPreferences);
+      }
       console.error('Failed to update preferences:', error);
     },
   });

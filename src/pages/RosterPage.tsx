@@ -320,6 +320,12 @@ export const RosterPage = () => {
     ...savedColumnWidths,
   }), [measuredWidths, savedColumnWidths]);
 
+  // Calculate total table width from visible column widths
+  const tableWidth = useMemo(() => {
+    if (!widthsInitialized) return undefined;
+    return visibleColumns.reduce((sum, col) => sum + (columnWidths[col] || 0), 0);
+  }, [widthsInitialized, visibleColumns, columnWidths]);
+
   // Called at the START of any resize - measure and lock all columns
   const handleResizeStart = useCallback(() => {
     if (widthsInitialized) return;
@@ -333,14 +339,19 @@ export const RosterPage = () => {
 
   // Handle column width change
   const handleColumnWidthChange = useCallback((columnKey: string, width: number) => {
+    // If measured widths is empty, measure now (handles case where state update is async)
+    const currentMeasuredWidths = Object.keys(measuredWidths).length > 0
+      ? measuredWidths
+      : (measureAllColumnWidths() ?? {});
+
     setGridPreferences(gridKey, {
       columnWidths: {
-        ...measuredWidths,
+        ...currentMeasuredWidths,
         ...savedColumnWidths,
         [columnKey]: width,
       },
     });
-  }, [gridKey, measuredWidths, savedColumnWidths, setGridPreferences]);
+  }, [gridKey, measureAllColumnWidths, measuredWidths, savedColumnWidths, setGridPreferences]);
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
@@ -619,7 +630,12 @@ export const RosterPage = () => {
       {/* Roster Table */}
       <div className="card overflow-hidden border-l-4 border-team-primary">
         <div className="overflow-x-auto">
-          <table ref={tableRef} className={widthsInitialized ? 'w-max table-fixed' : 'w-full'} data-testid="roster-table">
+          <table
+            ref={tableRef}
+            className={widthsInitialized ? 'table-fixed' : 'w-full'}
+            style={tableWidth ? { width: `${tableWidth}px` } : undefined}
+            data-testid="roster-table"
+          >
             <thead>
               <tr className="text-left text-xs text-gridiron-text-secondary uppercase tracking-wider border-b border-gridiron-border-subtle">
                 {visibleColumns.map((columnKey) => {
