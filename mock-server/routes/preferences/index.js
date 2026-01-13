@@ -4,8 +4,8 @@
  * - GET /api/users/me/preferences - Get current user's preferences
  * - PUT /api/users/me/preferences - Update current user's preferences
  *
- * Each scenario returns a canned response. Tests should set the appropriate
- * scenario before making requests to get the expected responses.
+ * The default scenario returns empty preferences.
+ * Tests can override with specific scenarios for canned responses.
  */
 
 const mocks = [];
@@ -45,7 +45,7 @@ const CANNED_RESPONSES = {
         },
       },
       grids: {
-        roster: {
+        rosterAll: {
           columns: ['number', 'name', 'position', 'overall', 'age', 'salary'],
           columnWidths: { name: 200, salary: 100 },
           sortColumn: 'overall',
@@ -69,6 +69,58 @@ const CANNED_RESPONSES = {
       ui: { theme: 'system' },
     },
   },
+  // Grid-specific scenarios for E2E testing
+  // Note: The grid key is 'rosterAll' for the default tab (not 'roster')
+  savedColumnWidths: {
+    preferences: {
+      grids: {
+        rosterAll: {
+          columns: ['number', 'name', 'position', 'status', 'overall', 'age'],
+          columnWidths: { name: 250, position: 120, overall: 80 },
+        },
+      },
+    },
+  },
+  collapsedNameColumn: {
+    preferences: {
+      grids: {
+        rosterAll: {
+          columns: ['number', 'name', 'position', 'status', 'overall', 'age'],
+          columnWidths: { name: 36 },
+        },
+      },
+    },
+  },
+  hiddenPositionColumn: {
+    preferences: {
+      grids: {
+        rosterAll: {
+          columns: ['number', 'name', 'status', 'overall', 'age'],  // position removed
+          columnWidths: {},
+        },
+      },
+    },
+  },
+  reorderedColumns: {
+    preferences: {
+      grids: {
+        rosterAll: {
+          columns: ['position', 'name', 'number', 'status', 'overall', 'age'],  // reordered
+          columnWidths: {},
+        },
+      },
+    },
+  },
+  multipleCustomizations: {
+    preferences: {
+      grids: {
+        rosterAll: {
+          columns: ['name', 'position', 'overall', 'age'],  // some hidden, reordered
+          columnWidths: { name: 180, position: 100, overall: 70 },
+        },
+      },
+    },
+  },
 };
 
 // Get user preferences
@@ -80,7 +132,11 @@ const getPreferences = {
   testScenario: 'defaultScenario',
   jsonTemplate: [
     {
-      defaultScenario: () => JSON.stringify(CANNED_RESPONSES.empty),
+      // Default: return empty preferences
+      defaultScenario: () => JSON.stringify({
+        preferences: {},
+        lastUpdated: new Date().toISOString(),
+      }),
       emptyScenario: () => JSON.stringify(CANNED_RESPONSES.empty),
       withRedTeamColors: () => JSON.stringify(CANNED_RESPONSES.withRedTeamColors),
       withBlueTeamColors: () => JSON.stringify(CANNED_RESPONSES.withBlueTeamColors),
@@ -88,6 +144,27 @@ const getPreferences = {
       lightThemeScenario: () => JSON.stringify(CANNED_RESPONSES.lightTheme),
       darkThemeScenario: () => JSON.stringify(CANNED_RESPONSES.darkTheme),
       systemThemeScenario: () => JSON.stringify(CANNED_RESPONSES.systemTheme),
+      // Grid-specific scenarios for E2E testing
+      savedColumnWidths: () => JSON.stringify({
+        ...CANNED_RESPONSES.savedColumnWidths,
+        lastUpdated: new Date().toISOString(),
+      }),
+      collapsedNameColumn: () => JSON.stringify({
+        ...CANNED_RESPONSES.collapsedNameColumn,
+        lastUpdated: new Date().toISOString(),
+      }),
+      hiddenPositionColumn: () => JSON.stringify({
+        ...CANNED_RESPONSES.hiddenPositionColumn,
+        lastUpdated: new Date().toISOString(),
+      }),
+      reorderedColumns: () => JSON.stringify({
+        ...CANNED_RESPONSES.reorderedColumns,
+        lastUpdated: new Date().toISOString(),
+      }),
+      multipleCustomizations: () => JSON.stringify({
+        ...CANNED_RESPONSES.multipleCustomizations,
+        lastUpdated: new Date().toISOString(),
+      }),
     },
     {
       // Error scenarios
@@ -103,8 +180,7 @@ const getPreferences = {
   ],
 };
 
-// Update user preferences - returns canned response (no state)
-// For manual dev testing, use 'echoScenario' to return what was sent
+// Update user preferences - echoes back what was sent
 const updatePreferences = {
   name: 'updatePreferences',
   mockRoute: '/api/users/me/preferences',
@@ -113,8 +189,16 @@ const updatePreferences = {
   testScenario: 'defaultScenario',
   jsonTemplate: [
     {
-      // Default: return empty preferences (simulates successful save)
-      defaultScenario: () => JSON.stringify(CANNED_RESPONSES.empty),
+      // Default: echo back what was sent
+      defaultScenario: (req) => {
+        const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+        return JSON.stringify({
+          preferences: body.preferences || {},
+          lastUpdated: new Date().toISOString(),
+        });
+      },
+      // Return empty preferences
+      emptyScenario: () => JSON.stringify(CANNED_RESPONSES.empty),
       // Return specific saved colors (tests should set this scenario before saving)
       withRedTeamColors: () => JSON.stringify(CANNED_RESPONSES.withRedTeamColors),
       withBlueTeamColors: () => JSON.stringify(CANNED_RESPONSES.withBlueTeamColors),

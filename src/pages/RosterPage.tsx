@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { usePlayers } from '../api/players';
 import { useTeam } from '../api/teams';
@@ -6,6 +6,7 @@ import {
   Loading,
   GridColumnCustomizer,
   ColumnFilterPopover,
+  ResizableColumnHeader,
 } from '../components';
 import { passesFilter, type NumericFilterValue } from '../utils/numericFilter';
 import { usePreferences } from '../contexts';
@@ -23,6 +24,7 @@ import {
   type Skill,
   type RosterGridType,
   SKILL_LABELS,
+  SKILL_ABBREV,
   ALL_SKILLS,
   ROSTER_GRID_POSITIONS,
   getGridSkills,
@@ -93,6 +95,7 @@ const FILTERABLE_STATUSES: PlayerStatus[] = [PlayerStatus.Injured];
 const BASE_COLUMNS = [
   { key: 'number', label: '#', defaultVisible: true },
   { key: 'name', label: 'Name', defaultVisible: true },
+  { key: 'nameShort', label: 'Name Short', defaultVisible: false },
   { key: 'position', label: 'Pos', defaultVisible: true },
   { key: 'status', label: 'Status', defaultVisible: true },
   { key: 'overall', label: 'OVR', defaultVisible: true },
@@ -123,6 +126,7 @@ function getColumnsForGrid(gridType: RosterGridType) {
 const SORTABLE_COLUMNS: Record<string, SortField | null> = {
   number: 'number',
   name: 'name',
+  nameShort: 'name', // Sort by name field
   position: 'position',
   status: null,
   overall: 'overall',
@@ -140,6 +144,7 @@ const SORTABLE_COLUMNS: Record<string, SortField | null> = {
 const COLUMN_HEADER_CONFIG: Record<string, { label: string; className: string }> = {
   number: { label: '#', className: 'px-4 py-3' },
   name: { label: 'Name', className: 'px-4 py-3' },
+  nameShort: { label: 'Name', className: 'px-4 py-3' },
   position: { label: 'Pos', className: 'px-4 py-3' },
   status: { label: 'Status', className: 'px-4 py-3 text-center' },
   overall: { label: 'OVR', className: 'px-4 py-3 text-center' },
@@ -149,10 +154,10 @@ const COLUMN_HEADER_CONFIG: Record<string, { label: string; className: string }>
   salary: { label: 'Salary', className: 'px-4 py-3 text-right' },
   contract: { label: 'Contract', className: 'px-4 py-3 text-center' },
   health: { label: 'Health', className: 'px-4 py-3 text-center' },
-  // Skill columns
+  // Skill columns (use 3-letter abbreviations)
   ...Object.fromEntries(ALL_SKILLS.map(skill => [
     skill,
-    { label: SKILL_LABELS[skill], className: 'px-4 py-3 text-center' }
+    { label: SKILL_ABBREV[skill], className: 'px-2 py-3 text-center' }
   ])),
 };
 
@@ -272,6 +277,86 @@ export const RosterPage = () => {
       numericFilters: cleanFilters,
     });
   }, [columnFilters, positionFilter, statusFilter, gridKey, setGridPreferences]);
+
+  // Get column widths from preferences (memoized to prevent dependency issues)
+  const savedColumnWidths = useMemo(
+    () => gridPrefs?.columnWidths ?? {},
+    [gridPrefs?.columnWidths]
+  );
+
+  // Ref to the table for measuring column widths
+  const tableRef = useRef<HTMLTableElement>(null);
+
+  // Track measured widths (captured on first resize interaction)
+  const [measuredWidths, setMeasuredWidths] = useState<Record<string, number>>({});
+
+  // Track if user has manually triggered resize (to know when to set measured widths)
+  const [hasUserResized, setHasUserResized] = useState(false);
+
+  // Widths are initialized when we have either saved widths from preferences or measured widths from user interaction
+  const widthsInitialized = useMemo(
+    () => Object.keys(savedColumnWidths).length > 0 || Object.keys(measuredWidths).length > 0,
+    [savedColumnWidths, measuredWidths]
+  );
+
+  // Measure all column widths from the table
+  const measureAllColumnWidths = useCallback(() => {
+    if (!tableRef.current) return null;
+
+    const headerCells = tableRef.current.querySelectorAll('th[data-testid^="column-header-"]');
+    if (headerCells.length === 0) return null;
+
+    const widths: Record<string, number> = {};
+    headerCells.forEach((cell) => {
+      const testId = cell.getAttribute('data-testid');
+      if (testId) {
+        const columnKey = testId.replace('column-header-', '');
+        widths[columnKey] = (cell as HTMLElement).offsetWidth;
+      }
+    });
+
+    return widths;
+  }, []);
+
+  // Combine saved widths with measured widths (saved takes precedence)
+  const columnWidths = useMemo(() => ({
+    ...measuredWidths,
+    ...savedColumnWidths,
+  }), [measuredWidths, savedColumnWidths]);
+
+  // Calculate total table width from visible column widths
+  const tableWidth = useMemo(() => {
+    if (!widthsInitialized) return undefined;
+    return visibleColumns.reduce((sum, col) => sum + (columnWidths[col] || 0), 0);
+  }, [widthsInitialized, visibleColumns, columnWidths]);
+
+  // Called at the START of any resize - measure and lock all columns
+  const handleResizeStart = useCallback(() => {
+    // If user has already resized or we have saved widths, don't re-measure
+    if (hasUserResized || Object.keys(savedColumnWidths).length > 0) return;
+
+    const measured = measureAllColumnWidths();
+    if (measured) {
+      setMeasuredWidths(measured);
+      setHasUserResized(true);
+    }
+  }, [hasUserResized, savedColumnWidths, measureAllColumnWidths]);
+
+  // Handle column width change
+  const handleColumnWidthChange = useCallback((columnKey: string, width: number) => {
+    // If measured widths is empty, measure now (handles case where state update is async)
+    const currentMeasuredWidths = Object.keys(measuredWidths).length > 0
+      ? measuredWidths
+      : (measureAllColumnWidths() ?? {});
+
+    setGridPreferences(gridKey, {
+      columnWidths: {
+        ...currentMeasuredWidths,
+        ...savedColumnWidths,
+        [columnKey]: width,
+      },
+    });
+  }, [gridKey, measureAllColumnWidths, measuredWidths, savedColumnWidths, setGridPreferences]);
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
@@ -550,7 +635,12 @@ export const RosterPage = () => {
       {/* Roster Table */}
       <div className="card overflow-hidden border-l-4 border-team-primary">
         <div className="overflow-x-auto">
-          <table className="w-full" data-testid="roster-table">
+          <table
+            ref={tableRef}
+            className={widthsInitialized ? 'table-fixed' : 'w-full'}
+            style={tableWidth ? { width: `${tableWidth}px` } : undefined}
+            data-testid="roster-table"
+          >
             <thead>
               <tr className="text-left text-xs text-gridiron-text-secondary uppercase tracking-wider border-b border-gridiron-border-subtle">
                 {visibleColumns.map((columnKey) => {
@@ -567,14 +657,18 @@ export const RosterPage = () => {
                   if (!config) return null;
 
                   return (
-                    <th
+                    <ResizableColumnHeader
                       key={columnKey}
-                      className={`${config.className}`}
+                      columnKey={columnKey}
+                      width={columnWidths[columnKey]}
+                      className={config.className}
+                      onResizeStart={handleResizeStart}
+                      onWidthChange={handleColumnWidthChange}
                       data-testid={`column-header-${columnKey}`}
                     >
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 pr-2 min-w-0">
                         <span
-                          className={sortableField ? 'cursor-pointer hover:text-gridiron-text-primary' : ''}
+                          className={`truncate min-w-0 ${sortableField ? 'cursor-pointer hover:text-gridiron-text-primary' : ''}`}
                           onClick={sortableField ? () => handleSort(sortableField) : undefined}
                         >
                           {config.label}{sortableField ? getSortIndicator(sortableField) : ''}
@@ -595,7 +689,7 @@ export const RosterPage = () => {
                           />
                         )}
                       </div>
-                    </th>
+                    </ResizableColumnHeader>
                   );
                 })}
               </tr>
@@ -664,6 +758,14 @@ function PlayerRow({ player, visibleColumns }: PlayerRowProps) {
           <td key={columnKey} className="px-4 py-3" data-testid={`cell-${columnKey}`}>
             <span className="text-gridiron-text-primary font-medium">
               {player.firstName} {player.lastName}
+            </span>
+          </td>
+        );
+      case 'nameShort':
+        return (
+          <td key={columnKey} className="px-4 py-3" data-testid={`cell-${columnKey}`}>
+            <span className="text-gridiron-text-primary font-medium">
+              {player.firstName.charAt(0)}. {player.lastName}
             </span>
           </td>
         );
