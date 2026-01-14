@@ -326,15 +326,36 @@ preStart().then(() => {
 
     // Get season state from in-memory store
     const storedSeason = state.getSeason(leagueId);
-    const seasonState = storedSeason || {
-      id: leagueId * 100 + 1,
-      leagueId: leagueId,
-      year: new Date().getFullYear(),
-      currentWeek: 1,
-      totalWeeks: 0,
-      phase: 'preseason',
-      isComplete: false,
-    };
+
+    if (storedSeason) {
+      // Return explicitly stored state (set by generateSchedule or advanceDays)
+      return res.json(storedSeason);
+    }
+
+    // No stored season - determine default based on league ID
+    // League IDs 1-2 are seed data and should have schedules by default
+    // League IDs 3+ are newly created during tests and should NOT have schedules
+    const isSeedDataLeague = leagueId <= 2;
+
+    const seasonState = isSeedDataLeague
+      ? {
+          id: leagueId * 100 + 1,
+          leagueId: leagueId,
+          year: new Date().getFullYear(),
+          currentWeek: 10,
+          totalWeeks: 18,
+          phase: 'regular',
+          isComplete: false,
+        }
+      : {
+          id: leagueId * 100 + 1,
+          leagueId: leagueId,
+          year: new Date().getFullYear(),
+          currentWeek: 1,
+          totalWeeks: 0,
+          phase: 'preseason',
+          isComplete: false,
+        };
 
     res.json(seasonState);
   });
