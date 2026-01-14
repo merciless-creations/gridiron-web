@@ -44,7 +44,7 @@ test.describe('GM Simulation Lock Experience', () => {
       await expect(banner).toBeVisible()
 
       // Banner should show simulation message
-      await expect(page.getByText(/Simulation in progress/i)).toBeVisible()
+      await expect(page.getByText(/Simulation in progress/i).first()).toBeVisible()
     })
 
     test('banner shows who started the simulation', async ({ page }) => {
@@ -54,7 +54,7 @@ test.describe('GM Simulation Lock Experience', () => {
       await expect(page.getByTestId('league-name')).toBeVisible({ timeout: 10000 })
 
       // Should show the commissioner's name
-      await expect(page.getByText(/Commissioner Bob/i)).toBeVisible()
+      await expect(page.getByText(/Commissioner Bob/i).first()).toBeVisible()
     })
 
     test('banner shows simulation duration', async ({ page }) => {
@@ -108,9 +108,9 @@ test.describe('GM Simulation Lock Experience', () => {
       // Wait for page to load
       await expect(page.getByRole('heading', { name: 'Season Dashboard' })).toBeVisible({ timeout: 10000 })
 
-      // Banner should be visible
-      await expect(page.getByText(/Simulation in progress/i)).toBeVisible()
-      await expect(page.getByText(/Commissioner Bob/i)).toBeVisible()
+      // Banner should be visible - use first() since text may appear in multiple places
+      await expect(page.getByText(/Simulation in progress/i).first()).toBeVisible()
+      await expect(page.getByText(/Commissioner Bob/i).first()).toBeVisible()
     })
 
     test('no banner on season dashboard when unlocked', async ({ page }) => {
@@ -158,14 +158,14 @@ test.describe('GM Simulation Lock Experience', () => {
       await expect(page.getByTestId('league-name')).toBeVisible({ timeout: 10000 })
 
       // Banner should be visible but page should load
-      await expect(page.getByText(/Simulation in progress/i)).toBeVisible()
+      await expect(page.getByText(/Simulation in progress/i).first()).toBeVisible()
 
       // Navigate to season dashboard
       await page.goto('/leagues/1/season')
       await expect(page.getByRole('heading', { name: 'Season Dashboard' })).toBeVisible({ timeout: 10000 })
 
       // Banner should still be visible
-      await expect(page.getByText(/Simulation in progress/i)).toBeVisible()
+      await expect(page.getByText(/Simulation in progress/i).first()).toBeVisible()
     })
 
     test('GM can view team roster page while locked', async ({ page }) => {
