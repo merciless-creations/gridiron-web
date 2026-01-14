@@ -26,7 +26,6 @@ export default function LeagueSimulatingPage() {
     if (!id) return;
 
     const leagueId = Number(id);
-    let intervalId: ReturnType<typeof setInterval>;
 
     const checkStatus = async () => {
       try {
@@ -53,12 +52,10 @@ export default function LeagueSimulatingPage() {
     checkStatus();
 
     // Poll every 10 seconds
-    intervalId = setInterval(checkStatus, 10000);
+    const intervalId = setInterval(checkStatus, 10000);
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      clearInterval(intervalId);
     };
   }, [id, navigate]);
 
