@@ -313,7 +313,7 @@ const listLeagues = {
 // Create a new league
 const createLeague = {
   name: 'createLeague',
-  mockRoute: '/api/leagues-management',
+  mockRoute: new RegExp(`^/api/leagues-management$`).source,
   method: 'POST',
   testScope: 'success',
   testScenario: 'defaultScenario',
@@ -321,14 +321,59 @@ const createLeague = {
     {
       defaultScenario: function (req) {
         const body = req.body;
+        const leagueId = state.getNextLeagueId();
+
+        // Build conference/division/team structure based on request
+        const numConferences = body.numberOfConferences || 2;
+        const divisionsPerConference = body.divisionsPerConference || 4;
+        const teamsPerDivision = body.teamsPerDivision || 4;
+
+        const conferences = [];
+        let teamId = 1;
+        let divisionId = 1;
+
+        for (let c = 1; c <= numConferences; c++) {
+          const divisions = [];
+          for (let d = 1; d <= divisionsPerConference; d++) {
+            const teams = [];
+            for (let t = 1; t <= teamsPerDivision; t++) {
+              teams.push({
+                id: teamId++,
+                name: `City ${c}-${d}-${t} Team ${t}`,
+                city: `City ${c}-${d}-${t}`,
+                abbreviation: `T${teamId - 1}`,
+                divisionId: divisionId,
+              });
+            }
+            divisions.push({
+              id: divisionId++,
+              name: `Division ${c}-${d}`,
+              conferenceId: c,
+              teams,
+            });
+          }
+          conferences.push({
+            id: c,
+            name: `Conference ${c}`,
+            leagueId,
+            divisions,
+          });
+        }
+
+        const totalTeams = numConferences * divisionsPerConference * teamsPerDivision;
+
         const newLeague = {
-          id: state.getNextLeagueId(),
+          id: leagueId,
           name: body.name,
           season: new Date().getFullYear(),
-          totalTeams: 0,
-          totalConferences: 0,
+          totalTeams,
+          totalConferences: numConferences,
           isActive: true,
-          conferences: [],
+          conferences,
+          // Playoff settings from request
+          playoffTeamsPerConference: body.playoffTeamsPerConference || 7,
+          divisionWinnersAutoQualify: body.divisionWinnersAutoQualify ?? true,
+          byeWeekForTopSeed: body.byeWeekForTopSeed ?? true,
         };
         state.setLeague(newLeague.id, newLeague);
         return JSON.stringify(newLeague);
