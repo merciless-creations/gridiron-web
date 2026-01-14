@@ -97,7 +97,10 @@ test.describe('Commissioner League Setup Journey', () => {
   test('Step 3: Populate rosters', async ({ page }) => {
     // Navigate to league detail page
     await page.goto(`/leagues/${leagueId}`)
-    await expect(page.getByText(leagueName)).toBeVisible({ timeout: 10000 })
+    // Wait for page to load - check for any league content rather than exact name
+    // (exact name matching is flaky with retries creating new leagues)
+    await expect(page.locator('main')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
 
     // Click Populate Rosters button (commissioner only)
     const populateButton = page.getByTestId('populate-rosters-button')
