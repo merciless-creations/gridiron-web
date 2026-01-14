@@ -86,10 +86,7 @@ test.describe('Commissioner League Setup Journey', () => {
     await page.goto(`/leagues/${leagueId}/structure`)
     await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
 
-    // Should see 2 conferences
-    // Look for conference sections (they might be collapsible buttons or headings)
-    const conferenceElements = page.locator('[data-testid^="conference-"]')
-    // If no test IDs, look for text patterns
+    // Should see 2 conferences - look for conference text
     await expect(page.getByText(/Conference 1|AFC|NFC/i).first()).toBeVisible()
   })
 
