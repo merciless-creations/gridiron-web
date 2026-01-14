@@ -16,6 +16,7 @@ try {
 
 // In-memory state
 let leagues = new Map(seedData.leagues?.map(l => [l.id, l]) || []);
+let seasons = new Map(); // Season state per league
 let nextLeagueId = Math.max(...Array.from(leagues.keys()), 0) + 1;
 let nextConferenceId = 1000;
 let nextDivisionId = 2000;
@@ -115,6 +116,7 @@ function resetState() {
     leagues = new Map();
     nextLeagueId = 1;
   }
+  seasons.clear(); // Reset season state between tests
   nextConferenceId = 1000;
   nextDivisionId = 2000;
   nextTeamId = 3000;
@@ -165,6 +167,10 @@ module.exports = {
   getLeagues: () => leagues,
   getLeague: (id) => leagues.get(id),
   setLeague: (id, league) => leagues.set(id, league),
+
+  // Season state accessors
+  getSeason: (leagueId) => seasons.get(leagueId),
+  setSeason: (leagueId, season) => seasons.set(leagueId, season),
 
   // ID generators
   getNextLeagueId: () => nextLeagueId++,

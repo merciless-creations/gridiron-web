@@ -74,6 +74,8 @@ function generateStandingsData(leagueId) {
 }
 
 // Get season info
+// NOTE: This route is now handled by custom handler in server.js for stateful responses
+// This mock definition is kept for route registration but won't be called
 const getSeason = {
   name: 'getSeason',
   mockRoute: new RegExp(`^/api/leagues-management/([0-9]+)/season$`).source,
@@ -91,15 +93,19 @@ const getSeason = {
           return JSON.stringify({ error: 'League not found' });
         }
 
-        return JSON.stringify({
+        // Get or create season state for this league
+        const storedSeason = state.getSeason(leagueId);
+        const seasonState = storedSeason || {
           id: leagueId * 100 + 1,
           leagueId: leagueId,
           year: new Date().getFullYear(),
-          currentWeek: 10,
-          totalWeeks: 18,
-          phase: 'regular',
+          currentWeek: 1,
+          totalWeeks: 0, // No schedule until generated
+          phase: 'preseason',
           isComplete: false,
-        });
+        };
+
+        return JSON.stringify(seasonState);
       },
     },
   ],
@@ -173,6 +179,8 @@ const getSchedule = {
 };
 
 // Generate schedule
+// NOTE: This route is now handled by custom handler in server.js for stateful responses
+// This mock definition is kept for route registration but won't be called
 const generateSchedule = {
   name: 'generateSchedule',
   mockRoute: new RegExp(`^/api/leagues-management/([0-9]+)/generate-schedule`).source,
@@ -184,6 +192,18 @@ const generateSchedule = {
       defaultScenario: function (req) {
         const match = req.originalUrl.match(/\/api\/leagues-management\/(\d+)\/generate-schedule/);
         const leagueId = match ? Number(match[1]) : null;
+
+        // Update season state to indicate schedule exists
+        const seasonState = {
+          id: leagueId * 100 + 1,
+          leagueId: leagueId,
+          year: new Date().getFullYear(),
+          currentWeek: 1,
+          totalWeeks: 18,
+          phase: 'regular',
+          isComplete: false,
+        };
+        state.setSeason(leagueId, seasonState);
 
         return JSON.stringify({
           seasonId: leagueId * 100 + 1,

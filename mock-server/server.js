@@ -17,7 +17,8 @@ preStart().then(() => {
 
   const fs = require('fs');
   const { loadAllRoutes } = require('./routes');
-  const { resetState } = require('./state');
+  const state = require('./state');
+  const { resetState } = state;
   const storeJsonFilePath = require('./common/store-json-file-path');
 
   // Load all routes from files
@@ -307,6 +308,108 @@ preStart().then(() => {
     console.log('Received shutdown signal');
     res.status(200).send('Shutting down...');
     process.exit(0);
+  });
+
+  // ===========================================================================
+  // Custom handlers for stateful routes that need dynamic responses
+  // These MUST come before mock-json-api to avoid caching issues
+  // ===========================================================================
+
+  // GET /api/leagues-management/:id/season - Returns season state (dynamic)
+  app.get('/api/leagues-management/:id/season', (req, res) => {
+    const leagueId = Number(req.params.id);
+    const league = state.getLeague(leagueId);
+
+    if (!league) {
+      return res.status(404).json({ error: 'League not found' });
+    }
+
+    // Get season state from in-memory store
+    const storedSeason = state.getSeason(leagueId);
+    const seasonState = storedSeason || {
+      id: leagueId * 100 + 1,
+      leagueId: leagueId,
+      year: new Date().getFullYear(),
+      currentWeek: 1,
+      totalWeeks: 0,
+      phase: 'preseason',
+      isComplete: false,
+    };
+
+    res.json(seasonState);
+  });
+
+  // POST /api/leagues-management/:id/generate-schedule - Updates season state
+  app.post('/api/leagues-management/:id/generate-schedule', (req, res) => {
+    const leagueId = Number(req.params.id);
+
+    // Update season state to indicate schedule exists
+    const seasonState = {
+      id: leagueId * 100 + 1,
+      leagueId: leagueId,
+      year: new Date().getFullYear(),
+      currentWeek: 1,
+      totalWeeks: 18,
+      phase: 'regular',
+      isComplete: false,
+    };
+    state.setSeason(leagueId, seasonState);
+
+    res.json({
+      seasonId: leagueId * 100 + 1,
+      totalGames: 272,
+      totalWeeks: 18,
+    });
+  });
+
+  // POST /api/leagues-management/:id/advance-days - Advances simulation
+  app.post('/api/leagues-management/:id/advance-days', (req, res) => {
+    const leagueId = Number(req.params.id);
+    const days = req.body?.days || 7;
+
+    // Get current season state
+    const currentSeason = state.getSeason(leagueId) || {
+      id: leagueId * 100 + 1,
+      leagueId: leagueId,
+      year: new Date().getFullYear(),
+      currentWeek: 1,
+      totalWeeks: 18,
+      phase: 'regular',
+      isComplete: false,
+    };
+
+    // Update week based on days advanced
+    const newWeek = Math.min(currentSeason.currentWeek + Math.floor(days / 7), currentSeason.totalWeeks);
+    const isComplete = newWeek >= currentSeason.totalWeeks;
+
+    const updatedSeason = {
+      ...currentSeason,
+      currentWeek: newWeek,
+      isComplete: isComplete,
+      phase: isComplete ? 'offseason' : 'regular',
+    };
+    state.setSeason(leagueId, updatedSeason);
+
+    // Calculate simulated games
+    const gamesPerDay = { 0: 14, 1: 1, 4: 1, 6: 2 };
+    let gamesSimulated = 0;
+    for (let d = 0; d < days; d++) {
+      const dayOfWeek = d % 7;
+      gamesSimulated += gamesPerDay[dayOfWeek] || 0;
+    }
+
+    res.json({
+      success: true,
+      daysAdvanced: days,
+      gamesSimulated: gamesSimulated,
+      injuriesHealed: Math.floor(days * 0.5),
+      playersProgressed: Math.floor(days * 2),
+      currentWeek: newWeek,
+      currentDay: days % 7,
+      phase: updatedSeason.phase,
+      gameResults: [],
+      warnings: [],
+    });
   });
 
   // Mount mock-json-api routes
