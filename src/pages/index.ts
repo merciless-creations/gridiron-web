@@ -16,3 +16,4 @@ export * from './LeagueManagePage';
 export * from './TeamManagePage';
 export * from './RosterPage';
 export * from './DepthChartPage';
+export { default as LeagueSimulatingPage } from './LeagueSimulatingPage';

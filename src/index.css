@@ -81,4 +81,20 @@
   .select-field {
     @apply w-full px-3 py-2 bg-gridiron-bg-secondary border border-gridiron-border-subtle rounded text-gridiron-text-primary focus:outline-none focus:ring-2 focus:ring-gridiron-accent focus:border-transparent;
   }
+
+  /* Toast slide-in animation */
+  .animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out;
+  }
+
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
 }

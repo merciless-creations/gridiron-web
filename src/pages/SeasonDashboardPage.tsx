@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useSeason, useSeasonStandings, useGenerateSchedule, useAdvanceWeek, useAdvanceByDays, useProcessYearEnd } from '../api/season';
-import { CommissionerControls } from '../components/CommissionerControls';
+import { useLeague, useUnlockSimulation } from '../api/leagues';
+import { CommissionerControls, SimulationLockBanner } from '../components';
 
 export default function SeasonDashboardPage() {
   const { id } = useParams<{ id: string }>();
@@ -8,11 +9,13 @@ export default function SeasonDashboardPage() {
 
   const { data: season, isLoading: isLoadingSeason, error: seasonError } = useSeason(leagueId);
   const { data: standings, isLoading: isLoadingStandings } = useSeasonStandings(leagueId);
+  const { data: league } = useLeague(leagueId);
 
   const generateSchedule = useGenerateSchedule();
   const advanceWeek = useAdvanceWeek();
   const advanceByDays = useAdvanceByDays();
   const processYearEnd = useProcessYearEnd();
+  const unlockSimulation = useUnlockSimulation();
 
   const handleGenerateSchedule = () => {
     generateSchedule.mutate({ leagueId });
@@ -28,6 +31,10 @@ export default function SeasonDashboardPage() {
 
   const handleProcessYearEnd = () => {
     processYearEnd.mutate(leagueId);
+  };
+
+  const handleUnlockSimulation = () => {
+    unlockSimulation.mutate(leagueId);
   };
 
   if (isLoadingSeason) {
@@ -79,6 +86,14 @@ export default function SeasonDashboardPage() {
   return (
     <div className="min-h-screen bg-zinc-900 p-8">
       <div className="max-w-6xl mx-auto">
+        {/* Show simulation lock banner when a simulation is in progress */}
+        {league?.simulationInProgress && league.simulationStartedAt && (
+          <SimulationLockBanner
+            startedAt={league.simulationStartedAt}
+            startedByUserName={league.simulationStartedByUserName}
+          />
+        )}
+
         <div className="mb-8">
           <Link
             to={`/leagues/${leagueId}`}
@@ -201,10 +216,15 @@ export default function SeasonDashboardPage() {
               onAdvanceWeek={handleAdvanceWeek}
               onAdvanceByDays={handleAdvanceByDays}
               onProcessYearEnd={handleProcessYearEnd}
+              onUnlockSimulation={handleUnlockSimulation}
               isGenerating={generateSchedule.isPending}
               isAdvancing={advanceWeek.isPending}
               isAdvancingByDays={advanceByDays.isPending}
               isProcessingYearEnd={processYearEnd.isPending}
+              isUnlocking={unlockSimulation.isPending}
+              simulationInProgress={league?.simulationInProgress ?? false}
+              simulationStartedAt={league?.simulationStartedAt ?? null}
+              simulationStartedByUserName={league?.simulationStartedByUserName ?? null}
             />
           </div>
         </div>

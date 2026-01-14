@@ -41,6 +41,13 @@ export const leaguesApi = {
     const response = await apiClient.post<PopulateRostersResponse>(url);
     return response.data;
   },
+
+  unlockSimulation: async (id: number): Promise<{ message: string; wasLocked: boolean }> => {
+    const response = await apiClient.post<{ message: string; wasLocked: boolean }>(
+      `/leagues-management/${id}/unlock-simulation`
+    );
+    return response.data;
+  },
 };
 
 // React Query hooks
@@ -108,6 +115,18 @@ export const usePopulateRosters = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['leagues', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['teams'] });
+    },
+  });
+};
+
+export const useUnlockSimulation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => leaguesApi.unlockSimulation(id),
+    onSuccess: (_, leagueId) => {
+      queryClient.invalidateQueries({ queryKey: ['leagues', leagueId] });
+      queryClient.invalidateQueries({ queryKey: ['leagues'] });
+      queryClient.invalidateQueries({ queryKey: ['season'] });
     },
   });
 };

@@ -10,7 +10,7 @@ import {
   useAssignLeagueRole,
   useRemoveLeagueRole,
 } from '../api';
-import { Loading, ErrorMessage } from '../components';
+import { Loading, ErrorMessage, SimulationLockBanner } from '../components';
 import type { UpdateLeagueRequest } from '../types/League';
 import type { User } from '../types/User';
 
@@ -200,6 +200,14 @@ export const LeagueDetailPage = () => {
           </div>
         )}
       </div>
+
+      {/* Simulation Lock Banner */}
+      {league.simulationInProgress && league.simulationStartedAt && (
+        <SimulationLockBanner
+          startedAt={league.simulationStartedAt}
+          startedByUserName={league.simulationStartedByUserName}
+        />
+      )}
 
       {/* Error Message */}
       {actionError && (
