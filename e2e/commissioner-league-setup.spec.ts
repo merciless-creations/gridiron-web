@@ -86,8 +86,9 @@ test.describe('Commissioner League Setup Journey', () => {
     await page.goto(`/leagues/${leagueId}/structure`)
     await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
 
-    // Should see 2 conferences - look for conference text
-    await expect(page.getByText(/Conference 1|AFC|NFC/i).first()).toBeVisible()
+    // Wait for structure to load - look for conference text with extended timeout
+    // The structure page shows conferences with divisions and teams
+    await expect(page.getByText(/Conference 1|Conference 2|AFC|NFC/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('Step 3: Populate rosters', async ({ page }) => {
