@@ -13,7 +13,6 @@ const { mockNavigate, mockState } = vi.hoisted(() => ({
     useAdvanceByDays: vi.fn(),
     useProcessYearEnd: vi.fn(),
     useLeague: vi.fn(),
-    useUnlockSimulation: vi.fn(),
   },
 }));
 
@@ -37,7 +36,6 @@ vi.mock('../../api/season', () => ({
 
 vi.mock('../../api/leagues', () => ({
   useLeague: () => mockState.useLeague(),
-  useUnlockSimulation: () => mockState.useUnlockSimulation(),
 }));
 
 import SeasonDashboardPage from '../SeasonDashboardPage';
@@ -133,10 +131,6 @@ describe('SeasonDashboardPage', () => {
         simulationStartedByUserName: null,
       },
       isLoading: false,
-    });
-    mockState.useUnlockSimulation = vi.fn().mockReturnValue({
-      mutate: vi.fn(),
-      isPending: false,
     });
   });
 

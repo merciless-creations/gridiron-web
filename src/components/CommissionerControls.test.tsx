@@ -24,15 +24,11 @@ describe('CommissionerControls', () => {
     onAdvanceWeek: vi.fn(),
     onAdvanceByDays: vi.fn(),
     onProcessYearEnd: vi.fn(),
-    onUnlockSimulation: vi.fn(),
     isGenerating: false,
     isAdvancing: false,
     isAdvancingByDays: false,
     isProcessingYearEnd: false,
-    isUnlocking: false,
     simulationInProgress: false,
-    simulationStartedAt: null,
-    simulationStartedByUserName: null,
   };
 
   beforeEach(() => {
@@ -46,150 +42,61 @@ describe('CommissionerControls', () => {
   });
 
   describe('Simulation Lock Display', () => {
-    it('does not show simulation lock section when not in progress', () => {
+    it('does not show simulation lock notice when not in progress', () => {
       render(<CommissionerControls {...defaultProps} />);
 
       expect(screen.queryByText(/Simulation in progress/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/Force Unlock/i)).not.toBeInTheDocument();
     });
 
-    it('shows simulation lock section when simulation is in progress', () => {
+    it('shows simulation lock notice when simulation is in progress', () => {
       render(
         <CommissionerControls
           {...defaultProps}
           simulationInProgress={true}
-          simulationStartedAt="2024-06-15T11:30:00Z"
-          simulationStartedByUserName="Admin"
         />
       );
 
       expect(screen.getByText(/Simulation in progress/i)).toBeInTheDocument();
-      expect(screen.getByText(/started by Admin/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Force Unlock/i })).toBeInTheDocument();
-    });
-
-    it('shows simulation duration when locked', () => {
-      render(
-        <CommissionerControls
-          {...defaultProps}
-          simulationInProgress={true}
-          simulationStartedAt="2024-06-15T11:30:00Z"
-          simulationStartedByUserName="Admin"
-        />
-      );
-
-      expect(screen.getByText(/Running for 30 minutes/i)).toBeInTheDocument();
-    });
-
-    it('shows explanation text for force unlock', () => {
-      render(
-        <CommissionerControls
-          {...defaultProps}
-          simulationInProgress={true}
-          simulationStartedAt="2024-06-15T11:00:00Z"
-          simulationStartedByUserName="Admin"
-        />
-      );
-
-      expect(
-        screen.getByText(/If the simulation has crashed or stalled/i)
-      ).toBeInTheDocument();
-    });
-  });
-
-  describe('Force Unlock Button', () => {
-    it('shows confirmation dialog when Force Unlock is clicked', () => {
-      render(
-        <CommissionerControls
-          {...defaultProps}
-          simulationInProgress={true}
-          simulationStartedAt="2024-06-15T11:00:00Z"
-          simulationStartedByUserName="Admin"
-        />
-      );
-
-      const unlockButton = screen.getByRole('button', { name: /Force Unlock/i });
-      fireEvent.click(unlockButton);
-
-      expect(screen.getByRole('button', { name: /Confirm Force Unlock/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Cancel/i })).toBeInTheDocument();
-    });
-
-    it('calls onUnlockSimulation when confirmed', () => {
-      const onUnlock = vi.fn();
-      render(
-        <CommissionerControls
-          {...defaultProps}
-          simulationInProgress={true}
-          simulationStartedAt="2024-06-15T11:00:00Z"
-          simulationStartedByUserName="Admin"
-          onUnlockSimulation={onUnlock}
-        />
-      );
-
-      // Click to show confirmation
-      fireEvent.click(screen.getByRole('button', { name: /Force Unlock/i }));
-
-      // Confirm the unlock
-      fireEvent.click(screen.getByRole('button', { name: /Confirm Force Unlock/i }));
-
-      expect(onUnlock).toHaveBeenCalledTimes(1);
-    });
-
-    it('cancels unlock when Cancel is clicked', () => {
-      const onUnlock = vi.fn();
-      render(
-        <CommissionerControls
-          {...defaultProps}
-          simulationInProgress={true}
-          simulationStartedAt="2024-06-15T11:00:00Z"
-          simulationStartedByUserName="Admin"
-          onUnlockSimulation={onUnlock}
-        />
-      );
-
-      // Click to show confirmation
-      fireEvent.click(screen.getByRole('button', { name: /Force Unlock/i }));
-
-      // Cancel
-      fireEvent.click(screen.getByRole('button', { name: /Cancel/i }));
-
-      expect(onUnlock).not.toHaveBeenCalled();
-      // Should be back to Force Unlock button
-      expect(screen.getByRole('button', { name: /Force Unlock/i })).toBeInTheDocument();
-    });
-
-    it('disables buttons while unlocking', () => {
-      render(
-        <CommissionerControls
-          {...defaultProps}
-          simulationInProgress={true}
-          simulationStartedAt="2024-06-15T11:00:00Z"
-          simulationStartedByUserName="Admin"
-          isUnlocking={true}
-        />
-      );
-
-      const unlockButton = screen.getByRole('button', { name: /Force Unlock/i });
-      expect(unlockButton).toBeDisabled();
+      expect(screen.getByText(/Controls are disabled until complete/i)).toBeInTheDocument();
     });
   });
 
   describe('Controls Disabled During Simulation', () => {
-    it('disables all action buttons when any operation is in progress', () => {
+    it('disables all action buttons when simulation is in progress', () => {
       render(
         <CommissionerControls
           {...defaultProps}
           simulationInProgress={true}
-          simulationStartedAt="2024-06-15T11:00:00Z"
-          simulationStartedByUserName="Admin"
-          isAdvancingByDays={true}
         />
       );
 
       // Find the advance days button
       const advanceDaysButton = screen.getByTestId('advance-days-button');
       expect(advanceDaysButton).toBeDisabled();
+    });
+
+    it('disables buttons when any operation is loading', () => {
+      render(
+        <CommissionerControls
+          {...defaultProps}
+          isAdvancingByDays={true}
+        />
+      );
+
+      const advanceDaysButton = screen.getByTestId('advance-days-button');
+      expect(advanceDaysButton).toBeDisabled();
+    });
+
+    it('disables quick day buttons during simulation', () => {
+      render(
+        <CommissionerControls
+          {...defaultProps}
+          simulationInProgress={true}
+        />
+      );
+
+      const quickButton = screen.getByTestId('quick-days-1');
+      expect(quickButton).toBeDisabled();
     });
   });
 
@@ -215,6 +122,41 @@ describe('CommissionerControls', () => {
       render(<CommissionerControls {...defaultProps} season={completeSeason} />);
 
       expect(screen.getByRole('button', { name: /Process Year End/i })).toBeInTheDocument();
+    });
+
+    it('enables buttons when not simulating and not loading', () => {
+      render(<CommissionerControls {...defaultProps} />);
+
+      const advanceDaysButton = screen.getByTestId('advance-days-button');
+      expect(advanceDaysButton).not.toBeDisabled();
+    });
+  });
+
+  describe('Advance Days Functionality', () => {
+    it('allows changing days to advance', () => {
+      render(<CommissionerControls {...defaultProps} />);
+
+      const daysInput = screen.getByTestId('days-input');
+      fireEvent.change(daysInput, { target: { value: '14' } });
+
+      expect(daysInput).toHaveValue(14);
+    });
+
+    it('calls onAdvanceByDays when confirmed', () => {
+      const onAdvanceByDays = vi.fn();
+      render(
+        <CommissionerControls
+          {...defaultProps}
+          onAdvanceByDays={onAdvanceByDays}
+        />
+      );
+
+      // Click to start confirmation
+      fireEvent.click(screen.getByTestId('advance-days-button'));
+      // Confirm
+      fireEvent.click(screen.getByTestId('advance-days-confirm'));
+
+      expect(onAdvanceByDays).toHaveBeenCalledWith(7); // Default is 7 days
     });
   });
 });

@@ -178,7 +178,8 @@ export const LeagueDetailPage = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setShowPopulateModal(true)}
-              className="px-4 py-2 bg-gridiron-win text-white rounded hover:bg-green-600 transition-colors"
+              disabled={league.simulationInProgress}
+              className="px-4 py-2 bg-gridiron-win text-white rounded hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="populate-rosters-button"
             >
               Populate Rosters

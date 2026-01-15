@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useSeason, useSeasonStandings, useGenerateSchedule, useAdvanceWeek, useAdvanceByDays, useProcessYearEnd } from '../api/season';
-import { useLeague, useUnlockSimulation } from '../api/leagues';
+import { useLeague } from '../api/leagues';
 import { CommissionerControls, SimulationLockBanner } from '../components';
 
 export default function SeasonDashboardPage() {
@@ -15,7 +15,6 @@ export default function SeasonDashboardPage() {
   const advanceWeek = useAdvanceWeek();
   const advanceByDays = useAdvanceByDays();
   const processYearEnd = useProcessYearEnd();
-  const unlockSimulation = useUnlockSimulation();
 
   const handleGenerateSchedule = () => {
     generateSchedule.mutate({ leagueId });
@@ -31,10 +30,6 @@ export default function SeasonDashboardPage() {
 
   const handleProcessYearEnd = () => {
     processYearEnd.mutate(leagueId);
-  };
-
-  const handleUnlockSimulation = () => {
-    unlockSimulation.mutate(leagueId);
   };
 
   if (isLoadingSeason) {
@@ -216,15 +211,11 @@ export default function SeasonDashboardPage() {
               onAdvanceWeek={handleAdvanceWeek}
               onAdvanceByDays={handleAdvanceByDays}
               onProcessYearEnd={handleProcessYearEnd}
-              onUnlockSimulation={handleUnlockSimulation}
               isGenerating={generateSchedule.isPending}
               isAdvancing={advanceWeek.isPending}
               isAdvancingByDays={advanceByDays.isPending}
               isProcessingYearEnd={processYearEnd.isPending}
-              isUnlocking={unlockSimulation.isPending}
               simulationInProgress={league?.simulationInProgress ?? false}
-              simulationStartedAt={league?.simulationStartedAt ?? null}
-              simulationStartedByUserName={league?.simulationStartedByUserName ?? null}
             />
           </div>
         </div>
